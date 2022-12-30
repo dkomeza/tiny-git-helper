@@ -219,7 +219,9 @@ async function askProtocol() {
 }
 
 async function cloneRepo(url) {
+  const spinner = createSpinner("Cloning your repo...").start();
   await exec(`git clone ${url}`);
+  spinner.success();
 }
 
 await checkSavedSettings();
