@@ -1,8 +1,15 @@
 import inquirer from "inquirer";
+// @ts-ignore
+import inquirerPrompt from "inquirer-autocomplete-prompt";
+import fuzzy from "fuzzy";
 import { createSpinner } from "nanospinner";
 import * as util from "node:util";
 import * as child_process from "node:child_process";
 const exec = util.promisify(child_process.exec);
+
+inquirer.registerPrompt("autocomplete", inquirerPrompt);
+
+let repoList: string[] = [];
 
 interface data {
   name: string;
@@ -14,6 +21,16 @@ interface data {
 interface Repo {
   name: string;
   lastUpdated: number;
+}
+
+function seatchRepos(answers: any, input: string) {
+  input = input || "";
+  return new Promise(function (resolve) {
+    setTimeout(() => {
+      const results = fuzzy.filter(input, repoList).map((el) => el.original);
+      resolve(results);
+    }, 100);
+  });
 }
 
 async function showCloneMenu(settings: {
@@ -65,7 +82,7 @@ async function listRepos(
       }
     }
   }
-
+  repoList = repo_list;
   let choice = await handleRepoChoice(repo_list);
   for (let i = 0; i < data.length; i++) {
     if (data[i].name === choice) {
@@ -79,12 +96,14 @@ async function listRepos(
 }
 
 async function handleRepoChoice(repo_list: string[]) {
-  const answers = await inquirer.prompt({
-    name: "github_repo",
-    type: "list",
-    message: "Select repo to clone",
-    choices: repo_list,
-  });
+  const answers = await inquirer.prompt([
+    {
+      type: "autocomplete",
+      name: "github_repo",
+      source: seatchRepos,
+      pageSize: 8,
+    },
+  ]);
   return answers.github_repo;
 }
 
