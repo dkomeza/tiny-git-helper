@@ -42,10 +42,11 @@ async function getInitialSettings(settings: settings) {
 }
 
 async function showSettingsMenu(settings: settings): Promise<void> {
+  console.clear();
   const answers = await inquirer.prompt({
     name: "settings_action",
     type: "list",
-    message: "Settings",
+    message: "Settings \n",
     choices: [
       `Username (${settings.username})`,
       `Sorting (${settings.sorting})`,

@@ -18,6 +18,7 @@ await loadSavedSettings(settings);
 await parseArgs();
 
 async function showMenu(): Promise<void> {
+  console.clear();
   console.log("Welcome to git-helper! \n");
   const answers = await inquirer.prompt({
     name: "menu_action",

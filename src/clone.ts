@@ -21,6 +21,7 @@ async function showCloneMenu(settings: {
   sorting: string;
   protocol: string;
 }) {
+  console.clear();
   const spinner = createSpinner("Loading your repos...\n").start();
   fetch(`https://api.github.com/users/${settings.username}/repos`)
     .then((response) => response.json())
@@ -41,6 +42,7 @@ async function listRepos(
   sorting: string,
   protocol: string
 ) {
+  console.clear();
   let repo_list = [];
   if (sorting === "Last updated") {
     let sortedList: Repo[] = [];
@@ -85,6 +87,7 @@ async function handleRepoChoice(repo_list: string[]) {
   });
   return answers.github_repo;
 }
+
 async function cloneRepo(url: string) {
   const spinner = createSpinner("Cloning your repo...").start();
   await exec(`git clone ${url}`);

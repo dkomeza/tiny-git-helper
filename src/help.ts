@@ -1,5 +1,6 @@
 async function showHelp() {
-    console.log(`Usage: tiny-git-helper [options]`);
+  console.clear();
+  console.log(`Usage: tiny-git-helper [options]`);
 }
 
 export default showHelp;
