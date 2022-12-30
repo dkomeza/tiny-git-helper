@@ -1,5 +1,17 @@
 #!/usr/bin/env node
 
+interface data {
+  name: string;
+  pushed_at: string;
+  clone_url: string;
+  ssh_url: string;
+}
+
+interface Repo {
+  name: string;
+  lastUpdated: number;
+}
+
 import chalk from "chalk";
 import inquirer from "inquirer";
 import os from "os";
@@ -13,9 +25,9 @@ const exec = util.promisify(child_process.exec);
 
 let loadedConfig = false;
 
-let githubUsername;
-let sorting = "Name";
-let protocol = "HTTPS";
+let githubUsername: string;
+let sorting:string = "Name";
+let protocol:string = "HTTPS";
 
 async function checkSavedSettings() {
   let homedir = os.homedir();
@@ -31,14 +43,14 @@ async function checkSavedSettings() {
       sorting = config.sorting;
       protocol = config.protocol;
     } else {
-      throw err;
+      throw new Error("Invalid config file");
     }
   } catch (error) {
     console.log(chalk.redBright("\nNo config file found\n"));
   }
 }
 
-async function saveCurrentSettings(update) {
+async function saveCurrentSettings() {
   let data = JSON.stringify({
     username: githubUsername,
     protocol: protocol,
@@ -71,7 +83,7 @@ async function askUsername() {
   }
 }
 
-async function renderMenu() {
+async function renderMenu() : Promise<void> {
   console.log("Welcome to git-helper! \n");
   const answers = await inquirer.prompt({
     name: "menu_action",
@@ -83,17 +95,17 @@ async function renderMenu() {
   return handleMenuChoice(answers.menu_action);
 }
 
-async function handleMenuChoice(choice) {
+async function handleMenuChoice(choice: string) {
   if (choice === "Clone repo") {
     return handleCloneRepo();
   } else if (choice === "Edit settings") {
     return renderSettingsMenu();
-  } else if (choice === "Exit") {
-    process.exit(0);
+  } else {
+    return process.exit(0);
   }
 }
 
-async function renderSettingsMenu() {
+async function renderSettingsMenu(): Promise<void>  {
   const answers = await inquirer.prompt({
     name: "settings_action",
     type: "list",
@@ -129,10 +141,10 @@ async function handleCloneRepo() {
     });
 }
 
-async function listRepos(data) {
+async function listRepos(data: data[]) {
   let repo_list = [];
   if (sorting === "Last updated") {
-    let sortedList = [];
+    let sortedList: Repo[] = [];
     for (let i = 0; i < data.length; i++) {
       sortedList.push({
         name: data[i].name,
@@ -165,11 +177,11 @@ async function listRepos(data) {
   }
 }
 
-async function handleRepoChoice(repo_list) {
+async function handleRepoChoice(repo_list: string[]) {
   const answers = await inquirer.prompt({
     name: "github_repo",
     type: "list",
-    message:"Select repo to clone",
+    message: "Select repo to clone",
     choices: repo_list,
   });
   return answers.github_repo;
@@ -195,7 +207,7 @@ async function askProtocol() {
   return answers.protocol;
 }
 
-async function cloneRepo(url) {
+async function cloneRepo(url: string) {
   const spinner = createSpinner("Cloning your repo...").start();
   await exec(`git clone ${url}`);
   spinner.success();

@@ -2,7 +2,7 @@
   "name": "tiny-git-helper",
   "version": "1.0.3",
   "description": "Tiny cli tool for github",
-  "main": "app.js",
+  "main": "build/app.js",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/dkomeza/tiny-git-helper.git"
@@ -14,12 +14,16 @@
   "author": "dkomeza",
   "license": "ISC",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "tsc && node ./build/app.js",
+    "build": "tsc"
   },
   "bin": {
     "helper": "./app.js"
   },
   "type": "module",
+  "files": [
+    "build/**/*"
+  ],
   "dependencies": {
     "chalk": "^5.2.0",
     "chalk-animation": "^2.0.3",
@@ -28,6 +32,7 @@
     "nanospinner": "^1.1.0"
   },
   "devDependencies": {
+    "@types/inquirer": "^9.0.3",
     "@types/node": "^18.11.18"
   }
 }
