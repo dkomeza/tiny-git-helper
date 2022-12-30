@@ -1,5 +1,5 @@
 {
-  "name": "tinyhelper",
+  "name": "tiny-git-helper",
   "version": "1.0.0",
   "description": "Tiny cli tool for github",
   "main": "app.js",
