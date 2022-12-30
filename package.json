@@ -15,11 +15,12 @@
   "license": "ISC",
   "scripts": {
     "start": "tsc && node ./build/app.js",
+    "watch": "tsc -w",
     "quick": "node ./build/app.js",
     "build": "tsc"
   },
   "bin": {
-    "helper": "./app.js"
+    "helper": "./build/app.js"
   },
   "type": "module",
   "files": [
