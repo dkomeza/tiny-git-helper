@@ -74,11 +74,11 @@ async function askUsername() {
 }
 
 async function renderMenu() {
-  console.log(chalk.whiteBright("Welcome to git-helper! \n"));
+  console.log("Welcome to git-helper! \n");
   const answers = await inquirer.prompt({
     name: "menu_action",
     type: "list",
-    message: chalk.whiteBright("What can I do for you?"),
+    message: "What can I do for you?",
     choices: ["Clone repo", "Edit settings", "Exit"],
   });
 
@@ -99,7 +99,7 @@ async function renderSettingsMenu() {
   const answers = await inquirer.prompt({
     name: "settings_action",
     type: "list",
-    message: chalk.whiteBright("Settings"),
+    message: "Settings",
     choices: [
       `Username (${githubUsername})`,
       `Sorting (${sorting})`,
@@ -171,7 +171,7 @@ async function handleRepoChoice(repo_list) {
   const answers = await inquirer.prompt({
     name: "github_repo",
     type: "list",
-    message: chalk.whiteBright("Select repo to clone"),
+    message:"Select repo to clone",
     choices: repo_list,
   });
   return answers.github_repo;
@@ -181,7 +181,7 @@ async function askSorting() {
   const answers = await inquirer.prompt({
     name: "sorting",
     type: "list",
-    message: chalk.whiteBright("Repo sorting method."),
+    message: "Repo sorting method.",
     choices: ["Name", "Last updated"],
   });
   return answers.sorting;
@@ -191,7 +191,7 @@ async function askProtocol() {
   const answers = await inquirer.prompt({
     name: "protocol",
     type: "list",
-    message: chalk.whiteBright("Which protocol to use?"),
+    message: "Which protocol to use?",
     choices: ["HTTPS", "SSH"],
   });
   return answers.protocol;
