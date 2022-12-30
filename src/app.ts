@@ -19,7 +19,7 @@ await parseArgs();
 
 async function showMenu(): Promise<void> {
   console.clear();
-  console.log("Welcome to git-helper! \n");
+  console.log("Welcome to tiny-git-helper! \n");
   const answers = await inquirer.prompt({
     name: "menu_action",
     type: "list",
