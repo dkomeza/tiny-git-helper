@@ -16,7 +16,6 @@ const exec = util.promisify(child_process.exec);
 let loadedConfig = false;
 
 let githubUsername;
-let saveSettings = false;
 let sorting = "Name";
 let protocol = "HTTPS";
 
@@ -28,12 +27,7 @@ async function checkSavedSettings() {
       flag: "r",
     });
     let config = JSON.parse(confFile);
-    if (
-      config.username &&
-      config.protocol &&
-      config.sorting &&
-      config.saveSettings
-    ) {
+    if (config.username && config.protocol && config.sorting) {
       loadedConfig = true;
       githubUsername = config.username;
       sorting = config.sorting;
@@ -47,25 +41,22 @@ async function checkSavedSettings() {
 }
 
 async function saveCurrentSettings(update) {
-  if (saveSettings || update) {
-    let data = JSON.stringify({
-      username: githubUsername,
-      protocol: protocol,
-      sorting: sorting,
-      saveSettings: saveSettings,
-    });
-    console.log(data);
-    let homedir = os.homedir();
-    try {
-      if (!fs.existsSync(homedir + "/.helper-config")) {
-        fs.mkdirSync(homedir + "/.helper-config");
-      }
-      fs.writeFileSync(homedir + "/.helper-config/settings.json", data);
-    } catch (error) {
-      console.log(error);
-      console.log(chalk.redBright("\nCritical error\n"));
-      process.exit(1);
+  let data = JSON.stringify({
+    username: githubUsername,
+    protocol: protocol,
+    sorting: sorting,
+  });
+  console.log(data);
+  let homedir = os.homedir();
+  try {
+    if (!fs.existsSync(homedir + "/.helper-config")) {
+      fs.mkdirSync(homedir + "/.helper-config");
     }
+    fs.writeFileSync(homedir + "/.helper-config/settings.json", data);
+  } catch (error) {
+    console.log(error);
+    console.log(chalk.redBright("\nCritical error\n"));
+    process.exit(1);
   }
 }
 
@@ -80,15 +71,6 @@ async function askUsername() {
   } else {
     await askUsername();
   }
-}
-
-async function askSaveSettings() {
-  const answers = await inquirer.prompt({
-    name: "save_settings",
-    type: "confirm",
-    message: "Do you want to save your settings?",
-  });
-  return answers.save_settings;
 }
 
 async function renderMenu() {
@@ -122,7 +104,6 @@ async function renderSettingsMenu() {
       `Username (${githubUsername})`,
       `Sorting (${sorting})`,
       `Protocol (${protocol})`,
-      `Save settings (${saveSettings})`,
       "Back",
     ],
   });
@@ -133,8 +114,6 @@ async function renderSettingsMenu() {
     sorting = await askSorting();
   } else if (answer === `Protocol (${protocol})`) {
     protocol = await askProtocol();
-  } else if (answer === `Save settings (${saveSettings})`) {
-    saveSettings = await askSaveSettings();
   } else {
     return renderMenu();
   }
@@ -228,7 +207,6 @@ await checkSavedSettings();
 
 if (!loadedConfig) {
   githubUsername = await askUsername();
-  saveSettings = await askSaveSettings();
   sorting = await askSorting();
   protocol = await askProtocol();
   await saveCurrentSettings();
