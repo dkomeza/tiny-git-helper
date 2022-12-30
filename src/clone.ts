@@ -1,5 +1,4 @@
 import inquirer from "inquirer";
-// @ts-ignore
 import inquirerPrompt from "inquirer-autocomplete-prompt";
 import fuzzy from "fuzzy";
 import { createSpinner } from "nanospinner";

@@ -37,6 +37,8 @@ async function handleMenuChoice(choice: string) {
     case "Edit settings":
       await showSettingsMenu(settings);
       return showMenu();
+    case "Help":
+      return showHelp(showMenu);
     default:
       return process.exit(0);
   }
