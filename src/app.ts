@@ -49,6 +49,8 @@ async function parseArgs() {
     switch (process.argv.slice(2)[0]) {
       case "clone":
         return showCloneMenu(settings);
+      case "settings":
+        return showSettingsMenu(settings);
       case "help":
         return showHelp();
     }
