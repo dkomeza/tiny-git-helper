@@ -17,4 +17,3 @@ A small tool designed to make process of cloning github repos easier.
   ### Update
    ```npm
     npm update -g tiny-git-helper
-    ```
