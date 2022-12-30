@@ -2,9 +2,7 @@
 
 import chalk from "chalk";
 import inquirer from "inquirer";
-import chalkAnimation from "chalk-animation";
-import figlet from "figlet";
-import os, { type } from "os";
+import os from "os";
 
 import * as fs from "fs";
 import { createSpinner } from "nanospinner";
