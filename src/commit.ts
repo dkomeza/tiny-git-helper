@@ -1,3 +1,4 @@
+import chalk from "chalk";
 import inquirer from "inquirer";
 import * as util from "node:util";
 import * as child_process from "node:child_process";
@@ -22,9 +23,19 @@ async function commitAllFiles(settings: settings) {
         `git add . && git commit -m "${process.argv.slice(2)[1]}" && git push`
       );
       spinner.success();
+      let output = stdout.split(" ");
+      let endIndex = output.indexOf("changed,");
+      let outputString = output
+        .slice(endIndex - 2, endIndex)
+        .join(" ")
+        .replace(/,/g, "");
+      console.log(chalk.green(`Done! Successfully commited ${outputString}.`));
     } catch (error: any) {
       spinner.error();
-      console.log(error.stderr);
+      const output = error.stdout.replace(/\n/g, " ").split(" ");
+      console.log(
+        chalk.red(`Error: ${output.splice(3).slice(0, 6).join(" ")}.`)
+      );
     }
   } else {
     const answers = await inquirer.prompt({
@@ -36,13 +47,23 @@ async function commitAllFiles(settings: settings) {
       color("Commiting...", settings.color)
     ).start();
     try {
-      await exec(
+      const { stdout, stderr } = await exec(
         `git add . && git commit -m "${answers.commit_message}" && git push`
       );
       spinner.success();
+      let output = stdout.split(" ");
+      let endIndex = output.indexOf("changed,");
+      let outputString = output
+        .slice(endIndex - 2, endIndex)
+        .join(" ")
+        .replace(/,/g, "");
+      console.log(chalk.green(`Done! Successfully commited ${outputString}.`));
     } catch (error: any) {
       spinner.error();
-      console.log(error.stderr);
+      const output = error.stdout.replace(/\n/g, " ").split(" ");
+      console.log(
+        chalk.red(`Error: ${output.splice(3).slice(0, 6).join(" ")}.`)
+      );
     }
   }
 }
