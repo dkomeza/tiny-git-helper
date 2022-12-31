@@ -9,9 +9,9 @@ A small tool designed to make process of using github easier.
     ```
 
 ### Commands
- - The whole tool is used with <i>helper</i> command
+ - The whole tool is used with <i>gh</i> command
   ```sh
-    helper
+    gh
   ```
   
   ### Update
