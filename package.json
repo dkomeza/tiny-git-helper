@@ -20,7 +20,7 @@
     "build": "tsc"
   },
   "bin": {
-    "helper": "./build/app.js"
+    "gh": "./build/app.js"
   },
   "type": "module",
   "files": [

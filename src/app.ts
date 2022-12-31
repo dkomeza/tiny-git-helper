@@ -35,7 +35,7 @@ async function showMenu(): Promise<void> {
 async function handleMenuChoice(choice: string) {
   switch (choice) {
     case "Clone repo":
-      return showCloneMenu(settings);
+      return showCloneMenu(settings, showMenu);
     case "Edit settings":
       await showSettingsMenu(settings);
       return showMenu();

@@ -10,6 +10,7 @@ const exec = util.promisify(child_process.exec);
 inquirer.registerPrompt("autocomplete", inquirerPrompt);
 
 let repoList: string[] = [];
+let showMenu: Function | undefined;
 
 interface data {
   name: string;
@@ -23,6 +24,13 @@ interface Repo {
   lastUpdated: number;
 }
 
+interface settings {
+  username: string;
+  sorting: string;
+  protocol: string;
+  color: string;
+}
+
 function seatchRepos(answers: any, input: string) {
   input = input || "";
   return new Promise(function (resolve) {
@@ -33,12 +41,8 @@ function seatchRepos(answers: any, input: string) {
   });
 }
 
-async function showCloneMenu(settings: {
-  username: string;
-  sorting: string;
-  protocol: string;
-  color: string;
-}) {
+async function showCloneMenu(settings: settings, callback?: Function) {
+  showMenu = callback;
   console.clear();
   const spinner = createSpinner(
     color("Loading your repos...\n", settings.color)
@@ -47,26 +51,14 @@ async function showCloneMenu(settings: {
     .then((response) => response.json())
     .then((data) => {
       spinner.success();
-      return listRepos(
-        data,
-        settings.username,
-        settings.sorting,
-        settings.protocol,
-        settings.color
-      );
+      return listRepos(data, settings);
     });
 }
 
-async function listRepos(
-  data: data[],
-  githubUsername: string,
-  sorting: string,
-  protocol: string,
-  color: string
-) {
+async function listRepos(data: data[], settings: settings): Promise<void> {
   console.clear();
   let repo_list = [];
-  if (sorting === "Last updated") {
+  if (settings.sorting === "Last updated") {
     let sortedList: Repo[] = [];
     for (let i = 0; i < data.length; i++) {
       sortedList.push({
@@ -76,26 +68,36 @@ async function listRepos(
     }
     sortedList.sort((a, b) => b.lastUpdated - a.lastUpdated);
     for (let i = 0; i < sortedList.length; i++) {
-      if (sortedList[i].name !== githubUsername) {
+      if (sortedList[i].name !== settings.username) {
         repo_list.push(sortedList[i].name);
       }
     }
   } else {
     for (let i = 0; i < data.length; i++) {
-      if (data[i].name !== githubUsername) {
+      if (data[i].name !== settings.username) {
         repo_list.push(data[i].name);
       }
     }
   }
   repoList = repo_list;
-  let choice = await handleRepoChoice(color);
+  repoList.push(" ");
+  repoList.push("Exit");
+  repoList.push(" ");
+  let choice = await handleRepoChoice(settings.color);
   for (let i = 0; i < data.length; i++) {
     if (data[i].name === choice) {
-      if (protocol === "HTTPS") {
+      if (settings.protocol === "HTTPS") {
         cloneRepo(data[i].clone_url);
-      } else if (protocol === "SSH") {
+      } else if (settings.protocol === "SSH") {
         cloneRepo(data[i].ssh_url);
       }
+    } else if (choice === "Exit") {
+      if (showMenu) return showMenu();
+      else process.exit(0);
+    } else {
+      console.clear();
+      console.log(color("Please select a repo\n", settings.color));
+      return listRepos(data, settings);
     }
   }
 }
