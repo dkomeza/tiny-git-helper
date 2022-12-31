@@ -26,7 +26,7 @@ async function showMenu(): Promise<void> {
     name: "menu_action",
     type: "list",
     message: color("What can I do for you?", settings.color),
-    choices: ["Clone repo", "Edit settings", "Help", "Exit"],
+    choices: ["Commit", "Clone", "Settings", "Help", "Exit"],
   });
 
   return handleMenuChoice(answers.menu_action);
@@ -34,9 +34,11 @@ async function showMenu(): Promise<void> {
 
 async function handleMenuChoice(choice: string) {
   switch (choice) {
-    case "Clone repo":
+    case "Commit":
+      return showCommitMenu(settings, showMenu);
+    case "Clone":
       return showCloneMenu(settings, showMenu);
-    case "Edit settings":
+    case "Settings":
       await showSettingsMenu(settings);
       return showMenu();
     case "Help":
