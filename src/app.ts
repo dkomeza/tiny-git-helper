@@ -51,9 +51,9 @@ async function parseArgs() {
     switch (process.argv.slice(2)[0]) {
       case "clone":
         return showCloneMenu(settings);
-      case "commit":
+      case "commitall":
         return commitAllFiles();
-      case "c":
+      case "ca":
         return commitAllFiles();
       case "settings":
         return showSettingsMenu(settings);
