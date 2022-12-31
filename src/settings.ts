@@ -2,11 +2,13 @@ import inquirer from "inquirer";
 import chalk from "chalk";
 import os from "os";
 import * as fs from "fs";
+import color, { settingsColor } from "./color.js";
 
 interface settings {
   username: string;
   sorting: string;
   protocol: string;
+  color: string;
 }
 
 async function loadSavedSettings(settings: settings) {
@@ -20,10 +22,11 @@ async function loadSavedSettings(settings: settings) {
       }
     );
     const config: settings = JSON.parse(confFile);
-    if (config.username && config.protocol && config.sorting) {
+    if (config.username && config.protocol && config.sorting && config.color) {
       settings.username = config.username;
       settings.sorting = config.sorting;
       settings.protocol = config.protocol;
+      settings.color = config.color;
       return;
     } else {
       throw new Error("Invalid config file");
@@ -38,6 +41,7 @@ async function getInitialSettings(settings: settings) {
   settings.username = await askUsername();
   settings.sorting = await askSorting();
   settings.protocol = await askProtocol();
+  settings.color = await askColor(settings);
   return saveCurrentSettings(settings);
 }
 
@@ -46,11 +50,12 @@ async function showSettingsMenu(settings: settings): Promise<void> {
   const answers = await inquirer.prompt({
     name: "settings_action",
     type: "list",
-    message: "Settings \n",
+    message: color("Settings \n", settings.color),
     choices: [
       `Username (${settings.username})`,
       `Sorting (${settings.sorting})`,
       `Protocol (${settings.protocol})`,
+      `Color (${settings.color})`,
       "Back",
     ],
   });
@@ -61,6 +66,8 @@ async function showSettingsMenu(settings: settings): Promise<void> {
     settings.sorting = await askSorting();
   } else if (answer === `Protocol (${settings.protocol})`) {
     settings.protocol = await askProtocol();
+  } else if (answer === `Color (${settings.color})`) {
+    settings.color = await askColor(settings);
   } else {
     return;
   }
@@ -73,6 +80,7 @@ async function saveCurrentSettings(settings: settings) {
     username: settings.username,
     protocol: settings.protocol,
     sorting: settings.sorting,
+    color: settings.color,
   });
   const homedir = os.homedir();
   try {
@@ -118,6 +126,27 @@ async function askProtocol() {
     choices: ["HTTPS", "SSH"],
   });
   return answers.protocol;
+}
+
+async function askColor(settings: settings) {
+  const answers = await inquirer.prompt({
+    name: "color",
+    type: "list",
+    message: color("Which color to use?", settings.color),
+    choices: [
+      settingsColor("Default", "Default"),
+      settingsColor("Red", "Red"),
+      settingsColor("Green", "Green"),
+      settingsColor("Yellow", "Yellow"),
+      settingsColor("Blue", "Blue"),
+      settingsColor("Magenta", "Magenta"),
+      settingsColor("Cyan", "Cyan"),
+      settingsColor("White", "White"),
+      settingsColor("Gray", "Gray"),
+    ],
+  });
+  console.log(answers.color);
+  return answers.color;
 }
 
 export default showSettingsMenu;
