@@ -54,9 +54,9 @@ async function parseArgs() {
       case "clone":
         return showCloneMenu(settings);
       case "commitall":
-        return commitAllFiles();
+        return commitAllFiles(settings);
       case "ca":
-        return commitAllFiles();
+        return commitAllFiles(settings);
       case "settings":
         return showSettingsMenu(settings);
       case "help":

@@ -1,9 +1,17 @@
 import inquirer from "inquirer";
 import * as util from "node:util";
 import * as child_process from "node:child_process";
+import color from "./color.js";
 const exec = util.promisify(child_process.exec);
 
-async function commitAllFiles() {
+interface settings {
+  username: string;
+  sorting: string;
+  protocol: string;
+  color: string;
+}
+
+async function commitAllFiles(settings: settings) {
   if (process.argv.slice(2)[1]) {
     try {
       const { stdout, stderr } = await exec(
@@ -16,7 +24,7 @@ async function commitAllFiles() {
     const answers = await inquirer.prompt({
       name: "commit_message",
       type: "input",
-      message: "Enter commit message",
+      message: color("Enter commit message:", settings.color),
     });
     try {
       await exec(
