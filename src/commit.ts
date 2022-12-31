@@ -125,7 +125,7 @@ async function commitFiles(settings: settings, files: string[]) {
   console.clear();
   if (files.length === 0)
     return console.log(chalk.red("Error: No files selected."));
-  const commitName = askCommitName(settings);
+  const commitName = await askCommitName(settings);
   const spinner = createSpinner(color("Commiting...", settings.color)).start();
   for (let i = 0; i < files.length; i++) {
     files[i] = files[i].slice(3);
