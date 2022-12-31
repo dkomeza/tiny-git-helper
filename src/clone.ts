@@ -4,6 +4,7 @@ import fuzzy from "fuzzy";
 import { createSpinner } from "nanospinner";
 import * as util from "node:util";
 import * as child_process from "node:child_process";
+import color from "./color.js";
 const exec = util.promisify(child_process.exec);
 
 inquirer.registerPrompt("autocomplete", inquirerPrompt);
@@ -36,9 +37,12 @@ async function showCloneMenu(settings: {
   username: string;
   sorting: string;
   protocol: string;
+  color: string;
 }) {
   console.clear();
-  const spinner = createSpinner("Loading your repos...\n").start();
+  const spinner = createSpinner(
+    color("Loading your repos...\n", settings.color)
+  ).start();
   fetch(`https://api.github.com/users/${settings.username}/repos`)
     .then((response) => response.json())
     .then((data) => {
@@ -47,7 +51,8 @@ async function showCloneMenu(settings: {
         data,
         settings.username,
         settings.sorting,
-        settings.protocol
+        settings.protocol,
+        settings.color
       );
     });
 }
@@ -56,7 +61,8 @@ async function listRepos(
   data: data[],
   githubUsername: string,
   sorting: string,
-  protocol: string
+  protocol: string,
+  color: string
 ) {
   console.clear();
   let repo_list = [];
@@ -82,7 +88,7 @@ async function listRepos(
     }
   }
   repoList = repo_list;
-  let choice = await handleRepoChoice(repo_list);
+  let choice = await handleRepoChoice(color);
   for (let i = 0; i < data.length; i++) {
     if (data[i].name === choice) {
       if (protocol === "HTTPS") {
@@ -94,11 +100,12 @@ async function listRepos(
   }
 }
 
-async function handleRepoChoice(repo_list: string[]) {
+async function handleRepoChoice(userColor: string) {
   const answers = await inquirer.prompt([
     {
       type: "autocomplete",
       name: "github_repo",
+      message: color("Github repo \n", userColor),
       source: seatchRepos,
       pageSize: 8,
     },

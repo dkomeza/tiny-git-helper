@@ -4,6 +4,7 @@ import showCloneMenu from "./clone.js";
 import { commitAllFiles } from "./commit.js";
 import showSettingsMenu, { loadSavedSettings } from "./settings.js";
 import showHelp from "./help.js";
+import color from "./color.js";
 
 import chalk from "chalk";
 import inquirer from "inquirer";
@@ -12,6 +13,7 @@ const settings = {
   username: "",
   sorting: "",
   protocol: "",
+  color: "",
 };
 
 await loadSavedSettings(settings);
@@ -19,11 +21,11 @@ await parseArgs();
 
 async function showMenu(): Promise<void> {
   console.clear();
-  console.log("Welcome to git-helper! \n");
+  console.log(color("Welcome to git-helper! \n", settings.color));
   const answers = await inquirer.prompt({
     name: "menu_action",
     type: "list",
-    message: "What can I do for you?",
+    message: color("What can I do for you?", settings.color),
     choices: ["Clone repo", "Edit settings", "Help", "Exit"],
   });
 
@@ -38,7 +40,7 @@ async function handleMenuChoice(choice: string) {
       await showSettingsMenu(settings);
       return showMenu();
     case "Help":
-      return showHelp(showMenu);
+      return showHelp(settings, showMenu);
     default:
       return process.exit(0);
   }
@@ -52,13 +54,13 @@ async function parseArgs() {
       case "clone":
         return showCloneMenu(settings);
       case "commitall":
-        return commitAllFiles();
+        return commitAllFiles(settings);
       case "ca":
-        return commitAllFiles();
+        return commitAllFiles(settings);
       case "settings":
         return showSettingsMenu(settings);
       case "help":
-        return showHelp();
+        return showHelp(settings);
     }
   }
 }
