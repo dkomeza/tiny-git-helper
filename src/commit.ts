@@ -123,22 +123,19 @@ function getFileColor(file: string) {
 
 async function commitFiles(settings: settings, files: string[]) {
   console.clear();
-  const answers = await inquirer.prompt({
-    name: "commit_message",
-    type: "input",
-    message: color("Enter commit message:", settings.color),
-  });
+  if (files.length === 0)
+    return console.log(chalk.red("Error: No files selected."));
+  const commitName = askCommitName(settings);
   const spinner = createSpinner(color("Commiting...", settings.color)).start();
   for (let i = 0; i < files.length; i++) {
     files[i] = files[i].slice(3);
   }
   for (let i = 0; i < files.length; i++) {
-    console.log(color(`Adding ${files[i]}...`, settings.color));
     await exec(`git add ${files[i]}`);
   }
   try {
     const { stdout, stderr } = await exec(
-      `git commit -m "${answers.commit_message}" && git push`
+      `git commit -m "${commitName}" && git push`
     );
     spinner.success();
     let output = stdout.split(" ");
@@ -152,6 +149,20 @@ async function commitFiles(settings: settings, files: string[]) {
     spinner.error();
     const output = error.stdout.replace(/\n/g, " ").split(" ");
     console.log(chalk.red(`Error: ${output.splice(3).slice(0, 6).join(" ")}.`));
+  }
+}
+
+async function askCommitName(settings: settings): Promise<string> {
+  const answers = await inquirer.prompt({
+    name: "commit_message",
+    type: "input",
+    message: color("Enter commit message:", settings.color),
+  });
+  if (answers.commit_message.length === 0) {
+    console.log(chalk.red("Error: Commit message cannot be empty."));
+    return askCommitName(settings);
+  } else {
+    return answers.commit_message;
   }
 }
 
