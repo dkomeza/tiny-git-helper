@@ -125,7 +125,7 @@ async function commitFiles(settings: settings, files: string[]) {
   console.clear();
   if (files.length === 0)
     return console.log(chalk.red("Error: No files selected."));
-  const commitName = await askCommitName(settings);
+  const commitMessage = await askCommitName(settings);
   const spinner = createSpinner(color("Commiting...", settings.color)).start();
   for (let i = 0; i < files.length; i++) {
     files[i] = files[i].slice(3);
@@ -135,7 +135,7 @@ async function commitFiles(settings: settings, files: string[]) {
   }
   try {
     const { stdout, stderr } = await exec(
-      `git commit -m "${commitName}" && git push`
+      `git commit -m "${commitMessage}" && git push`
     );
     spinner.success();
     let output = stdout.split(" ");
