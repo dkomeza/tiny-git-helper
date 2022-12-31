@@ -2,6 +2,14 @@ import inquirer from "inquirer";
 import inquirerPrompt from "inquirer-autocomplete-prompt";
 import fuzzy from "fuzzy";
 import readline from "readline";
+import color from "./color.js";
+
+interface settings {
+  username: string;
+  sorting: string;
+  protocol: string;
+  color: string;
+}
 
 inquirer.registerPrompt("autocomplete", inquirerPrompt);
 
@@ -26,39 +34,44 @@ function searchOptions(answers: any, input: string) {
   });
 }
 
-async function showHelp(callback?: any) {
-  callback = callback || "";
+async function showHelp(settings: settings, callback?: any) {
   console.clear();
   if (process.argv.slice(3).length === 0) {
-    console.log(`Usage: helper [options]`);
+    console.log(color(`Usage: helper [options]`, settings.color));
     const answers = await inquirer.prompt([
       {
         name: "help_action",
         type: "autocomplete",
-        message: "What can I help you with?",
+        message: color("What can I help you with? \n", settings.color),
         source: searchOptions,
         pageSize: 8,
       },
     ]);
-    return showHelpCommand(answers.help_action, callback);
+    return showHelpCommand(answers.help_action, settings, callback);
   } else {
-    return showHelpCommand(parseArgs(), callback);
+    return showHelpCommand(parseArgs(), settings);
   }
 }
 
-async function showHelpCommand(command: string, callback?: any): Promise<void> {
-  callback = callback || "";
+async function showHelpCommand(
+  command: string,
+  settings: settings,
+  callback?: any
+): Promise<void> {
+  console.clear();
   switch (command.split(" ")[0]) {
     case "clone":
-      console.log("Usage: helper clone");
+      console.log(color("Usage: helper clone", settings.color));
       console.log("Clone a repo");
       await waitForKeyPress();
-      return showHelp(callback);
+      if (callback) return showHelp(settings, callback);
+      else return process.exit(0);
     case "settings":
-      console.log("Usage: helper settings");
+      console.log(color("Usage: helper settings", settings.color));
       console.log("Edit settings");
       await waitForKeyPress();
-      return showHelp(callback);
+      if (callback) return showHelp(settings, callback);
+      else return process.exit(0);
     case "Exit":
       if (callback) return callback();
       else process.exit(0);
