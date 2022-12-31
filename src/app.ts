@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 import showCloneMenu from "./clone.js";
-import { commitAllFiles } from "./commit.js";
+import showCommitMenu, { commitAllFiles, selectFiles } from "./commit.js";
 import showSettingsMenu, { loadSavedSettings } from "./settings.js";
 import showHelp from "./help.js";
 import color from "./color.js";
@@ -53,10 +53,18 @@ async function parseArgs() {
     switch (process.argv.slice(2)[0]) {
       case "clone":
         return showCloneMenu(settings);
+      case "commit":
+        return showCommitMenu(settings);
+      case "c":
+        return showCommitMenu(settings);
       case "commitall":
         return commitAllFiles(settings);
       case "ca":
         return commitAllFiles(settings);
+      case "commitfiles":
+        return selectFiles(settings);
+      case "cf":
+        return selectFiles(settings);
       case "settings":
         return showSettingsMenu(settings);
       case "help":
