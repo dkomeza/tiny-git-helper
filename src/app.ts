@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 import showCloneMenu from "./clone.js";
-import { commitAllFiles } from "./commit.js";
+import showCommitMenu, { commitAllFiles, selectFiles } from "./commit.js";
 import showSettingsMenu, { loadSavedSettings } from "./settings.js";
 import showHelp from "./help.js";
 import color from "./color.js";
@@ -26,7 +26,7 @@ async function showMenu(): Promise<void> {
     name: "menu_action",
     type: "list",
     message: color("What can I do for you?", settings.color),
-    choices: ["Clone repo", "Edit settings", "Help", "Exit"],
+    choices: ["Commit", "Clone", "Settings", "Help", "Exit"],
   });
 
   return handleMenuChoice(answers.menu_action);
@@ -34,9 +34,11 @@ async function showMenu(): Promise<void> {
 
 async function handleMenuChoice(choice: string) {
   switch (choice) {
-    case "Clone repo":
+    case "Commit":
+      return showCommitMenu(settings, showMenu);
+    case "Clone":
       return showCloneMenu(settings, showMenu);
-    case "Edit settings":
+    case "Settings":
       await showSettingsMenu(settings);
       return showMenu();
     case "Help":
@@ -53,10 +55,18 @@ async function parseArgs() {
     switch (process.argv.slice(2)[0]) {
       case "clone":
         return showCloneMenu(settings);
+      case "commit":
+        return showCommitMenu(settings);
+      case "c":
+        return showCommitMenu(settings);
       case "commitall":
         return commitAllFiles(settings);
       case "ca":
         return commitAllFiles(settings);
+      case "commitfiles":
+        return selectFiles(settings);
+      case "cf":
+        return selectFiles(settings);
       case "settings":
         return showSettingsMenu(settings);
       case "help":
