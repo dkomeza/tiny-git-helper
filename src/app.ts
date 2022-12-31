@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 
-import showSettingsMenu, { loadSavedSettings } from "./settings.js";
-
 import showCloneMenu from "./clone.js";
+import { commitAllFiles } from "./commit.js";
+import showSettingsMenu, { loadSavedSettings } from "./settings.js";
 import showHelp from "./help.js";
 
 import chalk from "chalk";
@@ -51,6 +51,10 @@ async function parseArgs() {
     switch (process.argv.slice(2)[0]) {
       case "clone":
         return showCloneMenu(settings);
+      case "commitall":
+        return commitAllFiles();
+      case "ca":
+        return commitAllFiles();
       case "settings":
         return showSettingsMenu(settings);
       case "help":
