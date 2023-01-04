@@ -2,7 +2,11 @@
 
 import showCloneMenu from "./clone.js";
 import showCommitMenu, { commitAllFiles, selectFiles } from "./commit.js";
-import showSettingsMenu, { loadSavedSettings, settingsInterface } from "./settings.js";
+import initRepo from "./init.js";
+import showSettingsMenu, {
+  loadSavedSettings,
+  settingsInterface,
+} from "./settings.js";
 import showHelp from "./help.js";
 import color from "./color.js";
 
@@ -68,6 +72,8 @@ async function parseArgs() {
         return selectFiles(settings);
       case "cf":
         return selectFiles(settings);
+      case "init":
+        return initRepo(settings);
       case "settings":
         return showSettingsMenu(settings);
       case "help":
