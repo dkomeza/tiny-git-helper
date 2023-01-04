@@ -3,6 +3,7 @@ import chalk from "chalk";
 import os from "os";
 import * as fs from "fs";
 import color, { settingsColor } from "./color.js";
+import CryptoJS from "crypto-js";
 
 interface settingsInterface {
   username: string;
@@ -31,7 +32,7 @@ async function loadSavedSettings(settings: settingsInterface) {
       config.color
     ) {
       settings.username = config.username;
-      settings.key = config.key;
+      settings.key = decryptToken(config.key, config.username);
       settings.sorting = config.sorting;
       settings.protocol = config.protocol;
       settings.color = config.color;
@@ -41,12 +42,31 @@ async function loadSavedSettings(settings: settingsInterface) {
     }
   } catch (error) {
     console.log(chalk.redBright("\nNo config file found\n"));
+    const confFile = fs.readFileSync(
+      homedir + "/.helper-config/settings.json",
+      {
+        encoding: "utf8",
+        flag: "r",
+      }
+    );
+    const config: settingsInterface = JSON.parse(confFile);
+    console.log(config);
+    if (
+      config.username &&
+      config.key &&
+      config.protocol &&
+      config.sorting &&
+      config.color
+    ) {
+      console.log("Supcio");
+    }
     return getInitialSettings(settings);
   }
 }
 
 async function getInitialSettings(settings: settingsInterface) {
   settings.username = await askUsername();
+  settings.key = await askToken();
   settings.sorting = await askSorting();
   settings.protocol = await askProtocol();
   settings.color = await askColor(settings);
@@ -61,6 +81,7 @@ async function showSettingsMenu(settings: settingsInterface): Promise<void> {
     message: color("Settings \n", settings.color),
     choices: [
       `Username (${settings.username})`,
+      `Token`,
       `Sorting (${settings.sorting})`,
       `Protocol (${settings.protocol})`,
       `Color (${settings.color})`,
@@ -76,6 +97,8 @@ async function showSettingsMenu(settings: settingsInterface): Promise<void> {
     settings.protocol = await askProtocol();
   } else if (answer === `Color (${settings.color})`) {
     settings.color = await askColor(settings);
+  } else if (answer === "Token") {
+    settings.key = await askToken();
   } else {
     return;
   }
@@ -86,6 +109,7 @@ async function showSettingsMenu(settings: settingsInterface): Promise<void> {
 async function saveCurrentSettings(settings: settingsInterface) {
   const data = JSON.stringify({
     username: settings.username,
+    key: encryptToken(settings.key, settings.username),
     protocol: settings.protocol,
     sorting: settings.sorting,
     color: settings.color,
@@ -114,6 +138,27 @@ async function askUsername() {
   } else {
     await askUsername();
   }
+}
+
+async function askToken() {
+  const answer = await inquirer.prompt({
+    name: "github_token",
+    type: "input",
+    message: "What is you Github token?",
+  });
+  if (answer.github_token) {
+    return answer.github_token;
+  } else {
+    await askUsername();
+  }
+}
+
+function encryptToken(token: string, username: string) {
+  return CryptoJS.AES.encrypt(token, username).toString();
+}
+
+function decryptToken(token: string, username: string) {
+  return CryptoJS.AES.decrypt(token, username).toString(CryptoJS.enc.Utf8);
 }
 
 async function askSorting() {
