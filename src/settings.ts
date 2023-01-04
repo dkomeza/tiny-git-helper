@@ -4,14 +4,15 @@ import os from "os";
 import * as fs from "fs";
 import color, { settingsColor } from "./color.js";
 
-interface settings {
+interface settingsInterface {
   username: string;
+  key: string;
   sorting: string;
   protocol: string;
   color: string;
 }
 
-async function loadSavedSettings(settings: settings) {
+async function loadSavedSettings(settings: settingsInterface) {
   const homedir = os.homedir();
   try {
     const confFile = fs.readFileSync(
@@ -21,9 +22,16 @@ async function loadSavedSettings(settings: settings) {
         flag: "r",
       }
     );
-    const config: settings = JSON.parse(confFile);
-    if (config.username && config.protocol && config.sorting && config.color) {
+    const config: settingsInterface = JSON.parse(confFile);
+    if (
+      config.username &&
+      config.key &&
+      config.protocol &&
+      config.sorting &&
+      config.color
+    ) {
       settings.username = config.username;
+      settings.key = config.key;
       settings.sorting = config.sorting;
       settings.protocol = config.protocol;
       settings.color = config.color;
@@ -37,7 +45,7 @@ async function loadSavedSettings(settings: settings) {
   }
 }
 
-async function getInitialSettings(settings: settings) {
+async function getInitialSettings(settings: settingsInterface) {
   settings.username = await askUsername();
   settings.sorting = await askSorting();
   settings.protocol = await askProtocol();
@@ -45,7 +53,7 @@ async function getInitialSettings(settings: settings) {
   return saveCurrentSettings(settings);
 }
 
-async function showSettingsMenu(settings: settings): Promise<void> {
+async function showSettingsMenu(settings: settingsInterface): Promise<void> {
   console.clear();
   const answers = await inquirer.prompt({
     name: "settings_action",
@@ -75,7 +83,7 @@ async function showSettingsMenu(settings: settings): Promise<void> {
   return showSettingsMenu(settings);
 }
 
-async function saveCurrentSettings(settings: settings) {
+async function saveCurrentSettings(settings: settingsInterface) {
   const data = JSON.stringify({
     username: settings.username,
     protocol: settings.protocol,
@@ -128,7 +136,7 @@ async function askProtocol() {
   return answers.protocol;
 }
 
-async function askColor(settings: settings) {
+async function askColor(settings: settingsInterface) {
   const answers = await inquirer.prompt({
     name: "color",
     type: "list",
@@ -150,4 +158,4 @@ async function askColor(settings: settings) {
 }
 
 export default showSettingsMenu;
-export { loadSavedSettings };
+export { loadSavedSettings, settingsInterface };

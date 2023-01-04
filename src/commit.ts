@@ -4,18 +4,12 @@ import * as util from "node:util";
 import * as child_process from "node:child_process";
 import color from "./color.js";
 import { createSpinner } from "nanospinner";
+import { settingsInterface } from "./settings.js";
 const exec = util.promisify(child_process.exec);
-
-interface settings {
-  username: string;
-  sorting: string;
-  protocol: string;
-  color: string;
-}
 
 let showMenu: Function | undefined;
 
-async function showCommitMenu(settings: settings, callback?: Function) {
+async function showCommitMenu(settings: settingsInterface, callback?: Function) {
   showMenu = callback;
   console.clear();
   const answers = await inquirer.prompt({
@@ -27,7 +21,7 @@ async function showCommitMenu(settings: settings, callback?: Function) {
   return handleCommitChoice(answers.commit_action, settings);
 }
 
-async function handleCommitChoice(choice: string, settings: settings) {
+async function handleCommitChoice(choice: string, settings: settingsInterface) {
   switch (choice) {
     case "Commit all files":
       return commitAllFiles(settings);
@@ -39,7 +33,7 @@ async function handleCommitChoice(choice: string, settings: settings) {
   }
 }
 
-async function commitAllFiles(settings: settings) {
+async function commitAllFiles(settings: settingsInterface) {
   console.clear();
   if (process.argv.slice(2)[1]) {
     const spinner = createSpinner(
@@ -95,7 +89,7 @@ async function commitAllFiles(settings: settings) {
   }
 }
 
-async function selectFiles(settings: settings) {
+async function selectFiles(settings: settingsInterface) {
   const { stdout, stderr } = await exec("git status --short");
   const files = stdout.split("\n").filter((file) => file.length > 0);
   const choices = files.map((file) => {
@@ -121,7 +115,7 @@ function getFileColor(file: string) {
   else return file;
 }
 
-async function commitFiles(settings: settings, files: string[]) {
+async function commitFiles(settings: settingsInterface, files: string[]) {
   console.clear();
   if (files.length === 0)
     return console.log(chalk.red("Error: No files selected."));
@@ -152,7 +146,7 @@ async function commitFiles(settings: settings, files: string[]) {
   }
 }
 
-async function askCommitName(settings: settings): Promise<string> {
+async function askCommitName(settings: settingsInterface): Promise<string> {
   const answers = await inquirer.prompt({
     name: "commit_message",
     type: "input",

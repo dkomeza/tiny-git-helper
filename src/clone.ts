@@ -5,6 +5,7 @@ import { createSpinner } from "nanospinner";
 import * as util from "node:util";
 import * as child_process from "node:child_process";
 import color from "./color.js";
+import { settingsInterface } from "./settings.js";
 const exec = util.promisify(child_process.exec);
 
 inquirer.registerPrompt("autocomplete", inquirerPrompt);
@@ -24,13 +25,6 @@ interface Repo {
   lastUpdated: number;
 }
 
-interface settings {
-  username: string;
-  sorting: string;
-  protocol: string;
-  color: string;
-}
-
 function seatchRepos(answers: any, input: string) {
   input = input || "";
   return new Promise(function (resolve) {
@@ -41,7 +35,7 @@ function seatchRepos(answers: any, input: string) {
   });
 }
 
-async function showCloneMenu(settings: settings, callback?: Function) {
+async function showCloneMenu(settings: settingsInterface, callback?: Function) {
   showMenu = callback;
   console.clear();
   const spinner = createSpinner(
@@ -55,7 +49,7 @@ async function showCloneMenu(settings: settings, callback?: Function) {
     });
 }
 
-async function listRepos(data: data[], settings: settings): Promise<void> {
+async function listRepos(data: data[], settings: settingsInterface): Promise<void> {
   console.clear();
   let repo_list = [];
   if (settings.sorting === "Last updated") {

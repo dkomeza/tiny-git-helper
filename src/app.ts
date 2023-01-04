@@ -2,15 +2,16 @@
 
 import showCloneMenu from "./clone.js";
 import showCommitMenu, { commitAllFiles, selectFiles } from "./commit.js";
-import showSettingsMenu, { loadSavedSettings } from "./settings.js";
+import showSettingsMenu, { loadSavedSettings, settingsInterface } from "./settings.js";
 import showHelp from "./help.js";
 import color from "./color.js";
 
 import chalk from "chalk";
 import inquirer from "inquirer";
 
-const settings = {
+const settings: settingsInterface = {
   username: "",
+  key: "",
   sorting: "",
   protocol: "",
   color: "",
