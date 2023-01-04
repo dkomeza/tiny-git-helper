@@ -3,15 +3,17 @@ import chalk from "chalk";
 import os from "os";
 import * as fs from "fs";
 import color, { settingsColor } from "./color.js";
+import CryptoJS from "crypto-js";
 
-interface settings {
+interface settingsInterface {
   username: string;
+  key: string;
   sorting: string;
   protocol: string;
   color: string;
 }
 
-async function loadSavedSettings(settings: settings) {
+async function loadSavedSettings(settings: settingsInterface) {
   const homedir = os.homedir();
   try {
     const confFile = fs.readFileSync(
@@ -21,9 +23,16 @@ async function loadSavedSettings(settings: settings) {
         flag: "r",
       }
     );
-    const config: settings = JSON.parse(confFile);
-    if (config.username && config.protocol && config.sorting && config.color) {
+    const config: settingsInterface = JSON.parse(confFile);
+    if (
+      config.username &&
+      config.key &&
+      config.protocol &&
+      config.sorting &&
+      config.color
+    ) {
       settings.username = config.username;
+      settings.key = decryptToken(config.key, config.username);
       settings.sorting = config.sorting;
       settings.protocol = config.protocol;
       settings.color = config.color;
@@ -33,19 +42,38 @@ async function loadSavedSettings(settings: settings) {
     }
   } catch (error) {
     console.log(chalk.redBright("\nNo config file found\n"));
+    const confFile = fs.readFileSync(
+      homedir + "/.helper-config/settings.json",
+      {
+        encoding: "utf8",
+        flag: "r",
+      }
+    );
+    const config: settingsInterface = JSON.parse(confFile);
+    console.log(config);
+    if (
+      config.username &&
+      config.key &&
+      config.protocol &&
+      config.sorting &&
+      config.color
+    ) {
+      console.log("Supcio");
+    }
     return getInitialSettings(settings);
   }
 }
 
-async function getInitialSettings(settings: settings) {
+async function getInitialSettings(settings: settingsInterface) {
   settings.username = await askUsername();
+  settings.key = await askToken();
   settings.sorting = await askSorting();
   settings.protocol = await askProtocol();
   settings.color = await askColor(settings);
   return saveCurrentSettings(settings);
 }
 
-async function showSettingsMenu(settings: settings): Promise<void> {
+async function showSettingsMenu(settings: settingsInterface): Promise<void> {
   console.clear();
   const answers = await inquirer.prompt({
     name: "settings_action",
@@ -53,6 +81,7 @@ async function showSettingsMenu(settings: settings): Promise<void> {
     message: color("Settings \n", settings.color),
     choices: [
       `Username (${settings.username})`,
+      `Token`,
       `Sorting (${settings.sorting})`,
       `Protocol (${settings.protocol})`,
       `Color (${settings.color})`,
@@ -68,6 +97,8 @@ async function showSettingsMenu(settings: settings): Promise<void> {
     settings.protocol = await askProtocol();
   } else if (answer === `Color (${settings.color})`) {
     settings.color = await askColor(settings);
+  } else if (answer === "Token") {
+    settings.key = await askToken();
   } else {
     return;
   }
@@ -75,9 +106,10 @@ async function showSettingsMenu(settings: settings): Promise<void> {
   return showSettingsMenu(settings);
 }
 
-async function saveCurrentSettings(settings: settings) {
+async function saveCurrentSettings(settings: settingsInterface) {
   const data = JSON.stringify({
     username: settings.username,
+    key: encryptToken(settings.key, settings.username),
     protocol: settings.protocol,
     sorting: settings.sorting,
     color: settings.color,
@@ -108,6 +140,27 @@ async function askUsername() {
   }
 }
 
+async function askToken() {
+  const answer = await inquirer.prompt({
+    name: "github_token",
+    type: "input",
+    message: "What is you Github token?",
+  });
+  if (answer.github_token) {
+    return answer.github_token;
+  } else {
+    await askUsername();
+  }
+}
+
+function encryptToken(token: string, username: string) {
+  return CryptoJS.AES.encrypt(token, username).toString();
+}
+
+function decryptToken(token: string, username: string) {
+  return CryptoJS.AES.decrypt(token, username).toString(CryptoJS.enc.Utf8);
+}
+
 async function askSorting() {
   const answers = await inquirer.prompt({
     name: "sorting",
@@ -128,7 +181,7 @@ async function askProtocol() {
   return answers.protocol;
 }
 
-async function askColor(settings: settings) {
+async function askColor(settings: settingsInterface) {
   const answers = await inquirer.prompt({
     name: "color",
     type: "list",
@@ -150,4 +203,4 @@ async function askColor(settings: settings) {
 }
 
 export default showSettingsMenu;
-export { loadSavedSettings };
+export { loadSavedSettings, settingsInterface };

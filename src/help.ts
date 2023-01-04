@@ -3,14 +3,7 @@ import inquirerPrompt from "inquirer-autocomplete-prompt";
 import fuzzy from "fuzzy";
 import readline from "readline";
 import color from "./color.js";
-
-interface settings {
-  username: string;
-  sorting: string;
-  protocol: string;
-  color: string;
-}
-
+import { settingsInterface } from "./settings.js";
 inquirer.registerPrompt("autocomplete", inquirerPrompt);
 
 const optionList = [
@@ -34,7 +27,7 @@ function searchOptions(answers: any, input: string) {
   });
 }
 
-async function showHelp(settings: settings, callback?: any) {
+async function showHelp(settings: settingsInterface, callback?: any) {
   console.clear();
   if (process.argv.slice(3).length === 0) {
     console.log(color(`Usage: helper [options]`, settings.color));
@@ -55,7 +48,7 @@ async function showHelp(settings: settings, callback?: any) {
 
 async function showHelpCommand(
   command: string,
-  settings: settings,
+  settings: settingsInterface,
   callback?: any
 ): Promise<void> {
   console.clear();
