@@ -49,7 +49,10 @@ async function showCloneMenu(settings: settingsInterface, callback?: Function) {
     });
 }
 
-async function listRepos(data: data[], settings: settingsInterface): Promise<void> {
+async function listRepos(
+  data: data[],
+  settings: settingsInterface
+): Promise<void> {
   console.clear();
   let repo_list = [];
   if (settings.sorting === "Last updated") {
@@ -81,9 +84,9 @@ async function listRepos(data: data[], settings: settingsInterface): Promise<voi
   for (let i = 0; i < data.length; i++) {
     if (data[i].name === choice) {
       if (settings.protocol === "HTTPS") {
-        cloneRepo(data[i].clone_url);
+        await cloneRepo(data[i].clone_url);
       } else if (settings.protocol === "SSH") {
-        cloneRepo(data[i].ssh_url);
+        await cloneRepo(data[i].ssh_url);
       }
     } else if (choice === "Exit") {
       if (showMenu) return showMenu();
