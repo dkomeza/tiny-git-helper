@@ -9,7 +9,10 @@ const exec = util.promisify(child_process.exec);
 
 let showMenu: Function | undefined;
 
-async function showCommitMenu(settings: settingsInterface, callback?: Function) {
+async function showCommitMenu(
+  settings: settingsInterface,
+  callback?: Function
+) {
   showMenu = callback;
   console.clear();
   const answers = await inquirer.prompt({
@@ -35,13 +38,14 @@ async function handleCommitChoice(choice: string, settings: settingsInterface) {
 
 async function commitAllFiles(settings: settingsInterface) {
   console.clear();
-  if (process.argv.slice(2)[1]) {
+  if (process.argv.slice(3).length !== 0) {
+    const message = process.argv.slice(3).join(" ");
     const spinner = createSpinner(
       color("Commiting...", settings.color)
     ).start();
     try {
       const { stdout, stderr } = await exec(
-        `git add . && git commit -m "${process.argv.slice(2)[1]}" && git push`
+        `git add . && git commit -m "${message}" && git push`
       );
       spinner.success();
       let output = stdout.split(" ");
