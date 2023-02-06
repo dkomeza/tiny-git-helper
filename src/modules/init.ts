@@ -1,7 +1,6 @@
 import inquirer from "inquirer";
 import { createSpinner } from "nanospinner";
 import * as fs from "fs";
-import { Octokit } from "octokit";
 import * as util from "node:util";
 import * as child_process from "node:child_process";
 const exec = util.promisify(child_process.exec);
@@ -35,14 +34,18 @@ class Init {
       fs.mkdirSync(folderName);
       process.chdir(folderName);
       fs.writeFileSync("README.md", `# ${name}\n${description}`);
-      const octokit = new Octokit({
-        auth: Settings.settings.key,
+      const res = await fetch(`https://api.github.com/user/repos`, {
+        method: "POST",
+        headers: {
+          Authorization: `token ${Settings.settings.key}`,
+        },
+        body: JSON.stringify({
+          name: "super",
+          description: "super",
+          private: true,
+        }),
       });
-      const { data } = await octokit.request("POST /user/repos", {
-        name,
-        description,
-        private: privateRepo,
-      });
+      const data = await res.json();
       let remote = "";
       if (Settings.settings.protocol === "SSH") {
         remote = data.ssh_url;
@@ -58,7 +61,6 @@ class Init {
       spinner.error();
       console.log(error);
     }
-    console.log(name, description, privateRepo);
   }
 
   private getFolderName(folderName: string) {

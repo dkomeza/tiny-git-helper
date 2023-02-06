@@ -1,5 +1,3 @@
-import { Octokit } from "octokit";
-import { Endpoints } from "@octokit/types";
 import inquirer from "inquirer";
 import inquirerPrompt from "inquirer-autocomplete-prompt";
 import fuzzy from "fuzzy";
@@ -12,8 +10,6 @@ import Color from "./color.js";
 import Settings from "./settings.js";
 import InterruptedInquirer from "../utils/InteruptedPrompt.js";
 
-type data = Endpoints["GET /user/repos"]["response"]["data"][number];
-
 inquirer.registerPrompt("autocomplete", inquirerPrompt);
 
 new InterruptedInquirer(inquirer);
@@ -25,15 +21,17 @@ class Clone {
     const spinner = createSpinner(
       Color.colorText("Loading your repos...\n")
     ).start();
-    const octokit = new Octokit({
-      auth: Settings.settings.key,
+    const res = await fetch("https://api.github.com/user/repos", {
+      headers: {
+        Authorization: `token ${Settings.settings.key}`,
+      },
     });
-    const { data } = await octokit.request("GET /user/repos");
+    const data = await res.json();
     spinner.success();
     await this.listRepos(data);
   }
 
-  private async listRepos(data: data[]) {
+  private async listRepos(data: any) {
     console.clear();
     Clone.repoList = [];
     if (Settings.settings.sorting === "Last updated") {
@@ -62,9 +60,9 @@ class Clone {
     if (repoName) {
       let url: string | undefined = "";
       if (Settings.settings.protocol === "HTTPS") {
-        url = data.find((repo) => repo.name === repoName)?.clone_url;
+        url = data.find((repo: any) => repo.name === repoName)?.clone_url;
       } else {
-        url = data.find((repo) => repo.name === repoName)?.ssh_url;
+        url = data.find((repo: any) => repo.name === repoName)?.ssh_url;
       }
       if (url) {
         await this.cloneRepo(url);
