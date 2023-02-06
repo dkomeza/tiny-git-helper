@@ -1,6 +1,6 @@
 {
   "name": "tiny-git-helper",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "Tiny cli tool for github",
   "main": "build/app.js",
   "repository": {
