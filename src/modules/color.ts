@@ -1,18 +1,13 @@
 import chalk from "chalk";
+class Color {
+  private color = "Default";
 
-export default class Color {
-  private static color = "Default";
-
-  static setColor(color: string) {
-    Color.color = color;
+  setColor(color: string) {
+    this.color = color;
   }
 
-  static getColor() {
-    return Color.color;
-  }
-
-  static colorText(text: string, color?: string) {
-    const selectedColor = color ? color : Color.color;
+  colorText(text: string, color?: string) {
+    const selectedColor = color ? color : this.color;
     switch (selectedColor) {
       case "Red":
         return chalk.red(text);
@@ -35,3 +30,5 @@ export default class Color {
     }
   }
 }
+
+export default new Color();

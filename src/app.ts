@@ -4,6 +4,7 @@ import inquirer from "inquirer";
 
 import Color from "./modules/color.js";
 import Settings from "./modules/settings.js";
+import Clone from "./modules/clone.js";
 
 await Settings.loadSettings();
 Color.setColor(Settings.settings.color);
@@ -11,7 +12,7 @@ Color.setColor(Settings.settings.color);
 await parseArgs();
 
 async function showMenu(): Promise<void> {
-  console.clear();
+//   console.clear();
   const answers = await inquirer.prompt({
     name: "menu_action",
     type: "list",
@@ -26,8 +27,9 @@ async function handleMenuChoice(choice: string) {
   switch (choice) {
     // case "Commit":
     //   return showCommitMenu(settings, showMenu);
-    // case "Clone":
-    //   return showCloneMenu(settings, showMenu);
+    case "Clone":
+      await Clone.showCloneMenu();
+      return showMenu();
     case "Settings":
       await Settings.showSettings();
       return showMenu();
