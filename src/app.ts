@@ -46,29 +46,27 @@ async function parseArgs() {
   if (process.argv.slice(2).length === 0) {
     return showMenu();
   } else {
-    switch (
-      process.argv.slice(2)[0]
-      //   case "clone":
-      //     return showCloneMenu(settings);
-      //   case "commit":
-      //     return showCommitMenu(settings);
-      //   case "c":
-      //     return showCommitMenu(settings);
-      //   case "commitall":
-      //     return commitAllFiles(settings);
-      //   case "ca":
-      //     return commitAllFiles(settings);
-      //   case "commitfiles":
-      //     return selectFiles(settings);
-      //   case "cf":
-      //     return selectFiles(settings);
+    switch (process.argv.slice(2)[0]) {
+      case "clone":
+        return Clone.showCloneMenu();
+      case "commit":
+        return Commit.showCommitMenu();
+      case "c":
+        return Commit.showCommitMenu();
+      case "commitall":
+        return Commit.commitAllFiles();
+      case "ca":
+        return Commit.commitAllFiles();
+      case "commitfiles":
+        return Commit.selectFiles();
+      case "cf":
+        return Commit.selectFiles();
       //   case "init":
       //     return initRepo(settings);
-      //   case "settings":
-      //     return showSettingsMenu(settings);
+      case "settings":
+        return Settings.showSettings();
       //   case "help":
       //     return showHelp(settings);
-    ) {
     }
   }
 }
