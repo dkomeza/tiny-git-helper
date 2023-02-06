@@ -61,8 +61,6 @@ async function parseArgs() {
         return Commit.selectFiles();
       case "cf":
         return Commit.selectFiles();
-      //   case "init":
-      //     return initRepo(settings);
       case "settings":
         return Settings.showSettings();
       //   case "help":
