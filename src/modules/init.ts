@@ -1,5 +1,4 @@
 import inquirer from "inquirer";
-import { createSpinner } from "nanospinner";
 import * as fs from "fs";
 import * as util from "node:util";
 import * as child_process from "node:child_process";
@@ -7,6 +6,7 @@ const exec = util.promisify(child_process.exec);
 
 import Color from "./color.js";
 import Settings from "./settings.js";
+import Spinner from "../utils/Spinner.js";
 
 class Init {
   async showInitMenu() {
@@ -27,7 +27,7 @@ class Init {
         message: Color.colorText("Is this repository private?"),
       },
     ]);
-    const spinner = createSpinner(Color.colorText("Initializing...")).start();
+    const spinner = new Spinner(Color.colorText("Initializing...")).start();
     try {
       let folderName = name.replace(/ /g, "-");
       folderName = this.getFolderName(folderName);
@@ -58,7 +58,7 @@ class Init {
       spinner.success();
       console.log(Color.colorText("Repository initialized successfully!"));
     } catch (error) {
-      spinner.error();
+      spinner.fail();
       console.log(error);
     }
   }

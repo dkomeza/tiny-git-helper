@@ -2,10 +2,10 @@ import inquirer from "inquirer";
 import * as util from "node:util";
 import * as child_process from "node:child_process";
 const exec = util.promisify(child_process.exec);
-import { createSpinner } from "nanospinner";
 
 import Color from "./color.js";
 import Settings from "./settings.js";
+import Spinner from "../utils/Spinner.js";
 
 class Commit {
   async showCommitMenu() {
@@ -51,7 +51,7 @@ class Commit {
     } else {
       message = await this.askCommitMessage();
     }
-    const spinner = createSpinner(Color.colorText("Commiting...")).start();
+    const spinner = new Spinner(Color.colorText("Commiting...")).start();
     try {
       const { stdout, stderr } = await exec(
         `git add . && git commit -m "${message}" && git push`
@@ -67,7 +67,7 @@ class Commit {
         Color.colorText(`Done! Successfully commited ${outputString}.`, "green")
       );
     } catch (error: any) {
-      spinner.error();
+      spinner.fail();
       const output = error.stdout.replace(/\n/g, " ").split(" ");
       console.log(
         Color.colorText(
@@ -112,7 +112,7 @@ class Commit {
       return console.log(Color.colorText("Error: No files selected.", "red"));
     }
     const message = await this.askCommitMessage();
-    const spinner = createSpinner(Color.colorText("Commiting...")).start();
+    const spinner = new Spinner(Color.colorText("Commiting...")).start();
     for (let i = 0; i < files.length; i++) {
       files[i] = files[i].slice(3);
     }
@@ -131,7 +131,7 @@ class Commit {
         )
       );
     } catch (error: any) {
-      spinner.error();
+      spinner.fail();
       const output = error.stdout.replace(/\n/g, " ").split(" ");
       console.log(
         Color.colorText(

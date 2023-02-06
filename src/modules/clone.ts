@@ -1,7 +1,6 @@
 import inquirer from "inquirer";
 import inquirerPrompt from "inquirer-autocomplete-prompt";
 import fuzzy from "fuzzy";
-import { createSpinner } from "nanospinner";
 import * as util from "node:util";
 import * as child_process from "node:child_process";
 const exec = util.promisify(child_process.exec);
@@ -9,6 +8,7 @@ const exec = util.promisify(child_process.exec);
 import Color from "./color.js";
 import Settings from "./settings.js";
 import InterruptedInquirer from "../utils/InteruptedPrompt.js";
+import Spinner from "../utils/Spinner.js";
 
 inquirer.registerPrompt("autocomplete", inquirerPrompt);
 
@@ -18,7 +18,7 @@ class Clone {
   private static repoList: string[] = [];
   async showCloneMenu() {
     console.clear();
-    const spinner = createSpinner(
+    const spinner = new Spinner(
       Color.colorText("Loading your repos...\n")
     ).start();
     const res = await fetch("https://api.github.com/user/repos", {
@@ -101,7 +101,7 @@ class Clone {
   }
 
   private async cloneRepo(url: string) {
-    const spinner = createSpinner(Color.colorText("Cloning repo...\n")).start();
+    const spinner = new Spinner(Color.colorText("Cloning repo...\n")).start();
     await exec(`git clone ${url}`);
     spinner.success();
   }
