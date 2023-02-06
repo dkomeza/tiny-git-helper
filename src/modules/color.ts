@@ -8,22 +8,22 @@ class Color {
 
   colorText(text: string, color?: string) {
     const selectedColor = color ? color : this.color;
-    switch (selectedColor) {
-      case "Red":
+    switch (selectedColor.toLowerCase()) {
+      case "red":
         return chalk.red(text);
-      case "Green":
+      case "green":
         return chalk.green(text);
-      case "Yellow":
+      case "yellow":
         return chalk.yellow(text);
-      case "Blue":
+      case "blue":
         return chalk.blue(text);
-      case "Magenta":
+      case "magenta":
         return chalk.magenta(text);
-      case "Cyan":
+      case "cyan":
         return chalk.cyan(text);
-      case "White":
+      case "white":
         return chalk.white(text);
-      case "Gray":
+      case "gray":
         return chalk.gray(text);
       default:
         return text;
