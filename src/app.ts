@@ -6,6 +6,7 @@ import Color from "./modules/color.js";
 import Settings from "./modules/settings.js";
 import Clone from "./modules/clone.js";
 import Commit from "./modules/commit.js";
+import Init from "./modules/init.js";
 
 await Settings.loadSettings();
 Color.setColor(Settings.settings.color);
@@ -18,7 +19,7 @@ async function showMenu(): Promise<void> {
     name: "menu_action",
     type: "list",
     message: Color.colorText("What can I do for you?\n"),
-    choices: ["Commit", "Clone", "Settings", "Help", "Exit"],
+    choices: ["Commit", "Clone", "Init", "Settings", "Help", "Exit"],
   });
 
   return handleMenuChoice(answers.menu_action);
@@ -35,6 +36,9 @@ async function handleMenuChoice(choice: string) {
     case "Settings":
       await Settings.showSettings();
       return showMenu();
+    case "Init":
+      await Init.showInitMenu();
+      // return showMenu();
     // case "Help":
     //   return showHelp(settings, showMenu);
     default:
@@ -61,6 +65,8 @@ async function parseArgs() {
         return Commit.selectFiles();
       case "cf":
         return Commit.selectFiles();
+      case "init":
+        return Init.showInitMenu();
       case "settings":
         return Settings.showSettings();
       //   case "help":

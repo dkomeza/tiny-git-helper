@@ -6,7 +6,6 @@ import { createSpinner } from "nanospinner";
 
 import Color from "./color.js";
 import Settings from "./settings.js";
-import InterruptedInquirer from "../utils/InteruptedPrompt.js";
 
 class Commit {
   async showCommitMenu() {
