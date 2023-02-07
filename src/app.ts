@@ -38,7 +38,7 @@ async function handleMenuChoice(choice: string) {
       return showMenu();
     case "Init":
       await Init.showInitMenu();
-    // return showMenu();
+      return showMenu();
     // case "Help":
     //   return showHelp(settings, showMenu);
     default:

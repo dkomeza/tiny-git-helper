@@ -13,6 +13,33 @@ A small tool designed to make process of using git and github easier.
   ```sh
     tgh
   ```
+
+  - You can also use short version of the commands
+    - Commit (shows commit menu)
+      ```sh
+        tgh c
+      ```
+      - Commit all files
+        ```sh
+          tgh ca
+        ```
+      - Commit selected files
+        ```sh
+          tgh cf
+        ```
+    - Clone
+      ```sh
+        tgh clone
+      ```
+    - Init (create new repository)
+      ```sh
+        tgh init
+      ```
+    - Settings
+      ```sh
+        tgh settings
+      ```
+
   
   ### Update
    ```npm
