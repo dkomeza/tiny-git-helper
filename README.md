@@ -1,5 +1,5 @@
 # Tiny git helper
-A small tool designed to make process of using github easier.
+A small tool designed to make process of using git and github easier.
 
 ## Usage
 ### Instalation 
@@ -9,9 +9,9 @@ A small tool designed to make process of using github easier.
     ```
 
 ### Commands
- - The whole tool is used with <i>gh</i> command
+ - The whole tool is used with <i>tgh</i> command
   ```sh
-    gh
+    tgh
   ```
   
   ### Update

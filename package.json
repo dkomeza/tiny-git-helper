@@ -38,5 +38,11 @@
     "@types/inquirer": "^9.0.3",
     "@types/inquirer-autocomplete-prompt": "^3.0.0",
     "@types/node": "^18.11.18"
-  }
+  },
+  "keywords": [
+    "github",
+    "cli",
+    "git",
+    "helper"
+  ]
 }
