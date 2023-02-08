@@ -10,6 +10,13 @@ import Settings from "./settings.js";
 import InterruptedInquirer from "../utils/InteruptedPrompt.js";
 import Spinner from "../utils/Spinner.js";
 
+interface repo {
+  name: string;
+  pushed_at: string;
+  clone_url: string;
+  ssh_url: string;
+}
+
 inquirer.registerPrompt("autocomplete", inquirerPrompt);
 
 new InterruptedInquirer(inquirer);
@@ -31,7 +38,7 @@ class Clone {
     await this.listRepos(data);
   }
 
-  private async listRepos(data: any) {
+  private async listRepos(data: repo[]) {
     console.clear();
     Clone.repoList = [];
     if (Settings.settings.sorting === "Last updated") {
@@ -60,9 +67,9 @@ class Clone {
     if (repoName) {
       let url: string | undefined = "";
       if (Settings.settings.protocol === "HTTPS") {
-        url = data.find((repo: any) => repo.name === repoName)?.clone_url;
+        url = data.find((repo) => repo.name === repoName)?.clone_url;
       } else {
-        url = data.find((repo: any) => repo.name === repoName)?.ssh_url;
+        url = data.find((repo) => repo.name === repoName)?.ssh_url;
       }
       if (url) {
         await this.cloneRepo(url);
