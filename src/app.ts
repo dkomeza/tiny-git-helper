@@ -13,6 +13,10 @@ Color.setColor(Settings.settings.color);
 
 await parseArgs();
 
+/**
+ * Asks the user what they want to do
+ * @returns Function that handles the user's choice
+ */
 async function showMenu(): Promise<void> {
   console.clear();
   const answers = await inquirer.prompt({
@@ -25,6 +29,11 @@ async function showMenu(): Promise<void> {
   return handleMenuChoice(answers.menu_action);
 }
 
+/**
+ *  Handle the user menu choice
+ * @param {string} choice User menu choice
+ * @returns Either returns to the menu or closes the program
+ */
 async function handleMenuChoice(choice: string) {
   switch (choice) {
     case "Commit":
@@ -46,6 +55,10 @@ async function handleMenuChoice(choice: string) {
   }
 }
 
+/**
+ * Function to parse cli arguments
+ * @returns If there are no arguments shows main menu, otherwise shows appropriate submenu
+ */
 async function parseArgs() {
   if (process.argv.slice(2).length === 0) {
     return showMenu();
