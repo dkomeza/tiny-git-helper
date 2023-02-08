@@ -32,16 +32,28 @@ class Spinner {
     this.message = message;
   }
 
+  /**
+   * Start the spinner
+   * @returns The spinner instance
+   */
   start() {
     this.update().loop();
     return this;
   }
 
+  /**
+   * Stop the spinner with a tick
+   * @returns The function to stop the spinner
+   */
   success() {
     let symbol = this.symbols.tick;
     return this.stop(symbol, "green");
   }
 
+  /**
+   * Stop the spinner with a cross
+   * @returns The function to stop the spinner
+   */
   fail() {
     let symbol = this.symbols.cross;
     return this.stop(symbol, "red");
