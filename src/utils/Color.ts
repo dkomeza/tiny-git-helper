@@ -2,10 +2,20 @@ import chalk from "chalk";
 class Color {
   private color = "Default";
 
+  /**
+   * Set the default color to use
+   * @param {string} color Color to set
+   */
   setColor(color: string) {
     this.color = color;
   }
 
+  /**
+   * Colorize text based on the default color or the color passed in the parameter
+   * @param text Text to color
+   * @param color Optional color to use
+   * @returns Colored text
+   */
   colorText(text: string, color?: string) {
     const selectedColor = color ? color : this.color;
     switch (selectedColor.toLowerCase()) {
