@@ -84,6 +84,8 @@ async function parseArgs() {
         return Settings.showSettings();
       //   case "help":
       //     return showHelp(settings);
+      default:
+        return showMenu();
     }
   }
 }
