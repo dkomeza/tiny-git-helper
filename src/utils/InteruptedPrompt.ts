@@ -2,6 +2,10 @@ import inquirer from "inquirer";
 import observe from "inquirer/lib/utils/events.js";
 
 class InterruptedInquirer {
+  /**
+   * Create a new interruptable inquirer prompt for each prompt type
+   * @param Inquirer Inquirer instance
+   */
   constructor(Inquirer: typeof inquirer) {
     for (const key of Object.keys(Inquirer.prompt.prompts)) {
       Inquirer.prompt.prompts[key] = this.addInterruptedPrompt(
@@ -10,6 +14,11 @@ class InterruptedInquirer {
     }
   }
 
+  /**
+   * Add the interruptable prompt to the inquirer
+   * @param prompt Prompt to add interrupt to
+   * @returns The new prompt with interrupt
+   */
   private addInterruptedPrompt(prompt: inquirer.prompts.PromptConstructor) {
     class InterruptedPrompt extends prompt {
       run(): Promise<any> {
