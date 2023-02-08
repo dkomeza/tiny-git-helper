@@ -4,7 +4,7 @@ import * as util from "node:util";
 import * as child_process from "node:child_process";
 const exec = util.promisify(child_process.exec);
 
-import Color from "./color.js";
+import Color from "../utils/Color.js";
 import Settings from "./settings.js";
 import Spinner from "../utils/Spinner.js";
 

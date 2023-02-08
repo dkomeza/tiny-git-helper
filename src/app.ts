@@ -2,11 +2,12 @@
 
 import inquirer from "inquirer";
 
-import Color from "./modules/color.js";
 import Settings from "./modules/settings.js";
 import Clone from "./modules/clone.js";
 import Commit from "./modules/commit.js";
 import Init from "./modules/init.js";
+
+import Color from "./utils/Color.js";
 
 await Settings.loadSettings();
 Color.setColor(Settings.settings.color);

@@ -1,7 +1,7 @@
 import os from "os";
 import * as fs from "fs";
 
-import Color from "./color.js";
+import Color from "../utils/Color.js";
 import inquirer from "inquirer";
 
 interface settingsInterface {

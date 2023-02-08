@@ -1,5 +1,5 @@
 import tty from "tty";
-import Color from "../modules/color.js";
+import Color from "./Color.js";
 
 const isTTY =
   tty.isatty(1) && process.env.TERM !== "dumb" && !("CI" in process.env);
