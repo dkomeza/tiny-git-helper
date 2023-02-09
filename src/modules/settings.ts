@@ -56,61 +56,65 @@ class Settings {
 
   async showSettings(): Promise<void> {
     console.clear();
-    const answers = await inquirer.prompt({
-      name: "settings",
-      type: "list",
-      message: Color.colorText("Settings\n"),
-      choices: [
-        {
-          name: `Change username (${this.settings.username})`,
-          value: "username",
-        },
-        {
-          name: "Change token",
-          value: "token",
-        },
-        {
-          name: `Change sorting (${this.settings.sorting})`,
-          value: "sorting",
-        },
-        {
-          name: `Change protocol (${this.settings.protocol})`,
-          value: "protocol",
-        },
-        {
-          name: `Change color (${Color.colorText(
-            this.settings.color,
-            this.settings.color
-          )})`,
-          value: "color",
-        },
-        {
-          name: "Back",
-          value: "back",
-        },
-      ],
-    });
-    switch (answers.settings) {
-      case "username":
-        this.settings.username = await this.askUsername();
-        break;
-      case "token":
-        this.settings.key = await this.askToken();
-        break;
-      case "sorting":
-        this.settings.sorting = await this.askSorting();
-        break;
-      case "protocol":
-        this.settings.protocol = await this.askProtocol();
-        break;
-      case "color":
-        this.settings.color = await this.askColor();
-        break;
-      case "back":
-        return;
+    try {
+      const answers = await inquirer.prompt({
+        name: "settings",
+        type: "list",
+        message: Color.colorText("Settings\n"),
+        choices: [
+          {
+            name: `Change username (${this.settings.username})`,
+            value: "username",
+          },
+          {
+            name: "Change token",
+            value: "token",
+          },
+          {
+            name: `Change sorting (${this.settings.sorting})`,
+            value: "sorting",
+          },
+          {
+            name: `Change protocol (${this.settings.protocol})`,
+            value: "protocol",
+          },
+          {
+            name: `Change color (${Color.colorText(
+              this.settings.color,
+              this.settings.color
+            )})`,
+            value: "color",
+          },
+          {
+            name: "Back",
+            value: "back",
+          },
+        ],
+      });
+      switch (answers.settings) {
+        case "username":
+          this.settings.username = await this.askUsername();
+          break;
+        case "token":
+          this.settings.key = await this.askToken();
+          break;
+        case "sorting":
+          this.settings.sorting = await this.askSorting();
+          break;
+        case "protocol":
+          this.settings.protocol = await this.askProtocol();
+          break;
+        case "color":
+          this.settings.color = await this.askColor();
+          break;
+        case "back":
+          return;
+      }
+      await this.saveSettings();
+      return this.showSettings();
+    } catch (error) {
+      return;
     }
-    await this.saveSettings();
-    return this.showSettings();
   }
 
   private async askSettings() {
