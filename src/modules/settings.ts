@@ -59,7 +59,7 @@ class Settings {
     const answers = await inquirer.prompt({
       name: "settings",
       type: "list",
-      message: Color.colorText("Settings"),
+      message: Color.colorText("Settings\n"),
       choices: [
         {
           name: `Change username (${this.settings.username})`,

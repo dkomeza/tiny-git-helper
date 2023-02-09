@@ -83,7 +83,7 @@ class Clone {
         {
           type: "autocomplete",
           name: "repo",
-          message: Color.colorText("Select a repo"),
+          message: Color.colorText("Select a repo\n"),
           source: this.searchRepos,
           pageSize: 8,
         },

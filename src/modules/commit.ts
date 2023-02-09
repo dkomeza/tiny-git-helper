@@ -4,7 +4,6 @@ import * as child_process from "node:child_process";
 const exec = util.promisify(child_process.exec);
 
 import Color from "../utils/Color.js";
-import Settings from "./settings.js";
 import Spinner from "../utils/Spinner.js";
 
 class Commit {
@@ -13,7 +12,7 @@ class Commit {
     const answers = await inquirer.prompt({
       name: "commit_action",
       type: "list",
-      message: Color.colorText("What do you want to commit?"),
+      message: Color.colorText("What do you want to commit?\n"),
       choices: [
         {
           name: "Commit specific files",
@@ -39,7 +38,7 @@ class Commit {
       case "specific":
         return this.selectFiles();
       default:
-        return Settings.showSettings();
+        return;
     }
   }
 
