@@ -94,7 +94,7 @@ class Commit {
     });
     try {
       const { selected_files } = await inquirer.prompt({
-        name: "files",
+        name: "selected_files",
         type: "checkbox",
         message: Color.colorText("Select files to commit:"),
         choices: choices,
