@@ -9,26 +9,30 @@ import Spinner from "../utils/Spinner.js";
 class Commit {
   async showCommitMenu() {
     console.clear();
-    const answers = await inquirer.prompt({
-      name: "commit_action",
-      type: "list",
-      message: Color.colorText("What do you want to commit?\n"),
-      choices: [
-        {
-          name: "Commit specific files",
-          value: "specific",
-        },
-        {
-          name: "Commit all files",
-          value: "all",
-        },
-        {
-          name: "Back",
-          value: "back",
-        },
-      ],
-    });
-    return this.handleCommitChoice(answers.commit_action);
+    try {
+      const { commit_action } = await inquirer.prompt({
+        name: "commit_action",
+        type: "list",
+        message: Color.colorText("What do you want to commit?\n"),
+        choices: [
+          {
+            name: "Commit specific files",
+            value: "specific",
+          },
+          {
+            name: "Commit all files",
+            value: "all",
+          },
+          {
+            name: "Back",
+            value: "back",
+          },
+        ],
+      });
+      return this.handleCommitChoice(commit_action);
+    } catch (error: any) {
+      return;
+    }
   }
 
   private async handleCommitChoice(choice: string) {
@@ -50,6 +54,7 @@ class Commit {
     } else {
       message = await this.askCommitMessage();
     }
+    if (message.length === 0) return;
     const spinner = new Spinner(Color.colorText("Commiting...")).start();
     try {
       const { stdout, stderr } = await exec(
@@ -87,13 +92,17 @@ class Commit {
         value: file,
       };
     });
-    const answers = await inquirer.prompt({
-      name: "files",
-      type: "checkbox",
-      message: Color.colorText("Select files to commit:"),
-      choices: choices,
-    });
-    return this.commitFiles(answers.files);
+    try {
+      const { selected_files } = await inquirer.prompt({
+        name: "files",
+        type: "checkbox",
+        message: Color.colorText("Select files to commit:"),
+        choices: choices,
+      });
+      return this.commitFiles(selected_files);
+    } catch (error: any) {
+      return;
+    }
   }
 
   private getFileColor(file: string) {
@@ -111,6 +120,7 @@ class Commit {
       return console.log(Color.colorText("Error: No files selected.", "red"));
     }
     const message = await this.askCommitMessage();
+    if (message.length === 0) return;
     const spinner = new Spinner(Color.colorText("Commiting...")).start();
     for (let i = 0; i < files.length; i++) {
       files[i] = files[i].slice(3);
@@ -142,18 +152,22 @@ class Commit {
   }
 
   private async askCommitMessage(): Promise<string> {
-    const { message } = await inquirer.prompt({
-      name: "message",
-      type: "input",
-      message: Color.colorText("Enter commit message:"),
-    });
-    if (message.length === 0) {
-      console.log(
-        Color.colorText("Error: Commit message cannot be empty.", "red")
-      );
-      return this.askCommitMessage();
-    } else {
-      return message;
+    try {
+      const { message } = await inquirer.prompt({
+        name: "message",
+        type: "input",
+        message: Color.colorText("Enter commit message:"),
+      });
+      if (message.length === 0) {
+        console.log(
+          Color.colorText("Error: Commit message cannot be empty.", "red")
+        );
+        return this.askCommitMessage();
+      } else {
+        return message;
+      }
+    } catch (error: any) {
+      return "";
     }
   }
 }
