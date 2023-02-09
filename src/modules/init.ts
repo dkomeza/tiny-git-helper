@@ -10,56 +10,61 @@ import Spinner from "../utils/Spinner.js";
 
 class Init {
   async showInitMenu() {
-    const { name, description, privateRepo } = await inquirer.prompt([
-      {
-        name: "name",
-        type: "input",
-        message: Color.colorText("Enter repository name:"),
-      },
-      {
-        name: "description",
-        type: "input",
-        message: Color.colorText("Enter repository description:"),
-      },
-      {
-        name: "privateRepo",
-        type: "confirm",
-        message: Color.colorText("Is this repository private?"),
-      },
-    ]);
-    const spinner = new Spinner(Color.colorText("Initializing...")).start();
+    console.clear();
     try {
-      let folderName = name.replace(/ /g, "-");
-      folderName = this.getFolderName(folderName);
-      fs.mkdirSync(folderName);
-      process.chdir(folderName);
-      fs.writeFileSync("README.md", `# ${name}\n${description}`);
-      const res = await fetch(`https://api.github.com/user/repos`, {
-        method: "POST",
-        headers: {
-          Authorization: `token ${Settings.settings.key}`,
+      const { name, description, privateRepo } = await inquirer.prompt([
+        {
+          name: "name",
+          type: "input",
+          message: Color.colorText("Enter repository name:"),
         },
-        body: JSON.stringify({
-          name: name,
-          description: description,
-          private: privateRepo,
-        }),
-      });
-      const data = await res.json();
-      let remote = "";
-      if (Settings.settings.protocol === "SSH") {
-        remote = data.ssh_url;
-      } else {
-        remote = data.clone_url;
+        {
+          name: "description",
+          type: "input",
+          message: Color.colorText("Enter repository description:"),
+        },
+        {
+          name: "privateRepo",
+          type: "confirm",
+          message: Color.colorText("Is this repository private?"),
+        },
+      ]);
+      const spinner = new Spinner(Color.colorText("Initializing...")).start();
+      try {
+        let folderName = name.replace(/ /g, "-");
+        folderName = this.getFolderName(folderName);
+        fs.mkdirSync(folderName);
+        process.chdir(folderName);
+        fs.writeFileSync("README.md", `# ${name}\n${description}`);
+        const res = await fetch(`https://api.github.com/user/repos`, {
+          method: "POST",
+          headers: {
+            Authorization: `token ${Settings.settings.key}`,
+          },
+          body: JSON.stringify({
+            name: name,
+            description: description,
+            private: privateRepo,
+          }),
+        });
+        const data = await res.json();
+        let remote = "";
+        if (Settings.settings.protocol === "SSH") {
+          remote = data.ssh_url;
+        } else {
+          remote = data.clone_url;
+        }
+        const { stdout, stderr } = await exec(
+          `git init && git add . && git commit -m "Initial commit" && git remote add origin ${remote} && git push -u origin master`
+        );
+        spinner.success();
+        console.log(Color.colorText("Repository initialized successfully!"));
+      } catch (error) {
+        spinner.fail();
+        console.log(error);
       }
-      const { stdout, stderr } = await exec(
-        `git init && git add . && git commit -m "Initial commit" && git remote add origin ${remote} && git push -u origin master`
-      );
-      spinner.success();
-      console.log(Color.colorText("Repository initialized successfully!"));
     } catch (error) {
-      spinner.fail();
-      console.log(error);
+      return;
     }
   }
 
