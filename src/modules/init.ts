@@ -40,9 +40,9 @@ class Init {
           Authorization: `token ${Settings.settings.key}`,
         },
         body: JSON.stringify({
-          name: "super",
-          description: "super",
-          private: true,
+          name: name,
+          description: description,
+          private: privateRepo,
         }),
       });
       const data = await res.json();
