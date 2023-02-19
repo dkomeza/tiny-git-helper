@@ -10,6 +10,7 @@ interface settingsInterface {
   sorting: string;
   protocol: string;
   color: string;
+  fancyCommit: boolean | string;
 }
 
 class Settings {
@@ -19,6 +20,7 @@ class Settings {
     sorting: "",
     protocol: "",
     color: "",
+    fancyCommit: "",
   };
 
   async loadSettings() {
@@ -32,22 +34,13 @@ class Settings {
         }
       );
       const config: settingsInterface = JSON.parse(confFile);
-      if (
-        config.username &&
-        config.key &&
-        config.protocol &&
-        config.sorting &&
-        config.color
-      ) {
-        this.settings.username = config.username;
-        this.settings.key = config.key;
-        this.settings.sorting = config.sorting;
-        this.settings.protocol = config.protocol;
-        this.settings.color = config.color;
-        return;
-      } else {
-        throw new Error("Invalid config file");
+      for (const key in config) {
+        if (config.hasOwnProperty(key)) {
+          const keyName = key as keyof settingsInterface;
+          (this.settings[keyName] as string | boolean) = config[keyName];
+        }
       }
+      this.fillSettings();
     } catch (error) {
       console.log(Color.colorText("\nNo config file found\n", "Red"));
       return this.askSettings();
@@ -123,6 +116,41 @@ class Settings {
     this.settings.sorting = await this.askSorting();
     this.settings.protocol = await this.askProtocol();
     this.settings.color = await this.askColor();
+    return this.saveSettings();
+  }
+
+  private async fillSettings() {
+    for (const key in this.settings) {
+      const keyName = key as keyof settingsInterface;
+      if (this.settings[keyName] === "") {
+        switch (keyName) {
+          case "username":
+            this.settings.username = await this.askUsername();
+            break;
+          case "key":
+            this.settings.key = await this.askToken();
+            break;
+          case "sorting":
+            this.settings.sorting = await this.askSorting();
+            break;
+          case "protocol":
+            this.settings.protocol = await this.askProtocol();
+            break;
+          case "color":
+            this.settings.color = await this.askColor();
+            break;
+          case "fancyCommit":
+            this.settings.fancyCommit = await this.askFancyCommit();
+            break;
+        }
+      }
+    }
+    for (const key in this.settings) {
+      const keyName = key as keyof settingsInterface;
+      if (this.settings[keyName] === "") {
+        throw new Error("Invalid config file");
+      }
+    }
     return this.saveSettings();
   }
 
@@ -220,6 +248,15 @@ class Settings {
     return answers.color;
   }
 
+  private async askFancyCommit() {
+    const answers = await inquirer.prompt({
+      name: "fancyCommit",
+      type: "confirm",
+      message: "Use fancy commit messages?",
+    });
+    return answers.fancyCommit;
+  }
+
   private async saveSettings() {
     const data = JSON.stringify(this.settings);
     const homedir = os.homedir();
@@ -235,14 +272,6 @@ class Settings {
       process.exit(1);
     }
   }
-
-  //   private encryptToken(token: string, username: string) {
-  //     return CryptoJS.AES.encrypt(token, username).toString();
-  //   }
-
-  //   private decryptToken(token: string, username: string) {
-  //     return CryptoJS.AES.decrypt(token, username).toString(CryptoJS.enc.Utf8);
-  //   }
 }
 
 export default new Settings();
