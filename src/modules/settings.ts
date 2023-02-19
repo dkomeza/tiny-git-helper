@@ -79,6 +79,10 @@ class Settings {
             value: "color",
           },
           {
+            name: `Change fancy commit (${this.settings.fancyCommit})`,
+            value: "fancyCommit",
+          },
+          {
             name: "Back",
             value: "back",
           },
@@ -99,6 +103,9 @@ class Settings {
           break;
         case "color":
           this.settings.color = await this.askColor();
+          break;
+        case "fancyCommit":
+          this.settings.fancyCommit = await this.askFancyCommit();
           break;
         case "back":
           return;

@@ -12,7 +12,7 @@ import Color from "./utils/Color.js";
 await Settings.loadSettings();
 Color.setColor(Settings.settings.color);
 
-// await parseArgs();
+await parseArgs();
 
 /**
  * Asks the user what they want to do
