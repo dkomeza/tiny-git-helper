@@ -3,8 +3,11 @@ import * as util from "node:util";
 import * as child_process from "node:child_process";
 const exec = util.promisify(child_process.exec);
 
+import settings from "./settings.js";
+
 import Color from "../utils/Color.js";
 import Spinner from "../utils/Spinner.js";
+import CommitMessage from "../utils/CommitMessage.js";
 
 class Commit {
   async showCommitMenu() {
@@ -48,17 +51,25 @@ class Commit {
 
   async commitAllFiles() {
     console.clear();
-    let message: string;
+    let title: string;
+    let description = "";
     if (process.argv.slice(3).length !== 0) {
-      message = process.argv.slice(3).join(" ");
+      title = process.argv.slice(3).join(" ");
     } else {
-      message = await this.askCommitMessage();
+      const commitMessage = await CommitMessage.getCommitMessage(
+        settings.settings.fancyCommit ? true : false
+      );
+      title = commitMessage.title;
+      description = commitMessage.description;
     }
-    if (message.length === 0) return;
+    if (title.length === 0) return;
     const spinner = new Spinner(Color.colorText("Commiting...")).start();
     try {
-      const { stdout, stderr } = await exec(
-        `git add . && git commit -m "${message}" && git push`
+      const commitCommand = description
+        ? `git commit -m "${title}" -m "${description}"`
+        : `git commit -m "${title}"`;
+      const { stdout } = await exec(
+        `git add . && ${commitCommand} && git push`
       );
       spinner.success();
       let output = stdout.split(" ");
@@ -79,6 +90,7 @@ class Commit {
           "red"
         )
       );
+      console.log(error);
     }
   }
 
@@ -119,8 +131,10 @@ class Commit {
     if (files.length === 0) {
       return console.log(Color.colorText("Error: No files selected.", "red"));
     }
-    const message = await this.askCommitMessage();
-    if (message.length === 0) return;
+    const { title, description } = await CommitMessage.getCommitMessage(
+      settings.settings.fancyCommit ? true : false
+    );
+    if (title.length === 0) return;
     const spinner = new Spinner(Color.colorText("Commiting...")).start();
     for (let i = 0; i < files.length; i++) {
       files[i] = files[i].slice(3);
@@ -129,9 +143,10 @@ class Commit {
       await exec(`git add ${files[i]}`);
     }
     try {
-      const { stdout, stderr } = await exec(
-        `git commit -m "${message}" && git push`
-      );
+      const commitCommand = description
+        ? `git commit -m "${title}" -m "${description}"`
+        : `git commit -m "${title}"`;
+      await exec(`${commitCommand} && git push`);
       spinner.success();
       console.log(
         Color.colorText(

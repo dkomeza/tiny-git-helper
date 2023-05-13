@@ -19,15 +19,18 @@ await parseArgs();
  * @returns Function that handles the user's choice
  */
 async function showMenu(): Promise<void> {
-  console.clear();
-  const answers = await inquirer.prompt({
-    name: "menu_action",
-    type: "list",
-    message: Color.colorText("What can I do for you?\n"),
-    choices: ["Commit", "Clone", "Init", "Settings", "Help", "Exit"],
-  });
+  try {
+    const answers = await inquirer.prompt({
+      name: "menu_action",
+      type: "list",
+      message: Color.colorText("What can I do for you?\n"),
+      choices: ["Commit", "Clone", "Init", "Settings", "Help", "Exit"],
+    });
 
-  return handleMenuChoice(answers.menu_action);
+    return handleMenuChoice(answers.menu_action);
+  } catch (error: unknown) {
+    console.log(); // create empty line (visual improvement)
+  }
 }
 
 /**
