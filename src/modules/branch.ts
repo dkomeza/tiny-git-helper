@@ -35,6 +35,10 @@ class Branch {
                         value: "create",
                     },
                     {
+                        name: "Delete branch",
+                        value: "delete",
+                    },
+                    {
                         name: "Back",
                         value: "back",
                     },
@@ -52,6 +56,8 @@ class Branch {
                 return this.switchBranch();
             case "create":
                 return this.createBranch();
+            case "delete":
+                return this.deleteBranch();
             default:
                 return;
         }
@@ -92,6 +98,47 @@ class Branch {
             console.log(Color.colorText("Something went wrong!\n", "red"));
             console.log(error);
             return;
+        }
+    }
+
+    async deleteBranch() {
+        console.clear();
+
+        const spinner = new Spinner(
+            Color.colorText("Loading branches...\n")
+        ).start();
+        const branches = await exec(`git branch`);
+        Branch.branchesList = branches.stdout.split("\n");
+        spinner.success();
+
+        const selectedBranch: string | undefined = await this.handleBranchSelection();
+
+        if (!selectedBranch) {
+            return
+        };
+
+        const answers = await inquirer.prompt({
+            name: "deleteBranch",
+            type: "confirm",
+            message: `You sure you want to delete '${selectedBranch.slice(2)}' branch?`,
+        });
+
+        if (answers.deleteBranch) {
+            const spinner = new Spinner(
+                Color.colorText("Deleting branch...\n")
+            ).start();
+            try {
+                await exec(`git branch -d ${selectedBranch.slice(2)}`);
+                spinner.success();
+                console.log(
+                    Color.colorText(`Done! Successfully deleted branch: ${selectedBranch.slice(2)}.`, "green")
+                );
+            } catch (error) {
+                spinner.fail();
+                console.log(Color.colorText("Something went wrong!\n", "red"));
+                // console.log(error);
+                return;
+            }
         }
     }
 
