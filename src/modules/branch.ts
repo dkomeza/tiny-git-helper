@@ -32,25 +32,36 @@ class Branch {
     private async listBranches(branches: string[]) {
         console.clear();
         Branch.branchesList = branches;
-        console.log(Branch.branchesList);
 
         const selectedBranch: string | undefined = await this.handleBranchSelection();
 
-        console.log(selectedBranch);
+        if (!selectedBranch) {
+            return
+        };
 
-        await exec(`git checkout ${selectedBranch}`);
+        let currentBranch = await exec(`git branch --show-current`);
 
-        // if (repoName) {
-        //     let url: string | undefined = "";
-        //     if (Settings.settings.protocol === "HTTPS") {
-        //         url = data.find((repo) => repo.name === repoName)?.clone_url;
-        //     } else {
-        //         url = data.find((repo) => repo.name === repoName)?.ssh_url;
-        //     }
-        //     if (url) {
-        //         await this.cloneRepo(url);
-        //     }
-        // }
+        console.log(`selected: '${selectedBranch.slice(2)}'`);
+
+        let stashes = await exec(`git stash list`);
+        console.log(stashes.stdout.split("\n"));
+        console.log("-------------------");
+
+        let stashToLoad: string | undefined = undefined
+        for (let i = 0; i < stashes.stdout.split("\n").length; i++) {
+            if (stashes.stdout.split("\n")[i].includes(selectedBranch.slice(2))) {
+                stashToLoad = stashes.stdout.split("\n")[i].split(":")[0];
+            }
+        }
+        console.log(stashToLoad);
+
+        await exec(`git stash save ${currentBranch.stdout} -u`);
+        await exec(`git checkout ${selectedBranch.slice(2)}`);
+
+        if (stashToLoad) {
+            await exec(`git stash apply ${stashToLoad}`);
+            await exec(`git stash drop ${stashToLoad}`);
+        }
     }
 
     private async handleBranchSelection() {
