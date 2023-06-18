@@ -80,19 +80,24 @@ class Branch {
 
         const branchName = await BranchName.getBranchName();
 
+        if (!branchName) {
+            return;
+        }
+
         const spinner = new Spinner(
             Color.colorText("Creating branch...\n")
         ).start();
+
         try {
             const currentBranch = await exec(`git branch --show-current`);
             await exec(`git stash save -u ${currentBranch.stdout}`);
 
             await exec(`git switch -c ${branchName}`);
             spinner.success();
-
             console.log(
                 Color.colorText(`Done! Successfully created branch: ${branchName}.`, "green")
             );
+            return;
         } catch (error) {
             spinner.fail();
             console.log(Color.colorText("Something went wrong!\n", "red"));
