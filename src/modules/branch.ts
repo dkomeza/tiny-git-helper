@@ -18,7 +18,46 @@ class Branch {
     private static branchesList: string[] = [];
 
     async showBranchMenu() {
-        // console.clear();
+        console.clear();
+        try {
+            const { branch_action } = await inquirer.prompt({
+                name: "branch_action",
+                type: "list",
+                message: Color.colorText("What action do you want to perform?\n"),
+                choices: [
+                    {
+                        name: "Switch branch",
+                        value: "switch",
+                    },
+                    {
+                        name: "Create new branch",
+                        value: "create",
+                    },
+                    {
+                        name: "Back",
+                        value: "back",
+                    },
+                ],
+            });
+            return this.handleBranchChoice(branch_action);
+        } catch (error: any) {
+            return;
+        }
+    }
+
+    private async handleBranchChoice(choice: string) {
+        switch (choice) {
+            case "switch":
+                return this.switchBranch();
+            case "create":
+                return this.createBranch();
+            default:
+                return;
+        }
+    }
+
+    async switchBranch() {
+        console.clear();
         const spinner = new Spinner(
             Color.colorText("Loading branches...\n")
         ).start();
@@ -27,6 +66,10 @@ class Branch {
 
         spinner.success();
         await this.listBranches(branches.stdout.split("\n"));
+    }
+
+    async createBranch() {
+        console.log("create branch");
     }
 
     private async listBranches(branches: string[]) {
@@ -41,11 +84,7 @@ class Branch {
 
         let currentBranch = await exec(`git branch --show-current`);
 
-        console.log(`selected: '${selectedBranch.slice(2)}'`);
-
         let stashes = await exec(`git stash list`);
-        console.log(stashes.stdout.split("\n"));
-        console.log("-------------------");
 
         let stashToLoad: string | undefined = undefined
         for (let i = 0; i < stashes.stdout.split("\n").length; i++) {
@@ -53,7 +92,6 @@ class Branch {
                 stashToLoad = stashes.stdout.split("\n")[i].split(":")[0];
             }
         }
-        console.log(stashToLoad);
 
         await exec(`git stash save ${currentBranch.stdout} -u`);
         await exec(`git checkout ${selectedBranch.slice(2)}`);
@@ -92,12 +130,6 @@ class Branch {
                 resolve(results);
             }, 100);
         });
-    }
-
-    private async cloneRepo(url: string) {
-        const spinner = new Spinner(Color.colorText("Cloning repo...\n")).start();
-        await exec(`git clone ${url}`);
-        spinner.success();
     }
 }
 
