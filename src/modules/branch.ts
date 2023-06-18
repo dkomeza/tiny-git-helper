@@ -9,6 +9,7 @@ import Color from "../utils/Color.js";
 import Settings from "./settings.js";
 import InterruptedInquirer from "../utils/InteruptedPrompt.js";
 import Spinner from "../utils/Spinner.js";
+import BranchName from "../utils/BranchName.js";
 
 inquirer.registerPrompt("autocomplete", inquirerPrompt);
 
@@ -69,7 +70,29 @@ class Branch {
     }
 
     async createBranch() {
-        console.log("create branch");
+        console.clear();
+
+        const branchName = await BranchName.getBranchName();
+
+        const spinner = new Spinner(
+            Color.colorText("Creating branch...\n")
+        ).start();
+        try {
+            const currentBranch = await exec(`git branch --show-current`);
+            await exec(`git stash save -u ${currentBranch.stdout}`);
+
+            await exec(`git switch -c ${branchName}`);
+            spinner.success();
+
+            console.log(
+                Color.colorText(`Done! Successfully created branch: ${branchName}.`, "green")
+            );
+        } catch (error) {
+            spinner.fail();
+            console.log(Color.colorText("Something went wrong!\n", "red"));
+            console.log(error);
+            return;
+        }
     }
 
     private async listBranches(branches: string[]) {
