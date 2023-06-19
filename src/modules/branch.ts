@@ -136,7 +136,7 @@ class Branch {
             Color.colorText("Loading branches...\n")
         ).start();
         const branches = await exec(`git branch -a`);
-        Branch.branchList = branches.stdout.split("\n");
+        Branch.branchList = branches.stdout.split("\n").filter((branch: string) => branch.length > 0);
         spinner.success();
 
         const result: string | undefined = await this.handleBranchSelection();
@@ -163,9 +163,9 @@ class Branch {
                     const start = [selectedBranch.split("/")[0], selectedBranch.split("/")[1]].join("/") + "/"
                     const branch = selectedBranch.slice(start.length);
 
-                    await exec(`git push ${remote} --delete ${branch}`);
+                    await exec(`git push ${remote} -d -f ${branch}`);
                 } else {
-                    await exec(`git branch -d ${selectedBranch}`);
+                    await exec(`git branch -D ${selectedBranch}`);
                 }
 
                 spinner.success();
