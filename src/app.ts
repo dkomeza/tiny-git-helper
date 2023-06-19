@@ -6,6 +6,7 @@ import Settings from "./modules/settings.js";
 import Clone from "./modules/clone.js";
 import Commit from "./modules/commit.js";
 import Init from "./modules/init.js";
+import Branch from "./modules/branch.js";
 
 import Color from "./utils/Color.js";
 
@@ -24,7 +25,7 @@ async function showMenu(): Promise<void> {
       name: "menu_action",
       type: "list",
       message: Color.colorText("What can I do for you?\n"),
-      choices: ["Commit", "Clone", "Init", "Settings", "Help", "Exit"],
+      choices: ["Commit", "Branch", "Clone", "Init", "Settings", "Help", "Exit"],
     });
 
     return handleMenuChoice(answers.menu_action);
@@ -42,6 +43,9 @@ async function handleMenuChoice(choice: string) {
   switch (choice) {
     case "Commit":
       await Commit.showCommitMenu();
+      return showMenu();
+    case "Branch":
+      await Branch.showBranchMenu();
       return showMenu();
     case "Clone":
       await Clone.showCloneMenu();
@@ -82,6 +86,10 @@ async function parseArgs() {
         return Commit.selectFiles();
       case "cf":
         return Commit.selectFiles();
+      case "branch":
+        return Branch.showBranchMenu();
+      case "b":
+        return Branch.showBranchMenu();
       case "init":
         return Init.showInitMenu();
       case "settings":
