@@ -16,7 +16,7 @@ inquirer.registerPrompt("autocomplete", inquirerPrompt);
 new InterruptedInquirer(inquirer);
 
 class Branch {
-    private static branchesList: string[] = [];
+    private static branchList: string[] = [];
 
     async showBranchMenu() {
         console.clear();
@@ -90,13 +90,13 @@ class Branch {
         let loadChanges = false;
 
         if (changes.stdout.split("\n").filter((line: string) => line.length > 0).length > 0) {
-            const answers = await inquirer.prompt({
+            const { stashChanges } = await inquirer.prompt({
                 name: "stashChanges",
                 type: "confirm",
                 message: "You have uncommited changes. Do you want to stash them?",
             });
 
-            if (answers.stashChanges) {
+            if (stashChanges) {
                 loadChanges = true;
             }
         }
@@ -107,10 +107,9 @@ class Branch {
 
         try {
             const currentBranch = await exec(`git branch --show-current`);
+
             await exec(`git stash save -u ${currentBranch.stdout}`);
-
             await exec(`git switch -c ${branchName}`);
-
             await exec(`git config --add --bool push.autoSetupRemote true`);
 
             if (loadChanges) {
@@ -137,7 +136,7 @@ class Branch {
             Color.colorText("Loading branches...\n")
         ).start();
         const branches = await exec(`git branch -a`);
-        Branch.branchesList = branches.stdout.split("\n");
+        Branch.branchList = branches.stdout.split("\n");
         spinner.success();
 
         const result: string | undefined = await this.handleBranchSelection();
@@ -148,13 +147,13 @@ class Branch {
 
         const selectedBranch = result?.slice(2);
 
-        const answers = await inquirer.prompt({
+        const { deleteBranch } = await inquirer.prompt({
             name: "deleteBranch",
             type: "confirm",
             message: `You sure you want to delete '${selectedBranch}' branch?`,
         });
 
-        if (answers.deleteBranch) {
+        if (deleteBranch) {
             const spinner = new Spinner(
                 Color.colorText("Deleting branch...\n")
             ).start();
@@ -185,9 +184,9 @@ class Branch {
 
     private async listBranches(branches: string[]) {
         console.clear();
-        Branch.branchesList = branches.filter((branch: string) => branch.length > 0);
+        Branch.branchList = branches.filter((branch: string) => branch.length > 0);
 
-        const selectedBranch: string | undefined = await this.handleBranchSelection();
+        const selectedBranch = await this.handleBranchSelection();
 
         if (!selectedBranch) {
             return
@@ -238,7 +237,7 @@ class Branch {
         return new Promise(function (resolve) {
             setTimeout(() => {
                 const results = fuzzy
-                    .filter(input, Branch.branchesList)
+                    .filter(input, Branch.branchList)
                     .map((el) => el.original);
                 resolve(results);
             }, 100);

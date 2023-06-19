@@ -86,14 +86,14 @@ class BranchName {
         });
     }
 
-    private validateName(input: any) {
+    private validateName(input: string) {
         if (input == "") {
             return "Name cannot be empty";
         }
         return true;
     }
 
-    private validateType(input: any) {
+    private validateType(input: string) {
         if (input == "") {
             return "Type cannot be empty";
         }
