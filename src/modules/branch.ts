@@ -134,20 +134,22 @@ class Branch {
         const spinner = new Spinner(
             Color.colorText("Loading branches...\n")
         ).start();
-        const branches = await exec(`git branch`);
+        const branches = await exec(`git branch -a`);
         Branch.branchesList = branches.stdout.split("\n");
         spinner.success();
 
-        const selectedBranch: string | undefined = await this.handleBranchSelection();
+        const result: string | undefined = await this.handleBranchSelection();
 
-        if (!selectedBranch) {
+        if (!result) {
             return
         };
+
+        const selectedBranch = result?.slice(2);
 
         const answers = await inquirer.prompt({
             name: "deleteBranch",
             type: "confirm",
-            message: `You sure you want to delete '${selectedBranch.slice(2)}' branch?`,
+            message: `You sure you want to delete '${selectedBranch}' branch?`,
         });
 
         if (answers.deleteBranch) {
@@ -155,15 +157,24 @@ class Branch {
                 Color.colorText("Deleting branch...\n")
             ).start();
             try {
-                await exec(`git branch -d ${selectedBranch.slice(2)}`);
+                if (selectedBranch.startsWith("remotes")) {
+                    const remote = selectedBranch.split("/")[1];
+                    const start = [selectedBranch.split("/")[0], selectedBranch.split("/")[1]].join("/") + "/"
+                    const branch = selectedBranch.slice(start.length);
+
+                    await exec(`git push ${remote} --delete ${branch}`);
+                } else {
+                    await exec(`git branch -d ${selectedBranch}`);
+                }
+
                 spinner.success();
                 console.log(
-                    Color.colorText(`Done! Successfully deleted branch: ${selectedBranch.slice(2)}.`, "green")
+                    Color.colorText(`Done! Successfully deleted branch: ${selectedBranch}.`, "green")
                 );
             } catch (error) {
                 spinner.fail();
                 console.log(Color.colorText("Something went wrong!\n", "red"));
-                // console.log(error);
+                console.log(error);
                 return;
             }
         }
