@@ -58,7 +58,7 @@ class BranchName {
     }
 
     private async getName(): Promise<string> {
-        const answer = await inquirer.prompt([
+        const { name }: { name: string } = await inquirer.prompt([
             {
                 type: "input",
                 name: "name",
@@ -66,9 +66,7 @@ class BranchName {
                 validate: this.validateName,
             },
         ]);
-        const { name } = answer;
-        name.replace(" ", "-");
-        return name || "";
+        return name.trim().replace(/\ +/g, "-") || "";
     }
 
     private searchTypes(_answers: string, input: string) {
