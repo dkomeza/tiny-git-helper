@@ -108,8 +108,8 @@ class Branch {
         try {
             const currentBranch = await exec(`git branch --show-current`);
 
-            await exec(`git stash save -u ${currentBranch.stdout}`);
-            await exec(`git switch -c ${branchName}`);
+            await exec(`git stash save -u ${currentBranch.stdout.trim()}`);
+            await exec(`git switch -c ${branchName.trim()}`);
             await exec(`git config --add --bool push.autoSetupRemote true`);
 
             if (loadChanges) {
@@ -150,7 +150,7 @@ class Branch {
         const { deleteBranch } = await inquirer.prompt({
             name: "deleteBranch",
             type: "confirm",
-            message: `You sure you want to delete '${selectedBranch}' branch?`,
+            message: `You sure you want to delete '${selectedBranch.trim()}' branch?`,
         });
 
         if (deleteBranch) {
@@ -163,9 +163,9 @@ class Branch {
                     const start = [selectedBranch.split("/")[0], selectedBranch.split("/")[1]].join("/") + "/"
                     const branch = selectedBranch.slice(start.length);
 
-                    await exec(`git push ${remote} -d -f ${branch}`);
+                    await exec(`git push ${remote.trim()} -d -f ${branch.trim()}`);
                 } else {
-                    await exec(`git branch -D ${selectedBranch}`);
+                    await exec(`git branch -D ${selectedBranch.trim()}`);
                 }
 
                 spinner.success();
@@ -203,12 +203,12 @@ class Branch {
             }
         }
 
-        await exec(`git stash save ${currentBranch.stdout} -u`);
-        await exec(`git checkout ${selectedBranch.slice(2)}`);
+        await exec(`git stash save ${currentBranch.stdout.trim()} -u`);
+        await exec(`git checkout ${selectedBranch.slice(2).trim()}`);
 
         if (stashToLoad) {
-            await exec(`git stash apply ${stashToLoad}`);
-            await exec(`git stash drop ${stashToLoad}`);
+            await exec(`git stash apply ${stashToLoad.trim()}`);
+            await exec(`git stash drop ${stashToLoad.trim()}`);
         }
 
         return;
