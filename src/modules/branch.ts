@@ -93,6 +93,9 @@ class Branch {
             await exec(`git stash save -u ${currentBranch.stdout}`);
 
             await exec(`git switch -c ${branchName}`);
+
+            await exec(`git config --add --bool push.autoSetupRemote true`);
+
             spinner.success();
             console.log(
                 Color.colorText(`Done! Successfully created branch: ${branchName}.`, "green")
