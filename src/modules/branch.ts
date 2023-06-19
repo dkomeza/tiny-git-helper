@@ -73,6 +73,8 @@ class Branch {
 
         spinner.success();
         await this.listBranches(branches.stdout.split("\n"));
+
+        return;
     }
 
     async createBranch() {
@@ -171,6 +173,7 @@ class Branch {
                 console.log(
                     Color.colorText(`Done! Successfully deleted branch: ${selectedBranch}.`, "green")
                 );
+                return;
             } catch (error) {
                 spinner.fail();
                 console.log(Color.colorText("Something went wrong!\n", "red"));
@@ -182,7 +185,7 @@ class Branch {
 
     private async listBranches(branches: string[]) {
         console.clear();
-        Branch.branchesList = branches;
+        Branch.branchesList = branches.filter((branch: string) => branch.length > 0);
 
         const selectedBranch: string | undefined = await this.handleBranchSelection();
 
@@ -208,6 +211,8 @@ class Branch {
             await exec(`git stash apply ${stashToLoad}`);
             await exec(`git stash drop ${stashToLoad}`);
         }
+
+        return;
     }
 
     private async handleBranchSelection() {

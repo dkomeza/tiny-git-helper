@@ -42,7 +42,19 @@ class BranchName {
             },
         ]);
         const { type } = answer;
-        return type;
+
+        if (type === "custom") {
+            const answer = await inquirer.prompt({
+                name: "customBranchName",
+                type: "input",
+                message: "Enter custom branch type",
+                validate: this.validateType,
+            });
+
+            return answer.customBranchName;
+        } else {
+            return type;
+        }
     }
 
     private async getName(): Promise<string> {
@@ -77,6 +89,13 @@ class BranchName {
     private validateName(input: any) {
         if (input == "") {
             return "Name cannot be empty";
+        }
+        return true;
+    }
+
+    private validateType(input: any) {
+        if (input == "") {
+            return "Type cannot be empty";
         }
         return true;
     }
