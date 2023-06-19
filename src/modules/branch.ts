@@ -84,6 +84,21 @@ class Branch {
             return;
         }
 
+        const changes = await exec(`git status --short`)
+        let loadChanges = false;
+
+        if (changes.stdout.split("\n").filter((line: string) => line.length > 0).length > 0) {
+            const answers = await inquirer.prompt({
+                name: "stashChanges",
+                type: "confirm",
+                message: "You have uncommited changes. Do you want to stash them?",
+            });
+
+            if (answers.stashChanges) {
+                loadChanges = true;
+            }
+        }
+
         const spinner = new Spinner(
             Color.colorText("Creating branch...\n")
         ).start();
@@ -95,6 +110,10 @@ class Branch {
             await exec(`git switch -c ${branchName}`);
 
             await exec(`git config --add --bool push.autoSetupRemote true`);
+
+            if (loadChanges) {
+                await exec(`git stash apply`);
+            }
 
             spinner.success();
             console.log(

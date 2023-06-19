@@ -89,6 +89,7 @@ async function parseArgs() {
       case "branch":
         return Branch.showBranchMenu();
       case "b":
+
         return Branch.showBranchMenu();
       case "init":
         return Init.showInitMenu();
