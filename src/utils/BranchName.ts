@@ -10,11 +10,11 @@ inquirer.registerPrompt("autocomplete", inquirerPrompt);
 new InterruptedInquirer(inquirer);
 
 const types = [
-    { name: "feature" },
-    { name: "development" },
+    { name: "feat" },
     { name: "bugfix" },
     { name: "hotfix" },
     { name: "release" },
+    { name: "docs" },
     { name: "support" },
     { name: "custom" }
 ];
@@ -25,7 +25,7 @@ class BranchName {
             const branchType = await this.getBranchType();
             const name = await this.getName();
 
-            return `${branchType}-${name}`;
+            return `${branchType}/${name}`;
         } catch (error) {
             return "";
         }

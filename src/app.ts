@@ -86,6 +86,10 @@ async function parseArgs() {
         return Commit.selectFiles();
       case "cf":
         return Commit.selectFiles();
+      case "branch":
+        return Branch.showBranchMenu();
+      case "b":
+        return Branch.showBranchMenu();
       case "init":
         return Init.showInitMenu();
       case "settings":
