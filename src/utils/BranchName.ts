@@ -12,6 +12,8 @@ new InterruptedInquirer(inquirer);
 const types = [
     { name: "feat" },
     { name: "bugfix" },
+    { name: "test" },
+    { name: "refactor" },
     { name: "hotfix" },
     { name: "release" },
     { name: "docs" },
