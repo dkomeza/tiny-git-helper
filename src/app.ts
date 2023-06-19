@@ -7,6 +7,7 @@ import Clone from "./modules/clone.js";
 import Commit from "./modules/commit.js";
 import Init from "./modules/init.js";
 import Branch from "./modules/branch.js";
+import Version from "./modules/version.js";
 
 import Color from "./utils/Color.js";
 
@@ -25,7 +26,15 @@ async function showMenu(): Promise<void> {
       name: "menu_action",
       type: "list",
       message: Color.colorText("What can I do for you?\n"),
-      choices: ["Commit", "Branch", "Clone", "Init", "Settings", "Help", "Exit"],
+      choices: [
+        "Commit",
+        "Branch",
+        "Clone",
+        "Init",
+        "Settings",
+        "Help",
+        "Exit",
+      ],
     });
 
     return handleMenuChoice(answers.menu_action);
@@ -94,6 +103,10 @@ async function parseArgs() {
         return Init.showInitMenu();
       case "settings":
         return Settings.showSettings();
+      case "v":
+        return Version.showVersion();
+      case "version":
+        return Version.showVersion();
       //   case "help":
       //     return showHelp(settings);
       default:
