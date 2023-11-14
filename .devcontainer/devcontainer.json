@@ -1,0 +1,18 @@
+{
+  "name": "tiny-git-helper",
+
+  "build": {
+    "context": "..",
+    "dockerfile": "Dockerfile"
+  },
+
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "github.copilot",
+        "usernamehw.errorlens",
+		"rust-lang.rust-analyzer"
+      ]
+    }
+  }
+}
