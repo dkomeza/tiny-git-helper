@@ -1,5 +1,8 @@
 use std::env;
 
+mod utils;
+use utils::out;
+
 fn print_help() {
     println!("Usage:");
     println!("    commands:");
@@ -23,7 +26,7 @@ fn main() {
             "settings" => println!("Settings..."),
             "help" => print_help(),
             _ => {
-                println!("Unknown command: {}", mode);
+                out::print_error(format!("Unknown command: {} \n", mode).as_str());
                 print_help();
             }
         }
