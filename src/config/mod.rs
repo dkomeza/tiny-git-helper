@@ -22,3 +22,12 @@ fn get_config_path() -> String {
 
     return config_path;
 }
+
+fn config_exists() -> bool {
+    use std::path::Path;
+
+    let config_path = get_config_path();
+    let config_path = Path::new(&config_path);
+
+    return config_path.exists();
+}
