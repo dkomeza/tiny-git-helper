@@ -1,4 +1,13 @@
+use serde::{Deserialize, Serialize};
+
+#[derive(Serialize, Deserialize)]
 pub struct Config {
+    username: String,
+    token: String,
+    sort: i8,
+    protocol: i8,
+    color: i8,
+    fancy: bool,
 }
 
 pub fn load_config() -> Config {
