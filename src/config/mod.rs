@@ -1,3 +1,4 @@
+use crate::utils::input;
 use crate::utils::out;
 use serde::{Deserialize, Serialize};
 
@@ -95,15 +96,22 @@ fn read_config() -> Config {
 }
 
 fn create_config() -> Config {
-    use crate::utils::input;
     use std::fs::File;
     use std::io::prelude::*;
 
     let config_path = get_config_path();
+
+    // Create the config directory if it doesn't exist
+    std::fs::create_dir_all(format!(
+        "{}/.config/tgh",
+        home::home_dir().unwrap().display()
+    ))
+    .unwrap();
+
     let mut config_file = File::create(config_path).unwrap();
 
-    let username = input::text("Enter your GitHub username: ");
-    let mut token = input::text("Enter your GitHub token: ");
+    let username = input::text("Enter your GitHub username: ", true);
+    let mut token = input::text("Enter your GitHub token: ", true);
 
     let config = Config {
         username: "".to_string(),
