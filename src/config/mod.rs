@@ -84,3 +84,10 @@ fn validate_config_file() -> bool {
 
     return true;
 }
+
+fn read_config() -> Config {
+    let config_contents = read_config_file();
+    let config: Config = serde_json::from_str(&config_contents).unwrap();
+
+    return config;
+}
