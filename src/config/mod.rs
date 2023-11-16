@@ -39,3 +39,48 @@ fn config_exists() -> bool {
 
     return config_path.exists();
 }
+
+fn read_config_file() -> String {
+    use std::fs::File;
+    use std::io::prelude::*;
+
+    let config_path = get_config_path();
+    let mut config_file = File::open(config_path).unwrap();
+    let mut config_contents = String::new();
+
+    config_file.read_to_string(&mut config_contents).unwrap();
+
+    return config_contents;
+}
+
+fn validate_config_file() -> bool {
+    let config_contents = read_config_file();
+
+    if config_contents.len() == 0 {
+        return false;
+    }
+
+    let config: Config = serde_json::from_str(&config_contents).unwrap();
+
+    if config.username.len() == 0 || config.token.len() == 0 {
+        return false;
+    }
+
+    if config.sort < 0 || config.sort > 1 {
+        return false;
+    }
+
+    if config.protocol < 0 || config.protocol > 1 {
+        return false;
+    }
+
+    if config.color < 0 || config.color > 8 {
+        return false;
+    }
+
+    if config.fancy != true && config.fancy != false {
+        return false;
+    }
+
+    return true;
+}
