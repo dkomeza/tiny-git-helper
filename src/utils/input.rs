@@ -1,4 +1,4 @@
-pub fn text_input(message: &str) -> String {
+pub fn text(message: &str) -> String {
     use std::io::{stdin, stdout, Write};
 
     let mut input = String::new();

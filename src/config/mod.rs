@@ -93,3 +93,30 @@ fn read_config() -> Config {
 
     return config;
 }
+
+fn create_config() -> Config {
+    use crate::utils::input;
+    use std::fs::File;
+    use std::io::prelude::*;
+
+    let config_path = get_config_path();
+    let mut config_file = File::create(config_path).unwrap();
+
+    let username = input::text("Enter your GitHub username: ");
+    let mut token = input::text("Enter your GitHub token: ");
+
+    let config = Config {
+        username: "".to_string(),
+        token: "".to_string(),
+        sort: 0,
+        protocol: 0,
+        color: 0,
+        fancy: true,
+    };
+
+    let config_contents = serde_json::to_string_pretty(&config).unwrap();
+
+    config_file.write_all(config_contents.as_bytes()).unwrap();
+
+    return config;
+}
