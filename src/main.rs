@@ -10,6 +10,7 @@ fn print_help() {
     println!("        clone: clone a repository into a new directory");
     println!("        init: create an empty GitHub repository");
     println!("        settings: view and edit settings");
+    println!("")
 }
 
 fn main() {
