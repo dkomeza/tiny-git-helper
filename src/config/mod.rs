@@ -1,3 +1,4 @@
+use crate::utils::out;
 use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize)]
@@ -14,11 +15,12 @@ pub fn load_config() -> Config {
     if config_exists() {
         if validate_config_file() {
             return read_config();
-        } else {
-            return create_config();
         }
+        out::print_error("Config file is invalid. Creating a new one...\n");
+        return create_config();
     }
 
+    out::print_error("Config file not found. Creating one...\n");
     return create_config();
 }
 
