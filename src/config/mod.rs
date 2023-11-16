@@ -11,7 +11,15 @@ pub struct Config {
 }
 
 pub fn load_config() -> Config {
-    Config {}
+    if config_exists() {
+        if validate_config_file() {
+            return read_config();
+        } else {
+            return create_config();
+        }
+    }
+
+    return create_config();
 }
 
 fn get_config_path() -> String {
