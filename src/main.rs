@@ -3,6 +3,8 @@ use std::env;
 mod utils;
 use utils::out;
 
+mod config;
+
 fn print_help() {
     println!("Usage:");
     println!("    commands:");
@@ -14,6 +16,7 @@ fn print_help() {
 }
 
 fn main() {
+    let config = config::load_config();
     let args: Vec<String> = env::args().skip(1).collect();
 
     if args.len() == 0 {
