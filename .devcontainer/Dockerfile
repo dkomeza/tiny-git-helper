@@ -2,16 +2,16 @@ FROM mcr.microsoft.com/devcontainers/base:ubuntu-22.04
 
 SHELL ["/bin/bash", "--login", "-c"]
 
-# Install rust
+# Install Go
 RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
-    && apt-get -y install --no-install-recommends curl build-essential
+    && apt-get -y install --no-install-recommends \
+    golang \
+    && apt-get clean -y && rm -rf /var/lib/apt/lists/*
 
 USER vscode
-RUN curl https://sh.rustup.rs -sSf | bash -s -- -y
-ENV PATH="/home/vscode/.cargo/bin:${PATH}"
+RUN export PATH=$PATH:/usr/local/go/bin
 
 USER root
-
 # nvm environment variables
 ENV NVM_DIR /usr/local/nvm
 ENV NODE_VERSION 21.1.0
