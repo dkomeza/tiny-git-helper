@@ -10,7 +10,8 @@
     "vscode": {
       "extensions": [
         "github.copilot",
-        "usernamehw.errorlens"
+        "usernamehw.errorlens",
+		"rust-lang.rust-analyzer"
       ]
     }
   }
