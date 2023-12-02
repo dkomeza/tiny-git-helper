@@ -16,23 +16,25 @@ fn print_help() {
 }
 
 fn main() {
-    let config = config::load_config();
+    // let config = config::load_config();
+    config::check_prerequisites();
+
     let args: Vec<String> = env::args().skip(1).collect();
 
-    if args.len() == 0 {
-    } else {
-        let mode = args[0].clone();
+    // if args.len() == 0 {
+    // } else {
+    //     let mode = args[0].clone();
 
-        match mode.as_str() {
-            "commit" => println!("Committing..."),
-            "clone" => println!("Cloning..."),
-            "init" => println!("Initializing..."),
-            "settings" => println!("Settings..."),
-            "help" => print_help(),
-            _ => {
-                out::print_error(format!("Unknown command: {} \n", mode).as_str());
-                print_help();
-            }
-        }
-    }
+    //     match mode.as_str() {
+    //         "commit" => println!("Committing..."),
+    //         "clone" => println!("Cloning..."),
+    //         "init" => println!("Initializing..."),
+    //         "settings" => println!("Settings..."),
+    //         "help" => print_help(),
+    //         _ => {
+    //             out::print_error(format!("Unknown command: {} \n", mode).as_str());
+    //             print_help();
+    //         }
+    //     }
+    // }
 }

@@ -1,130 +1,152 @@
+use std::os;
+
 use crate::utils::input;
 use crate::utils::out;
 use serde::{Deserialize, Serialize};
 
-#[derive(Serialize, Deserialize)]
-pub struct Config {
-    username: String,
-    token: String,
-    sort: i8,
-    protocol: i8,
-    color: i8,
-    fancy: bool,
+pub fn check_prerequisites() {
+    if !check_git() {
+        out::print_error("Error: Git is not installed.\n");
+        std::process::exit(1);
+    }
 }
 
-pub fn load_config() -> Config {
-    if config_exists() {
-        if validate_config_file() {
-            return read_config();
-        }
-        out::print_error("Config file is invalid. Creating a new one...\n");
-        return create_config();
+fn check_git() -> bool {
+    let mut command = std::process::Command::new("git");
+    command.arg("--version");
+
+    let output = command.output().unwrap();
+
+    if output.status.success() {
+        return true;
     }
 
-    out::print_error("Config file not found. Creating one...\n");
-    return create_config();
+    return false;
 }
 
-fn get_config_path() -> String {
-    use home::home_dir;
+// #[derive(Serialize, Deserialize)]
+// pub struct Config {
+//     username: String,
+//     token: String,
+//     sort: i8,
+//     protocol: i8,
+//     color: i8,
+//     fancy: bool,
+// }
 
-    let home = home_dir().unwrap();
-    let config_path = format!("{}/.config/tgh/config.json", home.display());
+// pub fn load_config() -> Config {
+//     if config_exists() {
+//         if validate_config_file() {
+//             return read_config();
+//         }
+//         out::print_error("Config file is invalid. Creating a new one...\n");
+//         return create_config();
+//     }
 
-    return config_path;
-}
+//     out::print_error("Config file not found. Creating one...\n");
+//     return create_config();
+// }
 
-fn config_exists() -> bool {
-    use std::path::Path;
+// fn get_config_path() -> String {
+//     use home::home_dir;
 
-    let config_path = get_config_path();
-    let config_path = Path::new(&config_path);
+//     let home = home_dir().unwrap();
+//     let config_path = format!("{}/.config/tgh/config.json", home.display());
 
-    return config_path.exists();
-}
+//     return config_path;
+// }
 
-fn read_config_file() -> String {
-    use std::fs::File;
-    use std::io::prelude::*;
+// fn config_exists() -> bool {
+//     use std::path::Path;
 
-    let config_path = get_config_path();
-    let mut config_file = File::open(config_path).unwrap();
-    let mut config_contents = String::new();
+//     let config_path = get_config_path();
+//     let config_path = Path::new(&config_path);
 
-    config_file.read_to_string(&mut config_contents).unwrap();
+//     return config_path.exists();
+// }
 
-    return config_contents;
-}
+// fn read_config_file() -> String {
+//     use std::fs::File;
+//     use std::io::prelude::*;
 
-fn validate_config_file() -> bool {
-    let config_contents = read_config_file();
+//     let config_path = get_config_path();
+//     let mut config_file = File::open(config_path).unwrap();
+//     let mut config_contents = String::new();
 
-    if config_contents.len() == 0 {
-        return false;
-    }
+//     config_file.read_to_string(&mut config_contents).unwrap();
 
-    let config: Config = serde_json::from_str(&config_contents).unwrap();
+//     return config_contents;
+// }
 
-    if config.username.len() == 0 || config.token.len() == 0 {
-        return false;
-    }
+// fn validate_config_file() -> bool {
+//     let config_contents = read_config_file();
 
-    if config.sort < 0 || config.sort > 1 {
-        return false;
-    }
+//     if config_contents.len() == 0 {
+//         return false;
+//     }
 
-    if config.protocol < 0 || config.protocol > 1 {
-        return false;
-    }
+//     let config: Config = serde_json::from_str(&config_contents).unwrap();
 
-    if config.color < 0 || config.color > 8 {
-        return false;
-    }
+//     if config.username.len() == 0 || config.token.len() == 0 {
+//         return false;
+//     }
 
-    if config.fancy != true && config.fancy != false {
-        return false;
-    }
+//     if config.sort < 0 || config.sort > 1 {
+//         return false;
+//     }
 
-    return true;
-}
+//     if config.protocol < 0 || config.protocol > 1 {
+//         return false;
+//     }
 
-fn read_config() -> Config {
-    let config_contents = read_config_file();
-    let config: Config = serde_json::from_str(&config_contents).unwrap();
+//     if config.color < 0 || config.color > 8 {
+//         return false;
+//     }
 
-    return config;
-}
+//     if config.fancy != true && config.fancy != false {
+//         return false;
+//     }
 
-fn create_config() -> Config {
-    use std::fs::File;
-    use std::io::prelude::*;
+//     return true;
+// }
 
-    let config_path = get_config_path();
+// fn read_config() -> Config {
+//     let config_contents = read_config_file();
+//     let config: Config = serde_json::from_str(&config_contents).unwrap();
 
-    // Create the config directory if it doesn't exist
-    std::fs::create_dir_all(format!(
-        "{}/.config/tgh",
-        home::home_dir().unwrap().display()
-    ))
-    .unwrap();
+//     return config;
+// }
 
-    let mut config_file = File::create(config_path).unwrap();
+// fn create_config() -> Config {
+//     use std::fs::File;
+//     use std::io::prelude::*;
 
-    let username = input::text("Enter your GitHub username: ", true);
-    let mut token = input::text("Enter your GitHub token: ", true);
+//     let config_path = get_config_path();
 
-    let config = Config {
-        username: "".to_string(),
-        token: "".to_string(),
-        sort: 0,
-        protocol: 0,
-        color: 0,
-        fancy: true,
-    };
+//     // Create the config directory if it doesn't exist
+//     std::fs::create_dir_all(format!(
+//         "{}/.config/tgh",
+//         home::home_dir().unwrap().display()
+//     ))
+//     .unwrap();
 
-    let config_contents = serde_json::to_string_pretty(&config).unwrap();
+//     let mut config_file = File::create(config_path).unwrap();
 
-    config_file.write_all(config_contents.as_bytes()).unwrap();
+//     let username = input::text("Enter your GitHub username: ", true);
+//     let mut token = input::text("Enter your GitHub token: ", true);
 
-    return config;
-}
+//     let config = Config {
+//         username: "".to_string(),
+//         token: "".to_string(),
+//         sort: 0,
+//         protocol: 0,
+//         color: 0,
+//         fancy: true,
+//     };
+
+//     let config_contents = serde_json::to_string_pretty(&config).unwrap();
+
+//     config_file.write_all(config_contents.as_bytes()).unwrap();
+
+//     return config;
+// }
