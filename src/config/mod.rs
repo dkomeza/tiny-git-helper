@@ -1,16 +1,47 @@
-use std::os;
-
+use crate::config::utils::save_config_file;
 use crate::utils::input;
 use crate::utils::out;
+use reqwest::Error;
 use serde::{Deserialize, Serialize};
 
-pub fn check_prerequisites() {
+mod defines;
+mod utils;
+
+#[derive(Serialize, Deserialize, Clone)]
+pub struct Config {
+    username: String,
+    token: String,
+    sort: defines::SORTING,
+    protocol: defines::PROTOCOL,
+    color: defines::COLOR,
+    fancy: bool,
+}
+
+/// Checks if the prerequisites for tgh are installed.
+/// If not, it will print an error and exit.
+///
+/// ### Arguments
+/// * `args` - A vector of the command line arguments.
+pub fn check_prerequisites(args: Vec<String>) {
+    // Check if git is installed
     if !check_git() {
         out::print_error("Error: Git is not installed.\n");
         std::process::exit(1);
     }
-}
 
+    // Check for a GitHub token
+    if !check_token() {
+        if args.len() > 0 {
+            if args[0] == "login" {
+                return;
+            }
+        }
+
+        out::print_error("Error: No GitHub token found.");
+        println!("Please run `tgh login` to create one.\n");
+        std::process::exit(1);
+    }
+}
 fn check_git() -> bool {
     let mut command = std::process::Command::new("git");
     command.arg("--version");
@@ -23,130 +54,190 @@ fn check_git() -> bool {
 
     return false;
 }
+fn check_token() -> bool {
+    if !utils::config_exists() || !utils::validate_config_file() {
+        return false;
+    }
 
-// #[derive(Serialize, Deserialize)]
-// pub struct Config {
-//     username: String,
-//     token: String,
-//     sort: i8,
-//     protocol: i8,
-//     color: i8,
-//     fancy: bool,
-// }
+    let config = utils::read_config();
 
-// pub fn load_config() -> Config {
-//     if config_exists() {
-//         if validate_config_file() {
-//             return read_config();
-//         }
-//         out::print_error("Config file is invalid. Creating a new one...\n");
-//         return create_config();
-//     }
+    if config.token.len() == 0 {
+        return false;
+    }
 
-//     out::print_error("Config file not found. Creating one...\n");
-//     return create_config();
-// }
+    return true;
+}
 
-// fn get_config_path() -> String {
-//     use home::home_dir;
+/// Authenticate user with GitHub.
+/// @TODO: Split this function into smaller functions.
+async fn authenticate() -> Result<String, Error> {
+    use arboard::Clipboard;
 
-//     let home = home_dir().unwrap();
-//     let config_path = format!("{}/.config/tgh/config.json", home.display());
+    let client_id = "Iv1.d8c9cc38202b9305";
+    let client = reqwest::Client::new();
 
-//     return config_path;
-// }
+    let mut text = client
+        .post(format!(
+            "https://github.com/login/device/code?client_id={}",
+            client_id
+        ))
+        .send()
+        .await?
+        .text()
+        .await?;
 
-// fn config_exists() -> bool {
-//     use std::path::Path;
+    text = text.replace('"', "").to_string();
+    let text_split: Vec<String> = text
+        .split("&")
+        .map(|s| s.split("=").map(|s| s.to_string()).collect::<Vec<_>>()[1].to_string())
+        .collect();
 
-//     let config_path = get_config_path();
-//     let config_path = Path::new(&config_path);
+    let device_code = text_split[0].to_string();
+    let expires_in = text_split[1].parse::<u64>().unwrap();
+    let interval = text_split[2].parse::<u64>().unwrap();
+    let user_code = text_split[3].to_string();
+    let login_url = text_split[4].replace("%3A", ":").replace("%2F", "/");
+    let grant_type = "urn:ietf:params:oauth:grant-type:device_code";
 
-//     return config_path.exists();
-// }
+    println!("Please visit this URL to authenticate:\n{}", login_url);
 
-// fn read_config_file() -> String {
-//     use std::fs::File;
-//     use std::io::prelude::*;
+    let clipboard = Clipboard::new();
+    match clipboard {
+        Ok(mut clipboard) => {
+            clipboard.set_text(user_code.clone()).unwrap();
+            println!(
+                "Your user code has been copied to your clipboard. ({})",
+                user_code
+            )
+        }
+        Err(_) => {
+            println!(
+                "Error copying to clipboard, copy the code manually: {}",
+                user_code
+            );
+        }
+    }
 
-//     let config_path = get_config_path();
-//     let mut config_file = File::open(config_path).unwrap();
-//     let mut config_contents = String::new();
+    let params = [
+        ("client_id", client_id),
+        ("device_code", &device_code),
+        ("grant_type", grant_type),
+    ];
 
-//     config_file.read_to_string(&mut config_contents).unwrap();
+    let start_time = std::time::Instant::now();
+    let token;
 
-//     return config_contents;
-// }
+    loop {
+        let res = client
+            .post("https://github.com/login/oauth/access_token")
+            .header(reqwest::header::ACCEPT, "application/json")
+            .form(&params)
+            .send()
+            .await?;
 
-// fn validate_config_file() -> bool {
-//     let config_contents = read_config_file();
+        let mut res = res.text().await?;
 
-//     if config_contents.len() == 0 {
-//         return false;
-//     }
+        if res.contains("access_token") {
+            res = res
+                .replace("{", "")
+                .replace("}", "")
+                .replace('"', "")
+                .replace("/", "");
+            let res_split: Vec<String> = res
+                .split(",")
+                .map(|s| s.split(":").map(|s| s.to_string()).collect::<Vec<_>>()[1].to_string())
+                .collect();
 
-//     let config: Config = serde_json::from_str(&config_contents).unwrap();
+            token = res_split[0].to_string();
 
-//     if config.username.len() == 0 || config.token.len() == 0 {
-//         return false;
-//     }
+            break;
+        }
 
-//     if config.sort < 0 || config.sort > 1 {
-//         return false;
-//     }
+        // Check if the authentication timed out
+        if std::time::Instant::now()
+            .duration_since(start_time)
+            .as_secs()
+            > (expires_in)
+        {
+            println!("Authentication timed out.");
+            std::process::exit(1);
+        }
 
-//     if config.protocol < 0 || config.protocol > 1 {
-//         return false;
-//     }
+        // Wait for the interval
+        std::thread::sleep(std::time::Duration::from_secs(interval));
+    }
 
-//     if config.color < 0 || config.color > 8 {
-//         return false;
-//     }
+    return Ok(token);
+}
 
-//     if config.fancy != true && config.fancy != false {
-//         return false;
-//     }
+pub async fn login() {
+    let token = authenticate().await;
 
-//     return true;
-// }
+    match token {
+        Ok(token) => {
+            update_token(token.clone());
+        }
+        Err(err) => {
+            println!("{:?}", err);
+            out::print_error("Error: Failed to authenticate.\n");
+            std::process::exit(1);
+        }
+    }
+}
 
-// fn read_config() -> Config {
-//     let config_contents = read_config_file();
-//     let config: Config = serde_json::from_str(&config_contents).unwrap();
+/////////////////////////////////////////////////
+/// Section of logic used for the config file ///
+/////////////////////////////////////////////////
 
-//     return config;
-// }
+/// Loads the config file.
+/// If the config file doesn't exist, it will create one.
+/// If the config file is invalid, it will create a new one.
+///
+/// ### Returns
+/// A Config struct.
+pub fn load_config() -> Config {
+    if utils::config_exists() {
+        if utils::validate_config_file() {
+            return utils::read_config();
+        }
+        out::print_error("Config file is invalid. Creating a new one...\n");
+        return create_config();
+    }
 
-// fn create_config() -> Config {
-//     use std::fs::File;
-//     use std::io::prelude::*;
+    out::print_error("Config file not found. Creating one...\n");
+    return create_config();
+}
 
-//     let config_path = get_config_path();
+fn create_config() -> Config {
+    utils::handle_config_folder();
 
-//     // Create the config directory if it doesn't exist
-//     std::fs::create_dir_all(format!(
-//         "{}/.config/tgh",
-//         home::home_dir().unwrap().display()
-//     ))
-//     .unwrap();
+    let username = input::text("Enter your GitHub username: ", true);
 
-//     let mut config_file = File::create(config_path).unwrap();
+    let config = Config {
+        username,
+        token: "".to_string(),
+        sort: defines::SORTING::LastUpdated,
+        protocol: defines::PROTOCOL::HTTPS,
+        color: defines::COLOR::NORMAL,
+        fancy: true,
+    };
 
-//     let username = input::text("Enter your GitHub username: ", true);
-//     let mut token = input::text("Enter your GitHub token: ", true);
+    save_config_file(config.clone());
 
-//     let config = Config {
-//         username: "".to_string(),
-//         token: "".to_string(),
-//         sort: 0,
-//         protocol: 0,
-//         color: 0,
-//         fancy: true,
-//     };
+    return config;
+}
 
-//     let config_contents = serde_json::to_string_pretty(&config).unwrap();
+fn update_token(token: String) {
+    let config = utils::read_config();
 
-//     config_file.write_all(config_contents.as_bytes()).unwrap();
+    let new_config = Config {
+        username: config.username,
+        token,
+        sort: config.sort,
+        protocol: config.protocol,
+        color: config.color,
+        fancy: config.fancy,
+    };
 
-//     return config;
-// }
+    save_config_file(new_config);
+}
