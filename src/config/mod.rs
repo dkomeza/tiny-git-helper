@@ -1,6 +1,5 @@
-use crate::config::utils::save_config_file;
-use crate::utils::input;
-use crate::utils::out;
+use crate::utils::{input, out};
+use inquire::{autocompletion::Replacement, required, Autocomplete, CustomUserError};
 use reqwest::Error;
 use serde::{Deserialize, Serialize};
 
@@ -228,27 +227,34 @@ fn create_config() -> Config {
         fancy,
     };
 
-    save_config_file(config.clone());
+    utils::save_config_file(config.clone());
 
     return config;
 }
 
 fn ask_username() -> String {
-    let username = input::text("Enter your GitHub username: ", true);
+    use inquire::Text;
 
-    return username;
+    let username = Text::new("Enter your GitHub username:")
+        .with_validator(required!("Username is required."))
+        .prompt();
+
+    return username.unwrap();
 }
-fn ask_sort() -> defines::SORTING {
-    let options = vec![
-        input::Option::new("Last Updated", 0),
-        input::Option::new("Alphabetical", 1),
-    ];
+pub fn ask_sort() -> defines::SORTING {
+    use inquire::Select;
 
-    let index = input::list("Select a sorting method:", options);
+    let option = Select::new(
+        "Select a sorting method:",
+        vec!["Last Updated", "Alphabetical"],
+    )
+    .with_page_size(2)
+    .prompt()
+    .unwrap();
 
-    return match index {
-        0 => defines::SORTING::LastUpdated,
-        1 => defines::SORTING::Alphabetical,
+    return match option {
+        "Last Updated" => defines::SORTING::LastUpdated,
+        "Alphabetical" => defines::SORTING::Alphabetical,
         _ => {
             out::print_error("Invalid input.\n");
             ask_sort()
@@ -256,52 +262,71 @@ fn ask_sort() -> defines::SORTING {
     };
 }
 fn ask_protocol() -> defines::PROTOCOL {
-    let options = vec![input::Option::new("HTTPS", 0), input::Option::new("SSH", 1)];
+    use inquire::Select;
 
-    let index = input::list("Select a protocol:", options);
+    let option = Select::new("Select a protocol:", vec!["HTTPS", "SSH"])
+        .with_page_size(2)
+        .prompt()
+        .unwrap();
 
-    return match index {
-        0 => defines::PROTOCOL::HTTPS,
-        1 => defines::PROTOCOL::SSH,
+    return match option {
+        "HTTPS" => defines::PROTOCOL::HTTPS,
+        "SSH" => defines::PROTOCOL::SSH,
         _ => {
             out::print_error("Invalid input.\n");
             ask_protocol()
         }
     };
 }
+
 pub fn ask_color() -> defines::COLOR {
-    let options = vec![
-        input::Option::new("Normal", 0),
-        input::Option::new("Red", 1),
-        input::Option::new("Green", 2),
-        input::Option::new("Yellow", 3),
-        input::Option::new("Blue", 4),
-        input::Option::new("Magenta", 5),
-        input::Option::new("Cyan", 6),
-        input::Option::new("White", 7),
-        input::Option::new("Gray", 8),
-    ];
+    use inquire::Select;
 
-    let index = input::list("Select a color:", options);
+    let option = Select::new(
+        "Select a color for the output:",
+        vec![
+            "default", "red", "green", "yellow", "blue", "magenta", "cyan", "white", "gray",
+        ],
+    )
+    .with_page_size(5)
+    .prompt();
 
-    return match index {
-        0 => defines::COLOR::NORMAL,
-        1 => defines::COLOR::RED,
-        2 => defines::COLOR::GREEN,
-        3 => defines::COLOR::YELLOW,
-        4 => defines::COLOR::BLUE,
-        5 => defines::COLOR::MAGENTA,
-        6 => defines::COLOR::CYAN,
-        7 => defines::COLOR::WHITE,
-        8 => defines::COLOR::GRAY,
-        _ => {
-            out::print_error("Invalid input.\n");
-            ask_color()
+    match option {
+        Ok(option) => {
+            return match option {
+                "default" => defines::COLOR::NORMAL,
+                "red" => defines::COLOR::RED,
+                "green" => defines::COLOR::GREEN,
+                "yellow" => defines::COLOR::YELLOW,
+                "blue" => defines::COLOR::BLUE,
+                "magenta" => defines::COLOR::MAGENTA,
+                "cyan" => defines::COLOR::CYAN,
+                "white" => defines::COLOR::WHITE,
+                "gray" => defines::COLOR::GRAY,
+                _ => {
+                    out::print_error("Invalid input.\n");
+                    ask_color()
+                }
+            };
         }
-    };
+        Err(_) => {
+            out::print_error("Invalid input.\n");
+            return ask_color();
+        }
+    }
 }
 fn ask_fancy() -> bool {
-    return input::confirm("Enable fancy commits?", true);
+    use inquire::Confirm;
+
+    let option = Confirm::new("Enable fancy commits?").with_default(true).prompt();
+
+    match option {
+        Ok(option) => return option,
+        Err(_) => {
+            out::print_error("Invalid input.\n");
+            return ask_fancy();
+        }
+    }
 }
 
 fn update_token(token: String) {
@@ -316,7 +341,7 @@ fn update_token(token: String) {
         fancy: config.fancy,
     };
 
-    save_config_file(new_config);
+    utils::save_config_file(new_config);
 }
 fn update_username(username: String) {
     let config = utils::read_config();
@@ -330,7 +355,7 @@ fn update_username(username: String) {
         fancy: config.fancy,
     };
 
-    save_config_file(new_config);
+    utils::save_config_file(new_config);
 }
 fn update_sort(sort: defines::SORTING) {
     let config = utils::read_config();
@@ -344,7 +369,7 @@ fn update_sort(sort: defines::SORTING) {
         fancy: config.fancy,
     };
 
-    save_config_file(new_config);
+    utils::save_config_file(new_config);
 }
 fn update_protocol(protocol: defines::PROTOCOL) {
     let config = utils::read_config();
@@ -358,7 +383,7 @@ fn update_protocol(protocol: defines::PROTOCOL) {
         fancy: config.fancy,
     };
 
-    save_config_file(new_config);
+    utils::save_config_file(new_config);
 }
 fn update_color(color: defines::COLOR) {
     let config = utils::read_config();
@@ -372,7 +397,7 @@ fn update_color(color: defines::COLOR) {
         fancy: config.fancy,
     };
 
-    save_config_file(new_config);
+    utils::save_config_file(new_config);
 }
 fn update_fancy(fancy: bool) {
     let config = utils::read_config();
@@ -386,5 +411,5 @@ fn update_fancy(fancy: bool) {
         fancy,
     };
 
-    save_config_file(new_config);
+    utils::save_config_file(new_config);
 }
