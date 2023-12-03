@@ -4,6 +4,7 @@ mod utils;
 use utils::out;
 
 mod config;
+mod views;
 
 const VERSION: &'static str = env!("CARGO_PKG_VERSION");
 
@@ -64,14 +65,13 @@ impl Args {
 async fn main() {
     let args = Args::new();
 
-    let _ = config::load_config();
+    let config = config::load_config();
 
     config::check_prerequisites(args.mode.clone());
 
     if args.mode.len() == 0 {
-        out::print_error("Error: No command provided.\n");
-        print_help();
-        std::process::exit(1);
+        views::menu(config);
+        return;
     }
 
     match args.mode.as_str() {

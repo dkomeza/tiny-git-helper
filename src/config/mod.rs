@@ -8,12 +8,12 @@ mod utils;
 
 #[derive(Serialize, Deserialize, Clone)]
 pub struct Config {
-    username: String,
-    token: String,
-    sort: defines::SORTING,
-    protocol: defines::PROTOCOL,
-    color: defines::COLOR,
-    fancy: bool,
+    pub username: String,
+    pub token: String,
+    pub sort: defines::SORTING,
+    pub protocol: defines::PROTOCOL,
+    pub color: defines::COLOR,
+    pub fancy: bool,
 }
 
 /// Checks if the prerequisites for tgh are installed.
