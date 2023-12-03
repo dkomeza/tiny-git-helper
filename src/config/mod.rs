@@ -228,6 +228,8 @@ fn create_config() -> Config {
 
     utils::save_config_file(config.clone());
 
+    out::print_success("Successfully created config file.\n");
+
     return config;
 }
 
