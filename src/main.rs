@@ -6,6 +6,12 @@ use utils::out;
 mod config;
 
 fn print_help() {
+    use std::io::{stdout, Write};
+
+    stdout().flush().unwrap();
+
+    println!("");
+    println!("tgh - A GitHub CLI written in Rust");
     println!("Usage:");
     println!("    commands:");
     println!("        commit: commit changes");
@@ -14,8 +20,6 @@ fn print_help() {
     println!("        login: login to GitHub");
     println!("        settings: view and edit settings");
     println!("        version: show the version of tgh");
-    println!("    options:");
-    println!("        -h, --help: show this help message");
     println!("")
 }
 
@@ -38,10 +42,7 @@ impl Args {
         let mode = args[0].clone();
 
         if args.len() == 1 {
-            return Args {
-                mode,
-                args: vec![],
-            };
+            return Args { mode, args: vec![] };
         }
 
         let args = args[1..].to_vec();
