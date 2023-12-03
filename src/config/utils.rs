@@ -65,7 +65,7 @@ pub fn validate_config_file() -> bool {
 
     let config: Config = config.unwrap();
 
-    if config.username.len() == 0 || config.token.len() == 0 {
+    if config.username.len() == 0 {
         return false;
     }
 
