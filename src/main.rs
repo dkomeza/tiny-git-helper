@@ -19,9 +19,9 @@ fn print_help() {
 async fn main() {
     let args: Vec<String> = env::args().skip(1).collect();
 
-    config::check_prerequisites(args.clone());
-
     let _ = config::load_config();
+
+    config::check_prerequisites(args.clone());
 
     if args.len() == 0 {
         out::print_error("Error: No command provided.\n");
