@@ -41,23 +41,4 @@ async fn main() {
             print_help();
         }
     }
-
-    // let config = config::load_config();
-
-    // if args.len() == 0 {
-    // } else {
-    //     let mode = args[0].clone();
-
-    //     match mode.as_str() {
-    //         "commit" => println!("Committing..."),
-    //         "clone" => println!("Cloning..."),
-    //         "init" => println!("Initializing..."),
-    //         "settings" => println!("Settings..."),
-    //         "help" => print_help(),
-    //         _ => {
-    //             out::print_error(format!("Unknown command: {} \n", mode).as_str());
-    //             print_help();
-    //         }
-    //     }
-    // }
 }

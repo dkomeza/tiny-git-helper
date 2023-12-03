@@ -176,6 +176,8 @@ pub async fn login() {
     match token {
         Ok(token) => {
             update_token(token.clone());
+
+            out::print_success("Successfully authenticated.\n");
         }
         Err(err) => {
             println!("{:?}", err);
@@ -211,20 +213,95 @@ pub fn load_config() -> Config {
 fn create_config() -> Config {
     utils::handle_config_folder();
 
-    let username = input::text("Enter your GitHub username: ", true);
+    let username = ask_username();
+    let sort = ask_sort();
+    let protocol = ask_protocol();
+    let color = ask_color();
+    let fancy = ask_fancy();
 
     let config = Config {
         username,
         token: "".to_string(),
-        sort: defines::SORTING::LastUpdated,
-        protocol: defines::PROTOCOL::HTTPS,
-        color: defines::COLOR::NORMAL,
-        fancy: true,
+        sort,
+        protocol,
+        color,
+        fancy,
     };
 
     save_config_file(config.clone());
 
     return config;
+}
+
+fn ask_username() -> String {
+    let username = input::text("Enter your GitHub username: ", true);
+
+    return username;
+}
+fn ask_sort() -> defines::SORTING {
+    let options = vec![
+        input::Option::new("Last Updated", 0),
+        input::Option::new("Alphabetical", 1),
+    ];
+
+    let index = input::list("Select a sorting method:", options);
+
+    return match index {
+        0 => defines::SORTING::LastUpdated,
+        1 => defines::SORTING::Alphabetical,
+        _ => {
+            out::print_error("Invalid input.\n");
+            ask_sort()
+        }
+    };
+}
+fn ask_protocol() -> defines::PROTOCOL {
+    let options = vec![input::Option::new("HTTPS", 0), input::Option::new("SSH", 1)];
+
+    let index = input::list("Select a protocol:", options);
+
+    return match index {
+        0 => defines::PROTOCOL::HTTPS,
+        1 => defines::PROTOCOL::SSH,
+        _ => {
+            out::print_error("Invalid input.\n");
+            ask_protocol()
+        }
+    };
+}
+pub fn ask_color() -> defines::COLOR {
+    let options = vec![
+        input::Option::new("Normal", 0),
+        input::Option::new("Red", 1),
+        input::Option::new("Green", 2),
+        input::Option::new("Yellow", 3),
+        input::Option::new("Blue", 4),
+        input::Option::new("Magenta", 5),
+        input::Option::new("Cyan", 6),
+        input::Option::new("White", 7),
+        input::Option::new("Gray", 8),
+    ];
+
+    let index = input::list("Select a color:", options);
+
+    return match index {
+        0 => defines::COLOR::NORMAL,
+        1 => defines::COLOR::RED,
+        2 => defines::COLOR::GREEN,
+        3 => defines::COLOR::YELLOW,
+        4 => defines::COLOR::BLUE,
+        5 => defines::COLOR::MAGENTA,
+        6 => defines::COLOR::CYAN,
+        7 => defines::COLOR::WHITE,
+        8 => defines::COLOR::GRAY,
+        _ => {
+            out::print_error("Invalid input.\n");
+            ask_color()
+        }
+    };
+}
+fn ask_fancy() -> bool {
+    return input::confirm("Enable fancy commits?", true);
 }
 
 fn update_token(token: String) {
@@ -237,6 +314,76 @@ fn update_token(token: String) {
         protocol: config.protocol,
         color: config.color,
         fancy: config.fancy,
+    };
+
+    save_config_file(new_config);
+}
+fn update_username(username: String) {
+    let config = utils::read_config();
+
+    let new_config = Config {
+        username,
+        token: config.token,
+        sort: config.sort,
+        protocol: config.protocol,
+        color: config.color,
+        fancy: config.fancy,
+    };
+
+    save_config_file(new_config);
+}
+fn update_sort(sort: defines::SORTING) {
+    let config = utils::read_config();
+
+    let new_config = Config {
+        username: config.username,
+        token: config.token,
+        sort,
+        protocol: config.protocol,
+        color: config.color,
+        fancy: config.fancy,
+    };
+
+    save_config_file(new_config);
+}
+fn update_protocol(protocol: defines::PROTOCOL) {
+    let config = utils::read_config();
+
+    let new_config = Config {
+        username: config.username,
+        token: config.token,
+        sort: config.sort,
+        protocol,
+        color: config.color,
+        fancy: config.fancy,
+    };
+
+    save_config_file(new_config);
+}
+fn update_color(color: defines::COLOR) {
+    let config = utils::read_config();
+
+    let new_config = Config {
+        username: config.username,
+        token: config.token,
+        sort: config.sort,
+        protocol: config.protocol,
+        color,
+        fancy: config.fancy,
+    };
+
+    save_config_file(new_config);
+}
+fn update_fancy(fancy: bool) {
+    let config = utils::read_config();
+
+    let new_config = Config {
+        username: config.username,
+        token: config.token,
+        sort: config.sort,
+        protocol: config.protocol,
+        color: config.color,
+        fancy,
     };
 
     save_config_file(new_config);
