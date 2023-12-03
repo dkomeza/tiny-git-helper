@@ -5,6 +5,8 @@ use utils::out;
 
 mod config;
 
+const VERSION: &'static str = env!("CARGO_PKG_VERSION");
+
 fn print_help() {
     use std::io::{stdout, Write};
 
@@ -12,15 +14,22 @@ fn print_help() {
 
     println!("");
     println!("tgh - A GitHub CLI written in Rust");
+    println!("");
     println!("Usage:");
-    println!("    commands:");
-    println!("        commit: commit changes");
-    println!("        clone: clone a repository into a new directory");
-    println!("        init: create an empty GitHub repository");
-    println!("        login: login to GitHub");
-    println!("        settings: view and edit settings");
-    println!("        version: show the version of tgh");
+    println!("  commands:");
+    println!("      commit: commit changes");
+    println!("      clone: clone a repository into a new directory");
+    println!("      init: create an empty GitHub repository");
+    println!("      login: login to GitHub");
+    println!("      settings: view and edit settings");
+    println!("      version: show the version of tgh");
+    println!("  short commands:");
+    println!("      c: commit changes");
+    println!("      ca: commit all changes");
     println!("")
+}
+fn print_version() {
+    println!("tgh version: {}", VERSION);
 }
 
 struct Args {
@@ -70,6 +79,7 @@ async fn main() {
             let _ = config::login().await;
         }
         "help" => print_help(),
+        "version" => print_version(),
         _ => {
             out::print_error(format!("Unknown command: {} \n", args.mode).as_str());
             print_help();
