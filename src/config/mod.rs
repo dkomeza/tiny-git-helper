@@ -20,7 +20,7 @@ pub struct Config {
 ///
 /// ### Arguments
 /// * `args` - A vector of the command line arguments.
-pub fn check_prerequisites(args: Vec<String>) {
+pub fn check_prerequisites(mode: String) {
     // Check if git is installed
     if !check_git() {
         out::print_error("Error: Git is not installed.\n");
@@ -29,8 +29,8 @@ pub fn check_prerequisites(args: Vec<String>) {
 
     // Check for a GitHub token
     if !check_token() {
-        if args.len() > 0 {
-            if args[0] == "login" {
+        if mode.len() > 0 {
+            if mode == "login" {
                 return;
             }
         }
