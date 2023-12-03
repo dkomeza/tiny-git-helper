@@ -1,5 +1,4 @@
-use crate::utils::{input, out};
-use inquire::{autocompletion::Replacement, required, Autocomplete, CustomUserError};
+use crate::utils::out;
 use reqwest::Error;
 use serde::{Deserialize, Serialize};
 
@@ -233,7 +232,7 @@ fn create_config() -> Config {
 }
 
 fn ask_username() -> String {
-    use inquire::Text;
+    use inquire::{required, Text};
 
     let username = Text::new("Enter your GitHub username:")
         .with_validator(required!("Username is required."))
@@ -241,7 +240,7 @@ fn ask_username() -> String {
 
     return username.unwrap();
 }
-pub fn ask_sort() -> defines::SORTING {
+fn ask_sort() -> defines::SORTING {
     use inquire::Select;
 
     let option = Select::new(
@@ -279,7 +278,7 @@ fn ask_protocol() -> defines::PROTOCOL {
     };
 }
 
-pub fn ask_color() -> defines::COLOR {
+fn ask_color() -> defines::COLOR {
     use inquire::Select;
 
     let option = Select::new(
@@ -318,7 +317,9 @@ pub fn ask_color() -> defines::COLOR {
 fn ask_fancy() -> bool {
     use inquire::Confirm;
 
-    let option = Confirm::new("Enable fancy commits?").with_default(true).prompt();
+    let option = Confirm::new("Enable fancy commits?")
+        .with_default(true)
+        .prompt();
 
     match option {
         Ok(option) => return option,

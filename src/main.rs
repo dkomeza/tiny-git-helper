@@ -32,9 +32,6 @@ async fn main() {
     let mode = args[0].clone();
 
     match mode.as_str() {
-        "a" => {
-            let _ = config::ask_color();
-        }
         "login" => {
             let _ = config::login().await;
         }
