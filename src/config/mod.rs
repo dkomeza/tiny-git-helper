@@ -282,7 +282,6 @@ fn ask_protocol() -> defines::PROTOCOL {
 }
 fn ask_color() -> defines::COLOR {
     use inquire::Select;
-    use crate::utils::out::color;
 
     let option = Select::new(
         "Select a color for the output:",
