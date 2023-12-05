@@ -1,4 +1,5 @@
 pub mod help;
+pub mod commit;
 
 pub fn menu(config: crate::config::Config) {
     use inquire::Select;
@@ -23,7 +24,7 @@ pub fn menu(config: crate::config::Config) {
 
     match choice {
         "commit" => {
-            println!("commit");
+            commit::commit_menu(config);
         }
         "clone" => {
             println!("clone");

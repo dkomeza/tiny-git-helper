@@ -63,6 +63,9 @@ async fn main() {
     }
 
     match args.mode.as_str() {
+        "commit" => {
+            views::commit::commit_menu(config);
+        }
         "login" => {
             let _ = config::login().await;
         }
