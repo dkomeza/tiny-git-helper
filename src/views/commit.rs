@@ -7,7 +7,11 @@ pub fn commit_menu(config: crate::config::Config) {
 
     let choice;
 
-    let menu = Select::new("What do you want to do?", vec!["commit", "commit all"]).prompt();
+    let menu = Select::new(
+        "What do you want to commit?",
+        vec!["Commit specific files", "Commit all files"],
+    )
+    .prompt();
 
     match menu {
         Ok(option) => {
@@ -19,10 +23,10 @@ pub fn commit_menu(config: crate::config::Config) {
     }
 
     match choice {
-        "commit" => {
+        "Commit specific files" => {
             println!("commit");
         }
-        "commit all" => {
+        "Commit all files" => {
             println!("commit all");
         }
         _ => {
