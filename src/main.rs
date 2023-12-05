@@ -33,6 +33,19 @@ fn print_version() {
     println!("tgh version: {}", VERSION);
 }
 
+fn setup_ui() {
+    use inquire::ui::{Attributes, Color, RenderConfig, StyleSheet};
+
+    let mut render_config = RenderConfig::default();
+    render_config.prompt = StyleSheet::new().with_fg(Color::Grey);
+    render_config.answer = StyleSheet::new()
+        .with_fg(Color::Grey)
+        .with_attr(Attributes::BOLD);
+    render_config.help_message = StyleSheet::new().with_fg(Color::DarkGrey);
+
+    inquire::set_global_render_config(render_config);
+}
+
 struct Args {
     mode: String,
     args: Vec<String>,
@@ -68,6 +81,8 @@ async fn main() {
     let config = config::load_config();
 
     config::check_prerequisites(args.mode.clone());
+
+    setup_ui();
 
     if args.mode.len() == 0 {
         views::menu(config);
