@@ -6,32 +6,6 @@ use utils::out;
 mod config;
 mod views;
 
-const VERSION: &'static str = env!("CARGO_PKG_VERSION");
-
-fn print_help() {
-    use std::io::{stdout, Write};
-
-    stdout().flush().unwrap();
-
-    println!("");
-    println!("tgh - A GitHub CLI written in Rust");
-    println!("");
-    println!("Usage:");
-    println!("  commands:");
-    println!("      commit: commit changes");
-    println!("      clone: clone a repository into a new directory");
-    println!("      init: create an empty GitHub repository");
-    println!("      login: login to GitHub");
-    println!("      settings: view and edit settings");
-    println!("      version: show the version of tgh");
-    println!("  short commands:");
-    println!("      c: commit changes");
-    println!("      ca: commit all changes");
-    println!("")
-}
-fn print_version() {
-    println!("tgh version: {}", VERSION);
-}
 
 fn setup_ui() {
     use inquire::ui::{Attributes, Color, RenderConfig, StyleSheet};
@@ -50,7 +24,6 @@ struct Args {
     mode: String,
     args: Vec<String>,
 }
-
 impl Args {
     fn new() -> Args {
         let args: Vec<String> = env::args().skip(1).collect();
@@ -93,11 +66,11 @@ async fn main() {
         "login" => {
             let _ = config::login().await;
         }
-        "help" => print_help(),
-        "version" => print_version(),
+        "help" => views::help::print_help(),
+        "version" => views::help::print_version(),
         _ => {
             out::print_error(format!("Unknown command: {} \n", args.mode).as_str());
-            print_help();
+            views::help::print_help();
         }
     };
 }

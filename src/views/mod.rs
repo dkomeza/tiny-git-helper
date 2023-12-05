@@ -1,3 +1,5 @@
+pub mod help;
+
 pub fn menu(config: crate::config::Config) {
     use inquire::Select;
     use std::process;
