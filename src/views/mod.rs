@@ -1,9 +1,12 @@
-pub mod help;
 pub mod commit;
+pub mod help;
 
 pub fn menu(config: crate::config::Config) {
+    use crate::clear_screen;
     use inquire::Select;
     use std::process;
+
+    clear_screen();
 
     let choice;
 

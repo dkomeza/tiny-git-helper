@@ -2,10 +2,10 @@ use std::env;
 
 mod utils;
 use utils::out;
+use utils::out::clear_screen;
 
 mod config;
 mod views;
-
 
 fn setup_ui() {
     use inquire::ui::{Attributes, Color, RenderConfig, StyleSheet};
@@ -69,11 +69,10 @@ async fn main() {
         "login" => {
             let _ = config::login().await;
         }
-        "help" => views::help::print_help(),
+        "help" => views::help::print_help(false, args),
         "version" => views::help::print_version(),
         _ => {
-            out::print_error(format!("Unknown command: {} \n", args.mode).as_str());
-            views::help::print_help();
+            views::help::print_help(true, args);
         }
     };
 }

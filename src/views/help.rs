@@ -1,7 +1,14 @@
 const VERSION: &'static str = env!("CARGO_PKG_VERSION");
 
-pub fn print_help() {
+pub fn print_help(error: bool, args: crate::Args) {
+    use crate::clear_screen;
     use std::io::{stdout, Write};
+
+    clear_screen();
+
+    if error {
+        crate::out::print_error(format!("Unknown command: {}", args.mode).as_str());
+    }
 
     stdout().flush().unwrap();
 
