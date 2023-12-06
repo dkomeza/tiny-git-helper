@@ -6,6 +6,7 @@ use utils::out::clear_screen;
 
 mod config;
 mod views;
+mod functions;
 
 fn setup_ui() {
     use inquire::ui::{Attributes, Color, RenderConfig, StyleSheet};

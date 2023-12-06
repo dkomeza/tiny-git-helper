@@ -5,6 +5,11 @@ pub fn commit_menu(config: crate::config::Config) {
 
     clear_screen();
 
+    if !crate::functions::is_git_repo() {
+        crate::out::print_error("Not a git repository");
+        process::exit(0);
+    }
+
     let choice;
 
     let menu = Select::new(
