@@ -22,10 +22,10 @@ pub struct Config {
 /// * `args` - A vector of the command line arguments.
 pub async fn check_prerequisites() {
     // Check if git is installed
-    if true {
+    if !check_git() {
         out::print_error("Error: Git is not installed.\n");
         println!("Please install using the link below:");
-        println!("\x1B[4mhttps://git-scm.com/downloads\x1B[m\n");
+        println!("\x1B[mhttps://git-scm.com/downloads\x1B[m\n");
         std::process::exit(1);
     }
 
