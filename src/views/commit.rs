@@ -1,4 +1,4 @@
-pub fn commit_menu(config: crate::config::Config) {
+pub fn commit_menu() {
     use crate::clear_screen;
     use inquire::Select;
     use std::process;

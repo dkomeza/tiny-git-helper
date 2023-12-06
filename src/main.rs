@@ -52,20 +52,18 @@ impl Args {
 async fn main() {
     let args = Args::new();
 
-    let config = config::load_config();
-
-    config::check_prerequisites(args.mode.clone());
+    config::check_prerequisites().await;
 
     setup_ui();
 
     if args.mode.len() == 0 {
-        views::menu(config);
+        views::menu();
         return;
     }
 
     match args.mode.as_str() {
         "commit" => {
-            views::commit::commit_menu(config);
+            views::commit::commit_menu();
         }
         "login" => {
             let _ = config::login().await;

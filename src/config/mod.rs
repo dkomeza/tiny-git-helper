@@ -5,7 +5,6 @@ use serde::{Deserialize, Serialize};
 pub mod defines;
 mod utils;
 
-
 #[derive(Serialize, Deserialize, Clone)]
 pub struct Config {
     pub username: String,
@@ -21,24 +20,28 @@ pub struct Config {
 ///
 /// ### Arguments
 /// * `args` - A vector of the command line arguments.
-pub fn check_prerequisites(mode: String) {
+pub async fn check_prerequisites() {
     // Check if git is installed
     if !check_git() {
         out::print_error("Error: Git is not installed.\n");
         std::process::exit(1);
     }
 
+    // Check for a config file
+    if !utils::config_exists() {
+        out::print_error("Config file not found. Creating one...\n");
+        create_config();
+    } else if !utils::validate_config_file() {
+        out::print_error("Config file is invalid. Creating a new one...\n");
+        create_config();
+    }
+
     // Check for a GitHub token
     if !check_token() {
-        if mode.len() > 0 {
-            if mode == "login" {
-                return;
-            }
-        }
+        out::print_error("Error: GitHub token invalid.\n");
+        login().await;
 
-        out::print_error("Error: No GitHub token found.");
-        println!("Please run `tgh login` to create one.\n");
-        std::process::exit(1);
+        std::thread::sleep(std::time::Duration::from_secs(2));
     }
 }
 fn check_git() -> bool {
@@ -98,7 +101,7 @@ async fn authenticate() -> Result<String, Error> {
     let login_url = text_split[4].replace("%3A", ":").replace("%2F", "/");
     let grant_type = "urn:ietf:params:oauth:grant-type:device_code";
 
-    println!("Please visit this URL to authenticate:\n{}", login_url);
+    println!("Please visit this URL to authenticate: \x1B[4m{}\x1B[m", login_url);
 
     let clipboard = Clipboard::new();
     match clipboard {
