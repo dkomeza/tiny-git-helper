@@ -22,8 +22,10 @@ pub struct Config {
 /// * `args` - A vector of the command line arguments.
 pub async fn check_prerequisites() {
     // Check if git is installed
-    if !check_git() {
+    if true {
         out::print_error("Error: Git is not installed.\n");
+        println!("Please install using the link below:");
+        println!("\x1B[4mhttps://git-scm.com/downloads\x1B[m\n");
         std::process::exit(1);
     }
 
@@ -101,7 +103,10 @@ async fn authenticate() -> Result<String, Error> {
     let login_url = text_split[4].replace("%3A", ":").replace("%2F", "/");
     let grant_type = "urn:ietf:params:oauth:grant-type:device_code";
 
-    println!("Please visit this URL to authenticate: \x1B[4m{}\x1B[m", login_url);
+    println!(
+        "Please visit this URL to authenticate: \x1B[4m{}\x1B[m",
+        login_url
+    );
 
     let clipboard = Clipboard::new();
     match clipboard {
