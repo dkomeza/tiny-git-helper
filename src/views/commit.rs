@@ -37,7 +37,7 @@ pub fn commit_menu() {
     }
 }
 
-fn commit_all_files() {
+pub fn commit_all_files() {
     use crate::functions::commit::{is_valid_commit, commit_all_files};
 
     is_valid_commit();

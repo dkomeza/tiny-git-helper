@@ -73,6 +73,11 @@ async fn main() {
         }
         "help" => views::help::print_help(false, args),
         "version" => views::help::print_version(),
+
+        "ca" => {
+            views::commit::commit_all_files();
+        },
+
         _ => {
             views::help::print_help(true, args);
         }
