@@ -103,18 +103,16 @@ pub fn commit_all_files(message: String) {
         files_to_add.push(file.name.clone());
     });
 
+    let output = Command::new("git")
+        .arg("add")
+        .args(files_to_add)
+        .output()
+        .unwrap();
 
-    // let output = Command::new("git")
-    //     .arg("commit")
-    //     .arg("-m")
-    //     .arg(message)
-    //     .output()
-    //     .unwrap();
-
-    // if !output.status.success() {
-    //     crate::out::print_error("Error committing files");
-    //     std::process::exit(1);
-    // }
+    if !output.status.success() {
+        crate::out::print_error("Failed to add files");
+        std::process::exit(1);
+    }
 
     spinner.stop();
 
