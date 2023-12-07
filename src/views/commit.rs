@@ -29,10 +29,38 @@ pub fn commit_menu() {
             println!("commit");
         }
         "Commit all files" => {
-            println!("commit all");
+            commit_all_files();
         }
         _ => {
             println!("Invalid option");
+        }
+    }
+}
+
+fn commit_all_files() {
+    use crate::functions::commit::{is_valid_commit, commit_all_files};
+
+    is_valid_commit();
+
+    let message = ask_commit_message();
+
+    commit_all_files(message);
+}
+
+fn ask_commit_message() -> String {
+    use inquire::Text;
+
+    let message = Text::new("Commit message")
+        .with_help_message("Enter a commit message")
+        .prompt();
+
+    match message {
+        Ok(msg) => {
+            return msg;
+        }
+        Err(_) => {
+            crate::out::print_error("Error getting commit message");
+            std::process::exit(1);
         }
     }
 }

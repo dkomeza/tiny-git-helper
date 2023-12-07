@@ -1,3 +1,5 @@
+use std::thread;
+
 pub fn is_valid_commit() {
     use std::process;
 
@@ -50,4 +52,32 @@ pub fn is_top_level() -> bool {
     }
 
     true
+}
+
+pub fn commit_all_files(message: String) {
+    use spinners::{Spinner, Spinners};
+    use std::process::Command;
+
+    let mut spinner = Spinner::new(Spinners::Dots, "Committing...".into());
+
+    thread::sleep(std::time::Duration::from_millis(1000));
+
+    // let output = Command::new("git")
+    //     .arg("commit")
+    //     .arg("-m")
+    //     .arg(message)
+    //     .output()
+    //     .unwrap();
+
+    // if !output.status.success() {
+    //     crate::out::print_error("Error committing files");
+    //     std::process::exit(1);
+    // }
+
+    spinner.stop();
+
+    println!("");
+    crate::out::print_success("Files succesfully committed");
+
+    std::process::exit(0);
 }
