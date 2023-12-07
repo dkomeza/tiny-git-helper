@@ -5,11 +5,9 @@ pub fn is_git_repo() -> bool {
         .arg("status")
         .arg("-s")
         .output()
-        .expect("failed to execute process");
+        .unwrap();
 
-    let output = String::from_utf8_lossy(&output.stdout);
-
-    if output == "" {
+    if !output.status.success() {
         return false;
     }
 
