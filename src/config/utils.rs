@@ -1,3 +1,5 @@
+use inquire::validator::StringValidator;
+
 use crate::config::defines;
 
 pub fn handle_config_folder() {
@@ -99,3 +101,39 @@ pub fn save_config_file(config: crate::config::Config) {
 
     config_file.write_all(config_contents.as_bytes()).unwrap();
 }
+
+pub fn validate_email(email: &str) -> Result<inquire::validator::Validation, inquire::CustomUserError> {
+    use regex::Regex;
+
+    let re = Regex::new(r"^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$").unwrap();
+
+    if email.len() == 0 {
+        return Ok(inquire::validator::Validation::Invalid(
+            "Email cannot be empty".into(),
+        ));
+    }
+
+    if !re.is_match(email) {
+        return Ok(inquire::validator::Validation::Invalid(
+            "Invalid email".into(),
+        ));
+    }
+
+    return Ok(inquire::validator::Validation::Valid);
+}
+
+// pub fn email_validator(email: &str) -> Result<bool, &str> {
+//     use regex::Regex;
+
+//     let re = Regex::new(r"^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$").unwrap();
+
+//     if email.len() == 0 {
+//         return Err("Email cannot be empty");
+//     }
+
+//     if !re.is_match(email) {
+//         return Err("Invalid email");
+//     }
+
+//     return Ok(true);
+// }

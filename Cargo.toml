@@ -10,6 +10,7 @@ arboard = "3.3.0"
 crossterm = "0.27.0"
 home = "0.5.5"
 inquire = "0.6.2"
+regex = "1.10.2"
 reqwest = {version="0.11.22", features = ["json"]}
 serde = {version="1.0.192", features = ["derive"]}
 serde_json = "1.0.108"

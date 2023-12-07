@@ -29,6 +29,9 @@ pub async fn check_prerequisites() {
         std::process::exit(1);
     }
 
+    // Check for git config
+    check_git_config();
+
     // Check for a config file
     if !utils::config_exists() {
         out::print_error("Config file not found. Creating one...\n");
@@ -57,6 +60,48 @@ fn check_git() -> bool {
     }
 
     return false;
+}
+/// Checks if the user has a git config. (user.name, user.email)
+fn check_git_config() {
+    let mut command = std::process::Command::new("git");
+    command.args(["config", "--global", "user.name"]);
+
+    let output = command.output().unwrap();
+
+    if !output.status.success() {
+        out::print_error("Error: user.name was not found in git config.\n");
+        let name = ask_git_name();
+
+        let mut command = std::process::Command::new("git");
+        command.args(["config", "--global", "user.name", &name]);
+
+        let output = command.output().unwrap();
+
+        if !output.status.success() {
+            out::print_error("Error: Failed to set user.name.\n");
+            std::process::exit(1);
+        }
+    }
+
+    let mut command = std::process::Command::new("git");
+    command.args(["config", "--global", "user.email"]);
+
+    let output = command.output().unwrap();
+
+    if !output.status.success() {
+        out::print_error("Error: user.email was not found in git config.\n");
+        let email = ask_git_email();
+
+        let mut command = std::process::Command::new("git");
+        command.args(["config", "--global", "user.email", &email]);
+
+        let output = command.output().unwrap();
+
+        if !output.status.success() {
+            out::print_error("Error: Failed to set user.email.\n");
+            std::process::exit(1);
+        }
+    }
 }
 fn check_token() -> bool {
     if !utils::config_exists() || !utils::validate_config_file() {
@@ -338,6 +383,20 @@ fn ask_fancy() -> bool {
             return ask_fancy();
         }
     }
+}
+fn ask_git_name() -> String {
+    let name = inquire::Text::new("Enter name used for git:")
+        .with_validator(inquire::required!("Name is required."))
+        .prompt();
+
+    return name.unwrap();
+}
+fn ask_git_email() -> String {
+    let email = inquire::Text::new("Enter email used for git:")
+        .with_validator(utils::validate_email)
+        .prompt();
+
+    return email.unwrap();
 }
 
 fn update_token(token: String) {
