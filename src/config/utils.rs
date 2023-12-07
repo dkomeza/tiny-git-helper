@@ -121,19 +121,3 @@ pub fn validate_email(email: &str) -> Result<inquire::validator::Validation, inq
 
     return Ok(inquire::validator::Validation::Valid);
 }
-
-// pub fn email_validator(email: &str) -> Result<bool, &str> {
-//     use regex::Regex;
-
-//     let re = Regex::new(r"^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$").unwrap();
-
-//     if email.len() == 0 {
-//         return Err("Email cannot be empty");
-//     }
-
-//     if !re.is_match(email) {
-//         return Err("Invalid email");
-//     }
-
-//     return Ok(true);
-// }
