@@ -1,5 +1,10 @@
 use std::thread;
 
+struct File {
+    pub name: String,
+    pub status: String,
+}
+
 pub fn is_valid_commit() {
     use std::process;
 
@@ -28,6 +33,37 @@ fn are_files_to_commit() -> bool {
     }
 
     true
+}
+fn get_files_to_commit() -> Vec<File> {
+    use std::process::Command;
+
+    let mut files = Vec::new();
+
+    let output = Command::new("git")
+        .arg("status")
+        .arg("-s")
+        .output()
+        .unwrap();
+
+    let out = String::from_utf8(output.stdout).unwrap();
+
+    for line in out.lines() {
+        let mut file = File {
+            name: "".into(),
+            status: "".into(),
+        };
+
+        let mut chars = line.chars();
+
+        file.status.push(chars.next().unwrap());
+        file.status.push(chars.next().unwrap());
+
+        file.name = chars.as_str().trim().into();
+
+        files.push(file);
+    }
+
+    return files;
 }
 
 pub fn is_top_level() -> bool {
@@ -60,7 +96,13 @@ pub fn commit_all_files(message: String) {
 
     let mut spinner = Spinner::new(Spinners::Dots, "Committing...".into());
 
-    thread::sleep(std::time::Duration::from_millis(1000));
+    let files = get_files_to_commit();
+    let mut files_to_add = Vec::new();
+
+    files.iter().for_each(|file| {
+        files_to_add.push(file.name.clone());
+    });
+
 
     // let output = Command::new("git")
     //     .arg("commit")
