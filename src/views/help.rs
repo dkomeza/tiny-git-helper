@@ -1,32 +1,32 @@
 const VERSION: &'static str = env!("CARGO_PKG_VERSION");
 
 pub fn print_help(error: bool, args: crate::Args) {
-    use crate::clear_screen;
-    use std::io::{stdout, Write};
+    use crate::{
+        clear_screen,
+        out::{print_bold, print_dim, print_error},
+    };
 
     clear_screen();
 
     if error {
-        crate::out::print_error(format!("Unknown command: {}", args.mode).as_str());
+        print_error(format!("Unknown command: {}", args.mode).as_str());
     }
 
-    stdout().flush().unwrap();
-
     println!("");
-    println!("tgh - A GitHub CLI written in Rust");
+    print_bold("tgh - A GitHub CLI written in Rust");
     println!("");
-    println!("Usage:");
-    println!("  commands:");
-    println!("      commit: commit changes (WIP)");
-    println!("      clone: clone a repository into a new directory (WIP)");
-    println!("      init: create an empty GitHub repository (WIP)");
+    print_bold("Usage:");
+    print_bold("  commands:");
+    print_dim("      commit: commit changes (WIP)");
+    print_dim("      clone: clone a repository into a new directory (WIP)");
+    print_dim("      init: create an empty GitHub repository (WIP)");
     println!("      login: login to GitHub");
-    println!("      settings: view and edit settings (WIP)");
+    print_dim("      settings: view and edit settings (WIP)");
     println!("      version: show the version of tgh");
     println!("      help: show this help message");
-    println!("  short commands:");
-    println!("      c: commit changes");
-    println!("      ca: commit all changes");
+    print_bold("  short commands:");
+    print_dim("      c: commit changes");
+    print_dim("      ca: commit all changes");
     println!("")
 }
 
