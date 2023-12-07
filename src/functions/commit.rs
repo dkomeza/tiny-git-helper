@@ -1,6 +1,4 @@
-pub mod commit;
-
-pub fn is_git_repo() -> bool {
+pub fn are_files_to_commit() -> bool {
     use std::process::Command;
 
     let output = Command::new("git")
@@ -9,11 +7,9 @@ pub fn is_git_repo() -> bool {
         .output()
         .unwrap();
 
-    if !output.status.success() {
+    if output.stdout.len() == 0 {
         return false;
     }
 
     true
 }
-
-pub fn list_changed_files() {}
