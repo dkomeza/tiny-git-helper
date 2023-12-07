@@ -287,6 +287,23 @@ fn create_config() -> Config {
     return config;
 }
 
+pub fn get_inquire_color() -> inquire::ui::Color {
+    let config = load_config();
+    use defines::COLOR;
+
+    return match config.color {
+        COLOR::RED => inquire::ui::Color::LightRed,
+        COLOR::GREEN => inquire::ui::Color::LightGreen,
+        COLOR::YELLOW => inquire::ui::Color::LightYellow,
+        COLOR::BLUE => inquire::ui::Color::LightBlue,
+        COLOR::MAGENTA => inquire::ui::Color::LightMagenta,
+        COLOR::CYAN => inquire::ui::Color::LightCyan,
+        COLOR::WHITE => inquire::ui::Color::White,
+        COLOR::GRAY => inquire::ui::Color::Grey,
+        _ => inquire::ui::Color::White,
+    };
+}
+
 fn ask_username() -> String {
     use inquire::{required, Text};
 

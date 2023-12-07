@@ -1,5 +1,3 @@
-use inquire::validator::StringValidator;
-
 use crate::config::defines;
 
 pub fn handle_config_folder() {

@@ -5,14 +5,17 @@ use utils::out;
 use utils::out::clear_screen;
 
 mod config;
-mod views;
 mod functions;
+mod views;
 
 fn setup_ui() {
     use inquire::ui::{Attributes, Color, RenderConfig, StyleSheet};
 
     let mut render_config = RenderConfig::default();
-    render_config.prompt = StyleSheet::new().with_fg(Color::Grey);
+    if config::load_config().color != config::defines::COLOR::NORMAL {
+        let color = config::get_inquire_color();
+        render_config.prompt = StyleSheet::new().with_fg(color);
+    }
     render_config.answer = StyleSheet::new()
         .with_fg(Color::Grey)
         .with_attr(Attributes::BOLD);
