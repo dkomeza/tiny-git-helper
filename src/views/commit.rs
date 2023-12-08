@@ -50,17 +50,29 @@ pub fn commit_all_files() {
 fn ask_commit_message() -> String {
     use inquire::Text;
 
-    let message = Text::new("Commit message")
-        .with_help_message("Enter a commit message")
-        .prompt();
+    let config = crate::config::load_config();
 
-    match message {
-        Ok(msg) => {
-            return msg;
-        }
-        Err(_) => {
-            crate::out::print_error("Error getting commit message");
-            std::process::exit(1);
+    let mut message = String::new();
+
+    match config.fancy {
+        true => {
+        },
+        false => {
+            let msg = Text::new("Commit message")
+                .with_help_message("Enter a commit message")
+                .prompt();
+
+            match msg {
+                Ok(msg) => {
+                    message = msg;
+                }
+                Err(_) => {
+                    crate::out::print_error("Error getting commit message");
+                    std::process::exit(1);
+                }
+            }
         }
     }
+
+    return message;
 }
