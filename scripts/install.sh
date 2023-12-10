@@ -2,7 +2,7 @@
 
 OS=""
 ARCH=$(uname -m)
-APP_NAME="tgh-$OS-$ARCH"
+APP_NAME="tgh-$OS-$ARCH-$VERSION"
 REPO="dkomeza/tiny-git-helper"
 INSTALL_DIR="/usr/local/bin"
 
@@ -32,21 +32,28 @@ check_supported_arch() {
     fi
 }
 
+update_app_name() {
+    APP_NAME="tgh-$OS-$ARCH-$VERSION"
+}
+
 download_and_install() {
     DOWNLOAD_URL="https://github.com/$REPO/releases/download/$VERSION/$APP_NAME"
-    HTTP_STATUS_CODE=$(curl -s -L -o /dev/null -w "%{http_code}" "$DOWNLOAD_URL")
-    if [ "$HTTP_STATUS_CODE" -eq 200 ]; then
-        curl -L --output tgh "$DOWNLOAD_URL"
-        chmod +x tgh
-        mv tgh "$INSTALL_DIR"
-        echo "Installation complete."
-    else
-        echo "No suitable version found for your system."
-        exit 1
-    fi
+
+    echo "Downloading $DOWNLOAD_URL"
+    # HTTP_STATUS_CODE=$(curl -s -L -o /dev/null -w "%{http_code}" "$DOWNLOAD_URL")
+    # if [ "$HTTP_STATUS_CODE" -eq 200 ]; then
+    #     curl -L --output tgh "$DOWNLOAD_URL"
+    #     chmod +x tgh
+    #     mv tgh "$INSTALL_DIR"
+    #     echo "Installation complete."
+    # else
+    #     echo "No suitable version found for your system."
+    #     exit 1
+    # fi
 }
 
 check_supported_os
 check_supported_arch
 get_latest_version
+update_app_name
 download_and_install
