@@ -13,8 +13,7 @@ fn setup_ui() {
 
     let mut render_config = RenderConfig::default();
     if config::load_config().color != config::defines::COLOR::NORMAL {
-        let color = config::get_inquire_color();
-        render_config.prompt = StyleSheet::new().with_fg(color);
+        render_config.prompt = StyleSheet::new().with_fg(config::load_config().color.as_inquire_color());
     }
     render_config.answer = StyleSheet::new()
         .with_fg(Color::Grey)

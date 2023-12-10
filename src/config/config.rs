@@ -93,34 +93,27 @@ fn ask_protocol() -> defines::PROTOCOL {
 }
 fn ask_color() -> defines::COLOR {
     use inquire::Select;
+    use super::defines::COLOR::*;
 
     let option = Select::new(
         "Select a color for the output:",
         vec![
-            "default", "red", "green", "yellow", "blue", "magenta", "cyan", "white", "gray",
+            NORMAL,
+            RED,
+            GREEN,
+            YELLOW,
+            BLUE,
+            MAGENTA,
+            CYAN,
+            WHITE,
+            GRAY,
         ],
     )
     .with_page_size(5)
     .prompt();
 
     match option {
-        Ok(option) => {
-            return match option {
-                "default" => defines::COLOR::NORMAL,
-                "red" => defines::COLOR::RED,
-                "green" => defines::COLOR::GREEN,
-                "yellow" => defines::COLOR::YELLOW,
-                "blue" => defines::COLOR::BLUE,
-                "magenta" => defines::COLOR::MAGENTA,
-                "cyan" => defines::COLOR::CYAN,
-                "white" => defines::COLOR::WHITE,
-                "gray" => defines::COLOR::GRAY,
-                _ => {
-                    out::print_error("Invalid input.\n");
-                    ask_color()
-                }
-            };
-        }
+        Ok(option) => option,
         Err(_) => {
             out::print_error("Invalid input.\n");
             return ask_color();
