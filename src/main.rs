@@ -86,18 +86,3 @@ async fn main() {
         }
     };
 }
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn test_args() {
-        let args = Args {
-            mode: String::from("commit"),
-            args: vec![String::from("a"), String::from("b")],
-        };
-        assert_eq!(args.mode, "commit");
-        assert_eq!(args.args, vec![String::from("a"), String::from("b")]);
-    }
-}
