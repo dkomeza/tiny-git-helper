@@ -17,7 +17,7 @@ pub fn print_help(error: bool, args: crate::Args) {
     println!("");
     print_bold("Usage:");
     print_bold("  commands:");
-    print_dim("      commit: commit changes (WIP)");
+    println!("      commit | c: commit changes");
     print_dim("      clone: clone a repository into a new directory (WIP)");
     print_dim("      init: create an empty GitHub repository (WIP)");
     println!("      login: login to GitHub");
@@ -25,8 +25,8 @@ pub fn print_help(error: bool, args: crate::Args) {
     println!("      version: show the version of tgh");
     println!("      help: show this help message");
     print_bold("  short commands:");
-    print_dim("      c: commit changes");
-    print_dim("      ca: commit all changes");
+    println!("      ca: commit all changes");
+    println!("      cf: commit specific files");
     println!("")
 }
 
