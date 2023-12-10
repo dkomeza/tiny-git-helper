@@ -1,0 +1,56 @@
+name: Build binaries and upload artifacts
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  build:
+    name: Build binaries and upload artifacts
+    runs-on: ${{ matrix.os.host }}
+    strategy:
+      matrix:
+        os: 
+            - name: Windows-x64
+              architecture: x86-64
+              host: windows-latest
+            - name: Linux-x64
+              architecture: x86-64
+              host: ubuntu-latest
+            - name: Linux-arm64
+              architecture: arm64
+              host: ubuntu-latest
+            - name: MacOS-x64
+              architecture: x86-64
+              host: macos-latest
+            - name: MacOS-arm64
+              architecture: arm64
+              host: macos-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Rust
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          override: true
+      - name: Build binaries for ${{ matrix.os.name }}
+        uses: cross-platform-actions/action@v0.15.0
+        with:
+          operating_system: ${{ matrix.os.name }}
+          architecture: ${{ matrix.os.architecture }}
+          version: ${{ matrix.os.version }}
+          shell: bash
+          run: |
+            cargo build --release
+      - name: Upload artifacts for ${{ matrix.os.name }}
+        uses: actions/upload-artifact@v2
+        with:
+          name: binaries
+          path: target/release
