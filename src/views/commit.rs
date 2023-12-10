@@ -69,6 +69,34 @@ fn ask_commit_message() -> String {
                     std::process::exit(1);
                 }
             }
+
+            let msg = Text::new("Commit message")
+                .with_help_message("Enter a commit message")
+                .prompt();
+
+            match msg {
+                Ok(msg) => {
+                    message += &format!(" {}", msg);
+                }
+                Err(_) => {
+                    crate::out::print_error("Error getting commit message");
+                    std::process::exit(1);
+                }
+            }
+
+            let description = Text::new("Commit description")
+                .with_help_message("Enter a commit description")
+                .prompt();
+
+            match description {
+                Ok(description) => {
+                    message += &format!("\n\n{}", description);
+                }
+                Err(_) => {
+                    crate::out::print_error("Error getting commit description");
+                    std::process::exit(1);
+                }
+            }
         }
         false => {
             let msg = Text::new("Commit message")
