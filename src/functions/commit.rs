@@ -71,30 +71,6 @@ pub fn get_files_to_commit() -> Vec<File> {
     return files;
 }
 
-pub fn is_top_level() -> bool {
-    use std::process::Command;
-
-    let output = Command::new("git")
-        .arg("rev-parse")
-        .arg("--show-toplevel")
-        .output()
-        .unwrap();
-
-    if !output.status.success() {
-        return false;
-    }
-
-    let out = String::from_utf8(output.stdout).unwrap();
-    let out = out.trim();
-    let current_dir = std::env::current_dir().unwrap();
-
-    if out != current_dir.to_str().unwrap() {
-        return false;
-    }
-
-    true
-}
-
 fn commit_files(message: String, files: Vec<File>) {
     use spinners::{Spinner, Spinners};
     use std::process::Command;

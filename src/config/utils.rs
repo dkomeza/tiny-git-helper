@@ -105,7 +105,7 @@ pub fn validate_email(
 ) -> Result<inquire::validator::Validation, inquire::CustomUserError> {
     use regex::Regex;
 
-    let re = Regex::new(r"^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$").unwrap();
+    let re = Regex::new(r"^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$").unwrap();
 
     if email.len() == 0 {
         return Ok(inquire::validator::Validation::Invalid(
