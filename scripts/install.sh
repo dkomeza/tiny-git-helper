@@ -35,7 +35,7 @@ check_supported_os() {
 }
 
 check_supported_arch() {
-    if [ "$ARCH" != "x86_64" ] && [ "$ARCH" != "arm64" ]; then
+    if [ "$ARCH" != "x86_64" ] && [ "$ARCH" != "arm64" ] && [ "$ARCH" != "aarch64"]; then
         echo "Unsupported architecture: $ARCH"
         exit 1
     fi
