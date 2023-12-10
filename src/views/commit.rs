@@ -1,3 +1,6 @@
+use crate::functions::commit::File;
+use inquire::{list_option::ListOption, validator::Validation};
+
 pub fn commit_menu() {
     use crate::{clear_screen, functions::commit::is_valid_commit};
     use inquire::Select;
@@ -26,7 +29,7 @@ pub fn commit_menu() {
 
     match choice {
         "Commit specific files" => {
-            println!("commit");
+            commit_specific_files();
         }
         "Commit all files" => {
             commit_all_files();
@@ -45,6 +48,17 @@ pub fn commit_all_files() {
     let message = ask_commit_message();
 
     commit_all_files(message);
+}
+pub fn commit_specific_files() {
+    use crate::functions::commit::{commit_specific_files, is_valid_commit};
+
+    is_valid_commit();
+
+    let files = ask_files_to_commit();
+
+    let message = ask_commit_message();
+
+    commit_specific_files(files, message);
 }
 
 fn ask_commit_message() -> String {
@@ -116,4 +130,45 @@ fn ask_commit_message() -> String {
     }
 
     return message;
+}
+fn ask_files_to_commit() -> Vec<crate::functions::commit::File> {
+    use crate::functions::commit::get_files_to_commit;
+    use inquire::MultiSelect;
+
+    let mut files = Vec::new();
+
+    let changed_files = get_files_to_commit();
+
+    let choice = MultiSelect::new("Select files to commit", changed_files)
+        .with_validator(validate_file_selection)
+        .prompt();
+
+    match choice {
+        Ok(choice) => {
+            choice.iter().for_each(|file| {
+                files.push(file.clone());
+            });
+            if files.len() == 0 {
+                crate::out::print_error("You must select at least one file");
+                ask_files_to_commit();
+            }
+        }
+        Err(_) => {
+            crate::out::print_error("Error getting files to commit");
+            std::process::exit(1);
+        }
+    }
+
+    return files;
+}
+fn validate_file_selection(
+    files: &[ListOption<&File>],
+) -> Result<inquire::validator::Validation, inquire::CustomUserError> {
+    if files.len() == 0 {
+        return Ok(Validation::Invalid(
+            "You must select at least one file".into(),
+        ));
+    }
+
+    return Ok(Validation::Valid);
 }
