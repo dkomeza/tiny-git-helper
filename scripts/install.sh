@@ -6,6 +6,8 @@ APP_NAME="tgh-$OS-$ARCH-$VERSION"
 REPO="dkomeza/tiny-git-helper"
 INSTALL_DIR="/usr/local/bin"
 
+echo "Installing Tiny Git Helper..."
+
 check_sudo() {
     if [ "$(id -u)" -ne 0 ]; then
         echo "Please run as root."
@@ -48,7 +50,11 @@ download_and_install() {
     HTTP_STATUS_CODE=$(curl -s -L -o /dev/null -w "%{http_code}" "$DOWNLOAD_URL")
 
     if [ "$HTTP_STATUS_CODE" -eq 200 ]; then
-        curl -L --output tgh "$DOWNLOAD_URL"
+        # Create temp directory
+        TMP_DIR=$(mktemp -d)
+        cd "$TMP_DIR" || exit 1
+
+        curl -L -s --output tgh "$DOWNLOAD_URL"
         chmod +x tgh
         mv tgh "$INSTALL_DIR"
         echo "Installation complete."
