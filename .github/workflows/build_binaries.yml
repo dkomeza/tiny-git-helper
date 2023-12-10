@@ -28,7 +28,7 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: binaries
-          path: target/release
+          path: target/release/tgh.exe
   build-linux-x86_64:
     name: Build binaries for Linux x86_64
     runs-on: ubuntu-latest
@@ -45,5 +45,5 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: binaries
-          path: target/release
+          path: target/release/tgh
          
