@@ -112,7 +112,7 @@ jobs:
           override: true
 
       - name: Build
-        run: cross build --release
+        run: cargo build --release
 
       - name: Rename binary
         run: mv target/release/tgh.exe target/release/tgh-windows-x86_64.exe
