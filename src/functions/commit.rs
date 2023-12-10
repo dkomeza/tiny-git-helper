@@ -1,5 +1,3 @@
-use std::thread;
-
 struct File {
     pub name: String,
     pub status: String,
@@ -111,13 +109,44 @@ pub fn commit_all_files(message: String) {
 
     if !output.status.success() {
         crate::out::print_error("Failed to add files");
+
+        let out = String::from_utf8(output.stderr).unwrap();
+        crate::out::print_error(&out);
+        std::process::exit(1);
+    }
+
+    let output = Command::new("git")
+        .arg("commit")
+        .arg("-m")
+        .arg(message)
+        .output()
+        .unwrap();
+
+    if !output.status.success() {
+        crate::out::print_error("Failed to commit files");
+
+        let out = String::from_utf8(output.stderr).unwrap();
+        crate::out::print_error(&out);
+        std::process::exit(1);
+    }
+
+    let output = Command::new("git")
+        .arg("push")
+        .output()
+        .unwrap();
+
+    if !output.status.success() {
+        crate::out::print_error("Failed to push files");
+
+        let out = String::from_utf8(output.stderr).unwrap();
+        crate::out::print_error(&out);
         std::process::exit(1);
     }
 
     spinner.stop();
 
     println!("");
-    crate::out::print_success("Files succesfully committed");
+    crate::out::print_success(format!("Successfully commited {} files", files.len()).as_str());
 
     std::process::exit(0);
 }
