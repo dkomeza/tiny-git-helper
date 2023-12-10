@@ -122,3 +122,43 @@ jobs:
         with:
           name: binaries
           path: target/release/tgh-windows-x86_64.exe
+
+  release-macos:
+    strategy: 
+      matrix:
+        platform:
+          - release_for: X86_64 macOS
+            target: x86_64-apple-darwin
+            binary: "tgh-macos-x86_64"
+            host: "macos-latest"
+          - release_for: ARM64 macOS
+            target: aarch64-apple-darwin
+            binary: "tgh-macos-arm64"
+            host: "macos-latest"
+    
+    runs-on: macos-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Setup Rust
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          override: true
+          target: ${{ matrix.platform.target }}
+
+      - name: Setup cross-compilation
+        run: cargo install -f cross
+
+      - name: Build
+        run: cross build --release --target ${{ matrix.platform.target }}
+
+      - name: Rename binary
+        run: mv target/${{ matrix.platform.target }}/release/tgh target/${{ matrix.platform.target }}/release/${{ matrix.platform.binary }}
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: binaries
+          path: target/${{ matrix.platform.target }}/release/${{ matrix.platform.binary }}
