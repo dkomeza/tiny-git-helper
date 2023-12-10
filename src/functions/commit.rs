@@ -130,10 +130,7 @@ pub fn commit_all_files(message: String) {
         std::process::exit(1);
     }
 
-    let output = Command::new("git")
-        .arg("push")
-        .output()
-        .unwrap();
+    let output = Command::new("git").arg("push").output().unwrap();
 
     if !output.status.success() {
         crate::out::print_error("Failed to push files");
@@ -146,7 +143,11 @@ pub fn commit_all_files(message: String) {
     spinner.stop();
 
     println!("");
-    crate::out::print_success(format!("Successfully commited {} files", files.len()).as_str());
+    if files.len() == 1 {
+        crate::out::print_success("Successfully commited 1 file");
+    } else {
+        crate::out::print_success(format!("Successfully commited {} files", files.len()).as_str());
+    }
 
     std::process::exit(0);
 }
