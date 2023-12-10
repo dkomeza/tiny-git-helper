@@ -1,4 +1,4 @@
-name: Build binaries and upload artifacts
+name: Build binaries
 
 on:
   push:
