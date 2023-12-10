@@ -58,7 +58,7 @@ fn ask_commit_message() -> String {
         true => {
             let labels = crate::config::utils::get_labels();
 
-            let icon = Select::new("Select label\n", labels).prompt();
+            let icon = Select::new("Select label", labels).prompt();
 
             match icon {
                 Ok(icon) => {

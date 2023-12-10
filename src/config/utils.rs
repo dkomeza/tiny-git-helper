@@ -143,171 +143,171 @@ pub fn get_labels() -> Vec<CommitLabel> {
     });
     labels.push(CommitLabel {
         label: "Version tag".into(),
-        emoji: ":bookmark:".into(),
+        emoji: "🔖".into(),
     });
     labels.push(CommitLabel {
         label: "New feature".into(),
-        emoji: ":sparkles:".into(),
+        emoji: "✨".into(),
     });
     labels.push(CommitLabel {
         label: "Bug fix".into(),
-        emoji: ":bug:".into(),
+        emoji: "🐛".into(),
     });
     labels.push(CommitLabel {
         label: "Metadata".into(),
-        emoji: ":card_index:".into(),
+        emoji: "📇".into(),
     });
     labels.push(CommitLabel {
         label: "Documentation".into(),
-        emoji: ":books:".into(),
+        emoji: "📚".into(),
     });
     labels.push(CommitLabel {
         label: "Documenting source code".into(),
-        emoji: ":bulb:".into(),
+        emoji: "💡".into(),
     });
     labels.push(CommitLabel {
         label: "Performance".into(),
-        emoji: ":racehorse:".into(),
+        emoji: "🏇".into(),
     });
     labels.push(CommitLabel {
         label: "Cosmetic".into(),
-        emoji: ":lipstick:".into(),
+        emoji: "💄".into(),
     });
     labels.push(CommitLabel {
         label: "Tests".into(),
-        emoji: ":rotating_light:".into(),
+        emoji: "🚨".into(),
     });
     labels.push(CommitLabel {
         label: "Adding a test".into(),
-        emoji: ":white_check_mark:".into(),
+        emoji: "📋".into(),
     });
     labels.push(CommitLabel {
         label: "Make a test pass".into(),
-        emoji: ":heavy_check_mark:".into(),
+        emoji: "✅".into(),
     });
     labels.push(CommitLabel {
         label: "General update".into(),
-        emoji: ":zap:".into(),
+        emoji: "📂".into(),
     });
     labels.push(CommitLabel {
         label: "Improve format/structure".into(),
-        emoji: ":art:".into(),
+        emoji: "🎨".into(),
     });
     labels.push(CommitLabel {
         label: "Refactor code".into(),
-        emoji: ":hammer:".into(),
+        emoji: "🔨".into(),
     });
     labels.push(CommitLabel {
         label: "Removing code/files".into(),
-        emoji: ":fire:".into(),
+        emoji: "🔥".into(),
     });
     labels.push(CommitLabel {
         label: "Continuous Integration".into(),
-        emoji: ":green_heart:".into(),
+        emoji: "💚".into(),
     });
     labels.push(CommitLabel {
         label: "Security".into(),
-        emoji: ":lock:".into(),
+        emoji: "🔒".into(),
     });
     labels.push(CommitLabel {
-        label: "Upgrading dependencies".into(),
-        emoji: ":arrow_up:".into(),
+        label: " Upgrading dependencies".into(),
+        emoji: "⬆️".into(),
     });
     labels.push(CommitLabel {
-        label: "Downgrading dependencies".into(),
-        emoji: ":arrow_down:".into(),
+        label: " Downgrading dependencies".into(),
+        emoji: "⬇️".into(),
     });
     labels.push(CommitLabel {
         label: "Lint".into(),
-        emoji: ":shirt:".into(),
+        emoji: "👕".into(),
     });
     labels.push(CommitLabel {
         label: "Translation".into(),
-        emoji: ":alien:".into(),
+        emoji: "👽".into(),
     });
     labels.push(CommitLabel {
         label: "Text".into(),
-        emoji: ":pencil:".into(),
+        emoji: "📝".into(),
     });
     labels.push(CommitLabel {
         label: "Critical hotfix".into(),
-        emoji: ":ambulance:".into(),
+        emoji: "🚑".into(),
     });
     labels.push(CommitLabel {
         label: "Deploying stuff".into(),
-        emoji: ":rocket:".into(),
+        emoji: "🚀".into(),
     });
     labels.push(CommitLabel {
         label: "Fixing on MacOS".into(),
-        emoji: ":apple:".into(),
+        emoji: "🍎".into(),
     });
     labels.push(CommitLabel {
         label: "Fixing on Linux".into(),
-        emoji: ":penguin:".into(),
+        emoji: "🐧".into(),
     });
     labels.push(CommitLabel {
         label: "Fixing on Windows".into(),
-        emoji: ":checkered_flag:".into(),
+        emoji: "🏁".into(),
     });
     labels.push(CommitLabel {
         label: "Work in progress".into(),
-        emoji: ":construction:".into(),
+        emoji: "🚧".into(),
     });
     labels.push(CommitLabel {
         label: "Adding CI build system".into(),
-        emoji: ":construction_worker:".into(),
+        emoji: "👷".into(),
     });
     labels.push(CommitLabel {
         label: "Analytics or tracking code".into(),
-        emoji: ":chart_with_upwards_trend:".into(),
+        emoji: "📈".into(),
     });
     labels.push(CommitLabel {
         label: "Removing a dependency".into(),
-        emoji: ":heavy_minus_sign:".into(),
+        emoji: "➖".into(),
     });
     labels.push(CommitLabel {
         label: "Adding a dependency".into(),
-        emoji: ":heavy_plus_sign:".into(),
+        emoji: "➕".into(),
     });
     labels.push(CommitLabel {
         label: "Docker".into(),
-        emoji: ":whale:".into(),
+        emoji: "🐳".into(),
     });
     labels.push(CommitLabel {
         label: "Configuration files".into(),
-        emoji: ":wrench:".into(),
+        emoji: "🔧".into(),
     });
     labels.push(CommitLabel {
         label: "Package.json in JS".into(),
-        emoji: ":package:".into(),
+        emoji: "📦".into(),
     });
     labels.push(CommitLabel {
         label: "Merging branches".into(),
-        emoji: ":twisted_rightwards_arrows:".into(),
+        emoji: "🔀".into(),
     });
     labels.push(CommitLabel {
         label: "Bad code/need improv.".into(),
-        emoji: ":hankey:".into(),
+        emoji: "📑".into(),
     });
     labels.push(CommitLabel {
-        label: "Reverting changes".into(),
-        emoji: ":rewind:".into(),
+        label: " Reverting changes".into(),
+        emoji: "⏮️".into(),
     });
     labels.push(CommitLabel {
         label: "Breaking changes".into(),
-        emoji: ":boom:".into(),
+        emoji: "💥".into(),
     });
     labels.push(CommitLabel {
         label: "Code review changes".into(),
-        emoji: ":ok_hand:".into(),
+        emoji: "👍".into(),
     });
     labels.push(CommitLabel {
         label: "Accessibility".into(),
-        emoji: ":wheelchair:".into(),
+        emoji: "🦽".into(),
     });
     labels.push(CommitLabel {
         label: "Move/rename repository".into(),
-        emoji: ":truck:".into(),
+        emoji: "🚚".into(),
     });
 
     return labels;
