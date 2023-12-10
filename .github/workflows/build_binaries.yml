@@ -12,35 +12,74 @@ env:
   CARGO_TERM_COLOR: always
 
 jobs:
-  release:
+  # release:
+  #   strategy:
+  #     matrix:
+  #       platform:
+  #       #   - release_for: ARM64 macOS
+  #       #     target: aarch64-apple-darwin
+  #       #     binary: "tgh"
+  #       #     host: "macos-latest"
+  #         - release_for: ARM64 Linux
+  #           target: aarch64-unknown-linux-gnu
+  #           binary: "tgh"
+  #           host: "ubuntu-latest"
+  #         - release_for: X86_64 Linux
+  #           target: x86_64-unknown-linux-gnu
+  #           binary: "tgh"
+  #           host: "ubuntu-latest"
+  #   - release_for: X86_64 Windows
+  #     target: x86_64-pc-windows-msvc
+  #     binary: "tgh.exe"
+  #     host: "windows-latest"
+  #   - release_for: X86_64 macOS
+  #     target: x86_64-apple-darwin
+  #     binary: "tgh"
+  #     host: "macos-latest"
+
+  # runs-on: ${{ matrix.platform.host }}
+  # steps:
+  #   - name: Checkout
+  #     uses: actions/checkout@v2
+
+  #   - name: Setup Rust
+  #     uses: actions-rs/toolchain@v1
+  #     with:
+  #       toolchain: stable
+  #       override: true
+  #       target: ${{ matrix.platform.target }}
+
+  #   - name: Build
+  #     run: cargo build --release --target ${{ matrix.platform.target }}
+
+  #   - name: Upload artifacts
+  #     uses: actions/upload-artifact@v2
+  #     with:
+  #       name: binaries
+  #       path: target/${{ matrix.platform.target }}/release/${{ matrix.platform.binary }}
+
+  release-linux:
     strategy:
       matrix:
         platform:
-        #   - release_for: ARM64 macOS
-        #     target: aarch64-apple-darwin
-        #     binary: "tgh"
-        #     host: "macos-latest"
           - release_for: ARM64 Linux
             target: aarch64-unknown-linux-gnu
+            linker: aarch64-linux-gnu-gcc
             binary: "tgh"
             host: "ubuntu-latest"
           - release_for: X86_64 Linux
             target: x86_64-unknown-linux-gnu
+            linker: x86_64-linux-gnu-gcc
             binary: "tgh"
             host: "ubuntu-latest"
-        #   - release_for: X86_64 Windows
-        #     target: x86_64-pc-windows-msvc
-        #     binary: "tgh.exe"
-        #     host: "windows-latest"
-        #   - release_for: X86_64 macOS
-        #     target: x86_64-apple-darwin
-        #     binary: "tgh"
-        #     host: "macos-latest"
 
-    runs-on: ${{ matrix.platform.host }}
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v2
+
+      - name: Setup linker
+        run: sudo apt-get install -y ${{ matrix.platform.linker }}
 
       - name: Setup Rust
         uses: actions-rs/toolchain@v1
