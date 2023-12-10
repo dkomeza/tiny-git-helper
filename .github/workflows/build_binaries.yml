@@ -87,7 +87,10 @@ jobs:
         run: cargo install -f cross
 
       - name: Build
-        run: cross build --release --target ${{ matrix.platform.target }} --bin ${{ matrix.platform.binary }}
+        run: cross build --release --target ${{ matrix.platform.target }}
+      
+      - name: Rename binary
+        run: mv target/${{ matrix.platform.target }}/release/tgh target/${{ matrix.platform.target }}/release/${{ matrix.platform.binary }}
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v2
