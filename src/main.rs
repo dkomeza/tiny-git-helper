@@ -65,7 +65,7 @@ async fn main() {
     }
 
     match args.mode.as_str() {
-        "commit" => {
+        "commit" | "c" => {
             views::commit::commit_menu();
         }
         "login" => {
@@ -76,7 +76,10 @@ async fn main() {
 
         "ca" => {
             views::commit::commit_all_files();
-        },
+        }
+        "cf" => {
+            views::commit::commit_specific_files();
+        }
 
         _ => {
             views::help::print_help(true, args);
