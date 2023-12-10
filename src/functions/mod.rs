@@ -15,5 +15,3 @@ pub fn is_git_repo() -> bool {
 
     true
 }
-
-pub fn list_changed_files() {}
