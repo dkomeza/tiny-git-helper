@@ -2,17 +2,14 @@ name: Build binaries and upload artifacts
 
 on:
   push:
-    branches:
-      - main
-  pull_request:
-    branches:
-      - main
+    tags:
+      - v*
 
 env:
   CARGO_TERM_COLOR: always
 
 jobs:
-  build-linux:
+  release-linux:
     strategy:
       matrix:
         platform:
@@ -43,7 +40,15 @@ jobs:
       - name: Build
         run: cross build --release --target ${{ matrix.platform.target }}
 
-  build-windows:
+      - name: Upload binaries to release
+        uses: svenstaro/upload-release-action@v2
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: target/${{ matrix.platform.target }}/release/tgh
+          asset_name: ${{ matrix.platform.binary }}-${{ github.ref }}
+          tag: ${{ github.ref }}
+
+  release-windows:
     runs-on: windows-latest
 
     steps:
@@ -59,8 +64,16 @@ jobs:
       - name: Build
         run: cargo build --release
 
-  build-macos:
-    strategy: 
+      - name: Upload binaries to release
+        uses: svenstaro/upload-release-action@v2
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: target/release/tgh.exe
+          asset_name: tgh-windows-x86_64-${{ github.ref }}.exe
+          tag: ${{ github.ref }}
+
+  release-macos:
+    strategy:
       matrix:
         platform:
           - release_for: X86_64 macOS
@@ -71,7 +84,7 @@ jobs:
             target: aarch64-apple-darwin
             binary: "tgh-macos-arm64"
             host: "macos-latest"
-    
+
     runs-on: macos-latest
     steps:
       - name: Checkout
@@ -89,3 +102,11 @@ jobs:
 
       - name: Build
         run: cross build --release --target ${{ matrix.platform.target }}
+
+      - name: Upload binaries to release
+        uses: svenstaro/upload-release-action@v2
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: target/${{ matrix.platform.target }}/release/tgh
+          asset_name: ${{ matrix.platform.binary }}-${{ github.ref }}
+          tag: ${{ github.ref }}
