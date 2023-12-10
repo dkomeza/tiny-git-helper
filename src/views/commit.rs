@@ -38,7 +38,7 @@ pub fn commit_menu() {
 }
 
 pub fn commit_all_files() {
-    use crate::functions::commit::{is_valid_commit, commit_all_files};
+    use crate::functions::commit::{commit_all_files, is_valid_commit};
 
     is_valid_commit();
 
@@ -48,7 +48,7 @@ pub fn commit_all_files() {
 }
 
 fn ask_commit_message() -> String {
-    use inquire::Text;
+    use inquire::{Select, Text};
 
     let config = crate::config::load_config();
 
@@ -56,7 +56,20 @@ fn ask_commit_message() -> String {
 
     match config.fancy {
         true => {
-        },
+            let labels = crate::config::utils::get_labels();
+
+            let icon = Select::new("Select label\n", labels).prompt();
+
+            match icon {
+                Ok(icon) => {
+                    message += &icon.emoji;
+                }
+                Err(_) => {
+                    crate::out::print_error("Error getting commit icon");
+                    std::process::exit(1);
+                }
+            }
+        }
         false => {
             let msg = Text::new("Commit message")
                 .with_help_message("Enter a commit message")

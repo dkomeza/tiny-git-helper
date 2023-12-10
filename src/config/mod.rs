@@ -3,7 +3,7 @@ use reqwest::Error;
 use serde::{Deserialize, Serialize};
 
 pub mod defines;
-mod utils;
+pub mod utils;
 
 #[derive(Serialize, Deserialize, Clone)]
 pub struct Config {
