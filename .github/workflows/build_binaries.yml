@@ -70,6 +70,11 @@ jobs:
             target: x86_64-unknown-linux-gnu
             binary: "tgh-linux-x86_64"
             host: "ubuntu-latest"
+          - release_for: X86_64 Windows
+            target: x86_64-pc-windows-msvc
+            binary: "tgh-windows-x86_64.exe"
+            host: "windows-latest"
+          
 
     runs-on: ubuntu-latest
     steps:
