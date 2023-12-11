@@ -40,7 +40,36 @@ pub fn commit_menu() {
     }
 }
 
-struct CommitOptions {}
+struct CommitOptions {
+    no_push: bool,
+    skip_fancy: bool,
+    force_fancy: bool,
+}
+impl CommitOptions {
+    fn new(args: Vec<String>) -> CommitOptions {
+        let mut no_push = false;
+        let mut skip_fancy = false;
+        let mut force_fancy = false;
+
+        args.iter().for_each(|arg| {
+            if arg == "--no-push" {
+                no_push = true;
+            }
+            if arg == "--skip-fancy" {
+                skip_fancy = true;
+            }
+            if arg == "--force-fancy" {
+                force_fancy = true;
+            }
+        });
+
+        CommitOptions {
+            no_push,
+            skip_fancy,
+            force_fancy,
+        }
+    }
+}
 
 pub fn commit_all_files(args: Vec<String>) {
     use crate::functions::commit::{commit_all_files, is_valid_commit};
