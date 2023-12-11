@@ -17,17 +17,19 @@ pub fn print_help(error: bool, args: crate::Args) {
     println!("");
     print_bold("Usage:");
     print_bold("  commands:");
-    println!("      commit | c: commit changes");
+    println!("      commit | c: open the commit menu");
     print_dim("      clone: clone a repository into a new directory (WIP)");
     print_dim("      init: create an empty GitHub repository (WIP)");
     println!("      login: login to GitHub");
     print_dim("      settings: view and edit settings (WIP)");
     println!("      version: show the version of tgh");
     println!("      help: show this help message");
+    print_bold("  options:");
+    println!("      --help: show help message for a command");
     print_bold("  short commands:");
     println!("      ca: commit all changes");
     println!("      cf: commit specific files");
-    println!("")
+    println!("");
 }
 
 pub fn print_version() {

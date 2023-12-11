@@ -8,6 +8,18 @@ pub fn commit_menu() {
 
     clear_screen();
 
+    let args = crate::Args::new();
+
+    if args.args.len() > 0 && args.args[0] == "--help" {
+        println!("Usage: tgh ca|cf [options]");
+        println!();
+        println!("Options:");
+        println!("  --no-push       Do not push after commit");
+        println!("  --skip-fancy    Skip fancy commit");
+        println!("  --force-fancy   Force fancy commit");
+        process::exit(0);
+    }
+
     is_valid_commit();
 
     let choice;
@@ -29,10 +41,10 @@ pub fn commit_menu() {
 
     match choice {
         "Commit specific files" => {
-            commit_specific_files();
+            commit_specific_files(vec![]);
         }
         "Commit all files" => {
-            commit_all_files();
+            commit_all_files(vec![]);
         }
         _ => {
             println!("Invalid option");
@@ -40,35 +52,80 @@ pub fn commit_menu() {
     }
 }
 
-pub fn commit_all_files() {
+struct CommitOptions {
+    no_push: bool,
+    skip_fancy: bool,
+    force_fancy: bool,
+}
+impl CommitOptions {
+    fn new(args: Vec<String>) -> CommitOptions {
+        let mut no_push = false;
+        let mut skip_fancy = false;
+        let mut force_fancy = false;
+
+        args.iter().for_each(|arg| {
+            if arg == "--no-push" {
+                no_push = true;
+            }
+            if arg == "--skip-fancy" {
+                skip_fancy = true;
+            }
+            if arg == "--force-fancy" {
+                force_fancy = true;
+            }
+        });
+
+        CommitOptions {
+            no_push,
+            skip_fancy,
+            force_fancy,
+        }
+    }
+}
+
+pub fn commit_all_files(args: Vec<String>) {
     use crate::functions::commit::{commit_all_files, is_valid_commit};
 
     is_valid_commit();
 
-    let message = ask_commit_message();
+    let options = CommitOptions::new(args);
 
-    commit_all_files(message);
+    let message = ask_commit_message(&options);
+
+    commit_all_files(message, options.no_push);
 }
-pub fn commit_specific_files() {
+pub fn commit_specific_files(args: Vec<String>) {
     use crate::functions::commit::{commit_specific_files, is_valid_commit};
 
     is_valid_commit();
 
     let files = ask_files_to_commit();
 
-    let message = ask_commit_message();
+    let options = CommitOptions::new(args);
 
-    commit_specific_files(files, message);
+    let message = ask_commit_message(&options);
+
+    commit_specific_files(files, message, options.no_push);
 }
 
-fn ask_commit_message() -> String {
+fn ask_commit_message(options: &CommitOptions) -> String {
     use inquire::{Select, Text};
 
     let config = crate::config::load_config();
 
     let mut message = String::new();
 
-    match config.fancy {
+    let mut fancy = config.fancy;
+
+    if options.force_fancy {
+        fancy = true;
+    }
+
+    if options.skip_fancy {
+        fancy = false;
+    }
+
+    match fancy {
         true => {
             let labels = crate::config::utils::get_labels();
 
