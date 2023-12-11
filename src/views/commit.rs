@@ -76,7 +76,9 @@ pub fn commit_all_files(args: Vec<String>) {
 
     is_valid_commit();
 
-    let message = ask_commit_message();
+    let options = CommitOptions::new(args);
+
+    let message = ask_commit_message(options);
 
     commit_all_files(message);
 }
@@ -87,19 +89,31 @@ pub fn commit_specific_files(args: Vec<String>) {
 
     let files = ask_files_to_commit();
 
-    let message = ask_commit_message();
+    let options = CommitOptions::new(args);
+
+    let message = ask_commit_message(options);
 
     commit_specific_files(files, message);
 }
 
-fn ask_commit_message() -> String {
+fn ask_commit_message(options: CommitOptions) -> String {
     use inquire::{Select, Text};
 
     let config = crate::config::load_config();
 
     let mut message = String::new();
 
-    match config.fancy {
+    let mut fancy = config.fancy;
+
+    if options.force_fancy {
+        fancy = true;
+    }
+
+    if options.skip_fancy {
+        fancy = false;
+    }
+
+    match fancy {
         true => {
             let labels = crate::config::utils::get_labels();
 
