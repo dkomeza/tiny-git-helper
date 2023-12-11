@@ -29,10 +29,10 @@ pub fn commit_menu() {
 
     match choice {
         "Commit specific files" => {
-            commit_specific_files();
+            commit_specific_files(vec![]);
         }
         "Commit all files" => {
-            commit_all_files();
+            commit_all_files(vec![]);
         }
         _ => {
             println!("Invalid option");
@@ -40,7 +40,9 @@ pub fn commit_menu() {
     }
 }
 
-pub fn commit_all_files() {
+struct CommitOptions {}
+
+pub fn commit_all_files(args: Vec<String>) {
     use crate::functions::commit::{commit_all_files, is_valid_commit};
 
     is_valid_commit();
@@ -49,7 +51,7 @@ pub fn commit_all_files() {
 
     commit_all_files(message);
 }
-pub fn commit_specific_files() {
+pub fn commit_specific_files(args: Vec<String>) {
     use crate::functions::commit::{commit_specific_files, is_valid_commit};
 
     is_valid_commit();

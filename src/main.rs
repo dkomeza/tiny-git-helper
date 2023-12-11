@@ -74,10 +74,10 @@ async fn main() {
         "version" => views::help::print_version(),
 
         "ca" => {
-            views::commit::commit_all_files();
+            views::commit::commit_all_files(args.args);
         }
         "cf" => {
-            views::commit::commit_specific_files();
+            views::commit::commit_specific_files(args.args);
         }
 
         _ => {
