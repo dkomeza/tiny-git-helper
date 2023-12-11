@@ -78,9 +78,9 @@ pub fn commit_all_files(args: Vec<String>) {
 
     let options = CommitOptions::new(args);
 
-    let message = ask_commit_message(options);
+    let message = ask_commit_message(&options);
 
-    commit_all_files(message);
+    commit_all_files(message, options.no_push);
 }
 pub fn commit_specific_files(args: Vec<String>) {
     use crate::functions::commit::{commit_specific_files, is_valid_commit};
@@ -91,12 +91,12 @@ pub fn commit_specific_files(args: Vec<String>) {
 
     let options = CommitOptions::new(args);
 
-    let message = ask_commit_message(options);
+    let message = ask_commit_message(&options);
 
-    commit_specific_files(files, message);
+    commit_specific_files(files, message, options.no_push);
 }
 
-fn ask_commit_message(options: CommitOptions) -> String {
+fn ask_commit_message(options: &CommitOptions) -> String {
     use inquire::{Select, Text};
 
     let config = crate::config::load_config();
