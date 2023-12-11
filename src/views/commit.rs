@@ -8,6 +8,18 @@ pub fn commit_menu() {
 
     clear_screen();
 
+    let args = crate::Args::new();
+
+    if args.args.len() > 0 && args.args[0] == "--help" {
+        println!("Usage: tgh ca|cf [options]");
+        println!();
+        println!("Options:");
+        println!("  --no-push       Do not push after commit");
+        println!("  --skip-fancy    Skip fancy commit");
+        println!("  --force-fancy   Force fancy commit");
+        process::exit(0);
+    }
+
     is_valid_commit();
 
     let choice;
