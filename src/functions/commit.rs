@@ -71,7 +71,7 @@ pub fn get_files_to_commit() -> Vec<File> {
     return files;
 }
 
-fn commit_files(message: String, files: Vec<File>) {
+fn commit_files(message: String, files: Vec<File>, no_push: bool) {
     use spinners::{Spinner, Spinners};
     use std::process::Command;
 
@@ -112,6 +112,11 @@ fn commit_files(message: String, files: Vec<File>) {
         std::process::exit(1);
     }
 
+    if no_push {
+        spinner.stop();
+        return;
+    }
+
     let output = Command::new("git").arg("push").output().unwrap();
 
     if !output.status.success() {
@@ -124,10 +129,10 @@ fn commit_files(message: String, files: Vec<File>) {
 
     spinner.stop();
 }
-pub fn commit_all_files(message: String) {
+pub fn commit_all_files(message: String, no_push: bool) {
     let files = get_files_to_commit();
 
-    commit_files(message, files.clone());
+    commit_files(message, files.clone(), no_push);
 
     println!("");
     if files.len() == 1 {
@@ -138,8 +143,8 @@ pub fn commit_all_files(message: String) {
 
     std::process::exit(0);
 }
-pub fn commit_specific_files(files: Vec<File>, message: String) {
-    commit_files(message, files.clone());
+pub fn commit_specific_files(files: Vec<File>, message: String, no_push: bool) {
+    commit_files(message, files.clone(), no_push);
 
     println!("");
     if files.len() == 1 {
