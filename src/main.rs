@@ -66,7 +66,7 @@ impl Args {
 async fn main() {
     let args = Args::new();
 
-    config::check_prerequisites().await;
+    config::check_prerequisites(&args).await;
 
     setup_ui();
 
@@ -85,7 +85,7 @@ async fn main() {
             modules::commit::handle_commit(args);
         }
         "login" => {
-            let _ = config::login().await;
+            let _ = config::login(&args).await;
         }
         "version" => modules::help::print_version(),
 
