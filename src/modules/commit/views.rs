@@ -1,3 +1,5 @@
+mod help;
+
 use inquire::{list_option::ListOption, validator::Validation};
 
 pub fn commit_menu(args: crate::Args) {
@@ -7,14 +9,9 @@ pub fn commit_menu(args: crate::Args) {
 
     clear_screen();
 
-    if args.args.len() > 0 && args.args[0] == "--help" {
-        println!("Usage: tgh ca|cf [options]");
-        println!();
-        println!("Options:");
-        println!("  --no-push       Do not push after commit");
-        println!("  --skip-fancy    Skip fancy commit");
-        println!("  --force-fancy   Force fancy commit");
-        process::exit(0);
+    if args.help {
+        help::commit_help();
+        return;
     }
 
     super::functions::is_valid_commit();
