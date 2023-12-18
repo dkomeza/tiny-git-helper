@@ -27,6 +27,7 @@ fn setup_ui() {
 struct Args {
     mode: String,
     args: Vec<String>,
+    help: bool,
 }
 impl Args {
     fn new() -> Args {
@@ -36,18 +37,28 @@ impl Args {
             return Args {
                 mode: String::from(""),
                 args: vec![],
+                help: false,
             };
         }
 
         let mode = args[0].clone();
 
         if args.len() == 1 {
-            return Args { mode, args: vec![] };
+            return Args { mode, args: vec![], help: false };
         }
 
-        let args = args[1..].to_vec();
+        let mut args = args[1..].to_vec();
 
-        Args { mode, args }
+        let mut help = false;
+        for i in 0..args.len() {
+            if args[i] == "--help" || args[i] == "-h" {
+                help = true;
+                args.remove(i);
+                break;
+            }
+        }
+
+        Args { mode, args, help }
     }
 }
 
