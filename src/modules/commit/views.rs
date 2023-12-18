@@ -1,8 +1,7 @@
-use crate::functions::commit::File;
 use inquire::{list_option::ListOption, validator::Validation};
 
 pub fn commit_menu() {
-    use crate::{clear_screen, functions::commit::is_valid_commit};
+    use crate::clear_screen;
     use inquire::Select;
     use std::process;
 
@@ -20,7 +19,7 @@ pub fn commit_menu() {
         process::exit(0);
     }
 
-    is_valid_commit();
+    super::functions::is_valid_commit();
 
     let choice;
 
@@ -84,7 +83,7 @@ impl CommitOptions {
 }
 
 pub fn commit_all_files(args: Vec<String>) {
-    use crate::functions::commit::{commit_all_files, is_valid_commit};
+    use super::functions::{commit_all_files, is_valid_commit};
 
     is_valid_commit();
 
@@ -95,7 +94,7 @@ pub fn commit_all_files(args: Vec<String>) {
     commit_all_files(message, options.no_push);
 }
 pub fn commit_specific_files(args: Vec<String>) {
-    use crate::functions::commit::{commit_specific_files, is_valid_commit};
+    use super::functions::{commit_specific_files, is_valid_commit};
 
     is_valid_commit();
 
@@ -188,8 +187,8 @@ fn ask_commit_message(options: &CommitOptions) -> String {
 
     return message;
 }
-fn ask_files_to_commit() -> Vec<crate::functions::commit::File> {
-    use crate::functions::commit::get_files_to_commit;
+fn ask_files_to_commit() -> Vec<super::functions::File> {
+    use super::functions::get_files_to_commit;
     use inquire::MultiSelect;
 
     let mut files = Vec::new();
@@ -219,7 +218,7 @@ fn ask_files_to_commit() -> Vec<crate::functions::commit::File> {
     return files;
 }
 fn validate_file_selection(
-    files: &[ListOption<&File>],
+    files: &[ListOption<&super::functions::File>],
 ) -> Result<inquire::validator::Validation, inquire::CustomUserError> {
     if files.len() == 0 {
         return Ok(Validation::Invalid(

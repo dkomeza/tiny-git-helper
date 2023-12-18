@@ -13,7 +13,7 @@ impl std::fmt::Display for File {
 pub fn is_valid_commit() {
     use std::process;
 
-    if !super::is_git_repo() {
+    if !crate::functions::is_git_repo() {
         crate::out::print_error("Not a git repository");
         process::exit(0);
     }
