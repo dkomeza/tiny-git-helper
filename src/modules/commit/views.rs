@@ -96,6 +96,11 @@ pub fn commit_all_files(args: crate::Args) {
 pub fn commit_specific_files(args: crate::Args) {
     use super::functions::{commit_specific_files, is_valid_commit};
 
+    if args.help {
+        help::commit_specific_help();
+        return;
+    }
+
     is_valid_commit();
 
     let files = ask_files_to_commit();

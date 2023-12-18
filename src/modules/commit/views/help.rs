@@ -44,4 +44,22 @@ pub fn commit_all_help() {
     println!("");
 }
 
-pub fn commit_specific_help() {}
+pub fn commit_specific_help() {
+    use out::print_bold;
+
+    clear_screen();
+
+    print_bold("tgh commit specific - Commit specific changes to a GitHub repository");
+    println!("");
+    println!("Commits specific changes (shows a menu to select the files) to a GitHub repository and pushes them to the remote (fails if there is no remote (WIP))");
+    println!("");
+    print_bold("Usage:");
+    println!("      tgh commit specific [options]");
+    println!("");
+    print_bold("Options:");
+    println!("      -h | --help: show this help message");
+    println!("      --no-push: don't push changes to remote");
+    println!("      --skip-fancy: don't use fancy commit messages");
+    println!("      --force-fancy: force fancy commit messages");
+    println!("");
+}
