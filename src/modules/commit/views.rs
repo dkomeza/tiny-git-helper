@@ -1,13 +1,11 @@
 use inquire::{list_option::ListOption, validator::Validation};
 
-pub fn commit_menu() {
+pub fn commit_menu(args: crate::Args) {
     use crate::clear_screen;
     use inquire::Select;
     use std::process;
 
     clear_screen();
-
-    let args = crate::Args::new();
 
     if args.args.len() > 0 && args.args[0] == "--help" {
         println!("Usage: tgh ca|cf [options]");
@@ -40,10 +38,10 @@ pub fn commit_menu() {
 
     match choice {
         "Commit specific files" => {
-            commit_specific_files(vec![]);
+            commit_specific_files(args);
         }
         "Commit all files" => {
-            commit_all_files(vec![]);
+            commit_all_files(args);
         }
         _ => {
             println!("Invalid option");
@@ -82,25 +80,25 @@ impl CommitOptions {
     }
 }
 
-pub fn commit_all_files(args: Vec<String>) {
+pub fn commit_all_files(args: crate::Args) {
     use super::functions::{commit_all_files, is_valid_commit};
 
     is_valid_commit();
 
-    let options = CommitOptions::new(args);
+    let options = CommitOptions::new(args.args);
 
     let message = ask_commit_message(&options);
 
     commit_all_files(message, options.no_push);
 }
-pub fn commit_specific_files(args: Vec<String>) {
+pub fn commit_specific_files(args: crate::Args) {
     use super::functions::{commit_specific_files, is_valid_commit};
 
     is_valid_commit();
 
     let files = ask_files_to_commit();
 
-    let options = CommitOptions::new(args);
+    let options = CommitOptions::new(args.args);
 
     let message = ask_commit_message(&options);
 

@@ -76,7 +76,7 @@ async fn main() {
     }
 
     if args.mode.len() == 0 {
-        modules::menu();
+        modules::menu(args);
         return;
     }
 
