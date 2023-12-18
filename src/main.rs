@@ -70,6 +70,11 @@ async fn main() {
 
     setup_ui();
 
+    if args.help && args.mode.len() == 0 {
+        modules::help::print_help(false, args);
+        return;
+    }
+
     if args.mode.len() == 0 {
         modules::menu();
         return;
@@ -82,7 +87,6 @@ async fn main() {
         "login" => {
             let _ = config::login().await;
         }
-        "help" => modules::help::print_help(false, args),
         "version" => modules::help::print_version(),
 
         _ => {
