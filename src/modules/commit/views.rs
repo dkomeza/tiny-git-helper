@@ -80,6 +80,11 @@ impl CommitOptions {
 pub fn commit_all_files(args: crate::Args) {
     use super::functions::{commit_all_files, is_valid_commit};
 
+    if args.help {
+        help::commit_all_help();
+        return;
+    }
+
     is_valid_commit();
 
     let options = CommitOptions::new(args.args);
