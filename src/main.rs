@@ -6,14 +6,15 @@ use utils::out::clear_screen;
 
 mod config;
 mod functions;
-mod views;
+mod modules;
 
 fn setup_ui() {
     use inquire::ui::{Attributes, Color, RenderConfig, StyleSheet};
 
     let mut render_config = RenderConfig::default();
     if config::load_config().color != config::defines::COLOR::NORMAL {
-        render_config.prompt = StyleSheet::new().with_fg(config::load_config().color.as_inquire_color());
+        render_config.prompt =
+            StyleSheet::new().with_fg(config::load_config().color.as_inquire_color());
     }
     render_config.answer = StyleSheet::new()
         .with_fg(Color::Grey)
@@ -59,29 +60,22 @@ async fn main() {
     setup_ui();
 
     if args.mode.len() == 0 {
-        views::menu();
+        modules::menu();
         return;
     }
 
     match args.mode.as_str() {
-        "commit" | "c" => {
-            views::commit::commit_menu();
+        "commit" | "c" | "ca" | "cf" => {
+            modules::commit::handle_commit(args);
         }
         "login" => {
             let _ = config::login().await;
         }
-        "help" => views::help::print_help(false, args),
-        "version" => views::help::print_version(),
-
-        "ca" => {
-            views::commit::commit_all_files(args.args);
-        }
-        "cf" => {
-            views::commit::commit_specific_files(args.args);
-        }
+        "help" => modules::help::print_help(false, args),
+        "version" => modules::help::print_version(),
 
         _ => {
-            views::help::print_help(true, args);
+            modules::help::print_help(true, args);
         }
     };
 }

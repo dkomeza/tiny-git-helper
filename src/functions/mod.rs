@@ -1,5 +1,3 @@
-pub mod commit;
-
 pub fn is_git_repo() -> bool {
     use std::process::Command;
 
