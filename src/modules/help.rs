@@ -23,9 +23,8 @@ pub fn print_help(error: bool, args: crate::Args) {
     println!("      login: login to GitHub");
     print_dim("      settings: view and edit settings (WIP)");
     println!("      version: show the version of tgh");
-    println!("      help: show this help message");
     print_bold("  options:");
-    println!("      --help: show help message for a command");
+    println!("      -h | --help: show help message for a command");
     print_bold("  short commands:");
     println!("      ca: commit all changes");
     println!("      cf: commit specific files");

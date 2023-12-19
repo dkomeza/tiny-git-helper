@@ -6,14 +6,15 @@ use utils::out::clear_screen;
 
 mod config;
 mod functions;
-mod views;
+mod modules;
 
 fn setup_ui() {
     use inquire::ui::{Attributes, Color, RenderConfig, StyleSheet};
 
     let mut render_config = RenderConfig::default();
     if config::load_config().color != config::defines::COLOR::NORMAL {
-        render_config.prompt = StyleSheet::new().with_fg(config::load_config().color.as_inquire_color());
+        render_config.prompt =
+            StyleSheet::new().with_fg(config::load_config().color.as_inquire_color());
     }
     render_config.answer = StyleSheet::new()
         .with_fg(Color::Grey)
@@ -26,6 +27,7 @@ fn setup_ui() {
 struct Args {
     mode: String,
     args: Vec<String>,
+    help: bool,
 }
 impl Args {
     fn new() -> Args {
@@ -35,18 +37,28 @@ impl Args {
             return Args {
                 mode: String::from(""),
                 args: vec![],
+                help: false,
             };
         }
 
         let mode = args[0].clone();
 
         if args.len() == 1 {
-            return Args { mode, args: vec![] };
+            return Args { mode, args: vec![], help: false };
         }
 
-        let args = args[1..].to_vec();
+        let mut args = args[1..].to_vec();
 
-        Args { mode, args }
+        let mut help = false;
+        for i in 0..args.len() {
+            if args[i] == "--help" || args[i] == "-h" {
+                help = true;
+                args.remove(i);
+                break;
+            }
+        }
+
+        Args { mode, args, help }
     }
 }
 
@@ -54,34 +66,31 @@ impl Args {
 async fn main() {
     let args = Args::new();
 
-    config::check_prerequisites().await;
+    config::check_prerequisites(&args).await;
 
     setup_ui();
 
+    if args.help && args.mode.len() == 0 {
+        modules::help::print_help(false, args);
+        return;
+    }
+
     if args.mode.len() == 0 {
-        views::menu();
+        modules::menu(args);
         return;
     }
 
     match args.mode.as_str() {
-        "commit" | "c" => {
-            views::commit::commit_menu();
+        "commit" | "c" | "ca" | "cf" => {
+            modules::commit::handle_commit(args);
         }
         "login" => {
-            let _ = config::login().await;
+            let _ = config::login(&args).await;
         }
-        "help" => views::help::print_help(false, args),
-        "version" => views::help::print_version(),
-
-        "ca" => {
-            views::commit::commit_all_files(args.args);
-        }
-        "cf" => {
-            views::commit::commit_specific_files(args.args);
-        }
+        "version" => modules::help::print_version(),
 
         _ => {
-            views::help::print_help(true, args);
+            modules::help::print_help(true, args);
         }
     };
 }

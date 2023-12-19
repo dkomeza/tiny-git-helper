@@ -1,26 +1,20 @@
-use crate::functions::commit::File;
+mod help;
+
 use inquire::{list_option::ListOption, validator::Validation};
 
-pub fn commit_menu() {
-    use crate::{clear_screen, functions::commit::is_valid_commit};
+pub fn commit_menu(args: crate::Args) {
+    use crate::clear_screen;
     use inquire::Select;
     use std::process;
 
     clear_screen();
 
-    let args = crate::Args::new();
-
-    if args.args.len() > 0 && args.args[0] == "--help" {
-        println!("Usage: tgh ca|cf [options]");
-        println!();
-        println!("Options:");
-        println!("  --no-push       Do not push after commit");
-        println!("  --skip-fancy    Skip fancy commit");
-        println!("  --force-fancy   Force fancy commit");
-        process::exit(0);
+    if args.help {
+        help::commit_help();
+        return;
     }
 
-    is_valid_commit();
+    super::functions::is_valid_commit();
 
     let choice;
 
@@ -41,10 +35,10 @@ pub fn commit_menu() {
 
     match choice {
         "Commit specific files" => {
-            commit_specific_files(vec![]);
+            commit_specific_files(args);
         }
         "Commit all files" => {
-            commit_all_files(vec![]);
+            commit_all_files(args);
         }
         _ => {
             println!("Invalid option");
@@ -83,25 +77,35 @@ impl CommitOptions {
     }
 }
 
-pub fn commit_all_files(args: Vec<String>) {
-    use crate::functions::commit::{commit_all_files, is_valid_commit};
+pub fn commit_all_files(args: crate::Args) {
+    use super::functions::{commit_all_files, is_valid_commit};
+
+    if args.help {
+        help::commit_all_help();
+        return;
+    }
 
     is_valid_commit();
 
-    let options = CommitOptions::new(args);
+    let options = CommitOptions::new(args.args);
 
     let message = ask_commit_message(&options);
 
     commit_all_files(message, options.no_push);
 }
-pub fn commit_specific_files(args: Vec<String>) {
-    use crate::functions::commit::{commit_specific_files, is_valid_commit};
+pub fn commit_specific_files(args: crate::Args) {
+    use super::functions::{commit_specific_files, is_valid_commit};
+
+    if args.help {
+        help::commit_specific_help();
+        return;
+    }
 
     is_valid_commit();
 
     let files = ask_files_to_commit();
 
-    let options = CommitOptions::new(args);
+    let options = CommitOptions::new(args.args);
 
     let message = ask_commit_message(&options);
 
@@ -188,8 +192,8 @@ fn ask_commit_message(options: &CommitOptions) -> String {
 
     return message;
 }
-fn ask_files_to_commit() -> Vec<crate::functions::commit::File> {
-    use crate::functions::commit::get_files_to_commit;
+fn ask_files_to_commit() -> Vec<super::functions::File> {
+    use super::functions::get_files_to_commit;
     use inquire::MultiSelect;
 
     let mut files = Vec::new();
@@ -219,7 +223,7 @@ fn ask_files_to_commit() -> Vec<crate::functions::commit::File> {
     return files;
 }
 fn validate_file_selection(
-    files: &[ListOption<&File>],
+    files: &[ListOption<&super::functions::File>],
 ) -> Result<inquire::validator::Validation, inquire::CustomUserError> {
     if files.len() == 0 {
         return Ok(Validation::Invalid(
