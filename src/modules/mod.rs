@@ -27,7 +27,7 @@ pub fn menu() {
 
     match choice {
         "commit" => {
-            // commit::commit_menu();
+            commit::commit_menu(commit::CommitOptions::default());
         }
         "clone" => {
             println!("clone");

@@ -22,3 +22,14 @@ pub struct CommitOptions {
     /// Commit message (optional, skips the fancy commit message menu)
     pub commit_message: Option<String>,
 }
+
+impl Default for CommitOptions {
+    fn default() -> Self {
+        Self {
+            no_push: false,
+            skip_fancy: false,
+            force_fancy: false,
+            commit_message: None,
+        }
+    }
+}
