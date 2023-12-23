@@ -1,7 +1,7 @@
 pub mod commit;
 pub mod help;
 
-pub fn menu(args: crate::Args) {
+pub async fn menu() {
     use crate::clear_screen;
     use inquire::Select;
     use std::process;
@@ -12,7 +12,7 @@ pub fn menu(args: crate::Args) {
 
     let menu = Select::new(
         "What do you want to do?",
-        vec!["commit", "clone", "init", "login", "settings", "version"],
+        vec!["commit", "clone", "init", "login", "settings"],
     )
     .prompt();
 
@@ -27,7 +27,7 @@ pub fn menu(args: crate::Args) {
 
     match choice {
         "commit" => {
-            commit::commit_menu(args);
+            commit::commit_menu(commit::CommitOptions::default());
         }
         "clone" => {
             println!("clone");
@@ -36,13 +36,10 @@ pub fn menu(args: crate::Args) {
             println!("init");
         }
         "login" => {
-            println!("login");
+            crate::config::login().await;
         }
         "settings" => {
             println!("settings");
-        }
-        "version" => {
-            println!("version");
         }
         _ => {
             println!("Invalid option");

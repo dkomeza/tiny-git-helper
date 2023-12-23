@@ -25,7 +25,7 @@ pub struct Config {
 ///
 /// ### Arguments
 /// * `args` - A vector of the command line arguments.
-pub async fn check_prerequisites(args: &crate::Args) {
+pub async fn check_prerequisites() {
     // Check if git is installed
     if !git::check_git() {
         out::print_error("Error: Git is not installed.\n");
@@ -49,7 +49,7 @@ pub async fn check_prerequisites(args: &crate::Args) {
     // Check for a GitHub token
     if !github::check_token() {
         out::print_error("Error: GitHub token invalid.\n");
-        login(args).await;
+        login().await;
 
         std::thread::sleep(std::time::Duration::from_secs(2));
     }

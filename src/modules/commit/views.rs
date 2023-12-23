@@ -1,18 +1,12 @@
-mod help;
-
 use inquire::{list_option::ListOption, validator::Validation};
+use super::CommitOptions;
 
-pub fn commit_menu(args: crate::Args) {
+pub fn commit_menu(options: CommitOptions) {
     use crate::clear_screen;
     use inquire::Select;
     use std::process;
 
     clear_screen();
-
-    if args.help {
-        help::commit_help();
-        return;
-    }
 
     super::functions::is_valid_commit();
 
@@ -35,10 +29,10 @@ pub fn commit_menu(args: crate::Args) {
 
     match choice {
         "Commit specific files" => {
-            commit_specific_files(args);
+            commit_specific_files(options);
         }
         "Commit all files" => {
-            commit_all_files(args);
+            commit_all_files(options);
         }
         _ => {
             println!("Invalid option");
@@ -46,66 +40,21 @@ pub fn commit_menu(args: crate::Args) {
     }
 }
 
-struct CommitOptions {
-    no_push: bool,
-    skip_fancy: bool,
-    force_fancy: bool,
-}
-impl CommitOptions {
-    fn new(args: Vec<String>) -> CommitOptions {
-        let mut no_push = false;
-        let mut skip_fancy = false;
-        let mut force_fancy = false;
-
-        args.iter().for_each(|arg| {
-            if arg == "--no-push" {
-                no_push = true;
-            }
-            if arg == "--skip-fancy" {
-                skip_fancy = true;
-            }
-            if arg == "--force-fancy" {
-                force_fancy = true;
-            }
-        });
-
-        CommitOptions {
-            no_push,
-            skip_fancy,
-            force_fancy,
-        }
-    }
-}
-
-pub fn commit_all_files(args: crate::Args) {
+pub fn commit_all_files(options: CommitOptions) {
     use super::functions::{commit_all_files, is_valid_commit};
 
-    if args.help {
-        help::commit_all_help();
-        return;
-    }
-
     is_valid_commit();
-
-    let options = CommitOptions::new(args.args);
 
     let message = ask_commit_message(&options);
 
     commit_all_files(message, options.no_push);
 }
-pub fn commit_specific_files(args: crate::Args) {
+pub fn commit_specific_files(options: CommitOptions) {
     use super::functions::{commit_specific_files, is_valid_commit};
-
-    if args.help {
-        help::commit_specific_help();
-        return;
-    }
 
     is_valid_commit();
 
     let files = ask_files_to_commit();
-
-    let options = CommitOptions::new(args.args);
 
     let message = ask_commit_message(&options);
 

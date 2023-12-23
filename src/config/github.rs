@@ -121,21 +121,7 @@ pub async fn authenticate() -> Result<String, reqwest::Error> {
     return Ok(token);
 }
 
-pub async fn login(args: &crate::Args) {
-    if args.help {
-        out::print_bold("tgh login - Login to GitHub");
-        println!("");
-        println!("Logs in to GitHub and saves the token to the config file.");
-        println!("");
-        out::print_bold("Usage:");
-        println!("      tgh login [options]");
-        println!("");
-        out::print_bold("Options:");
-        println!("      -h | --help: show this help message");
-        println!("");
-        return;
-    }
-
+pub async fn login() {
     let token = authenticate().await;
 
     match token {
