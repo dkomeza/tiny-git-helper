@@ -1,7 +1,7 @@
 pub mod commit;
 pub mod help;
 
-pub fn menu(args: crate::Args) {
+pub fn menu() {
     use crate::clear_screen;
     use inquire::Select;
     use std::process;
@@ -27,7 +27,7 @@ pub fn menu(args: crate::Args) {
 
     match choice {
         "commit" => {
-            commit::commit_menu(args);
+            // commit::commit_menu();
         }
         "clone" => {
             println!("clone");

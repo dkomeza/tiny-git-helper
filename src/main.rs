@@ -1,4 +1,4 @@
-use std::env;
+use clap::{Parser, Subcommand};
 
 mod utils;
 use utils::out;
@@ -24,73 +24,80 @@ fn setup_ui() {
     inquire::set_global_render_config(render_config);
 }
 
-struct Args {
-    mode: String,
-    args: Vec<String>,
-    help: bool,
+#[derive(Parser)]
+#[command(name = "tgh", author, version, about)]
+struct Cli {
+    #[clap(subcommand)]
+    subcmd: Option<SubCommand>,
 }
-impl Args {
-    fn new() -> Args {
-        let args: Vec<String> = env::args().skip(1).collect();
 
-        if args.len() == 0 {
-            return Args {
-                mode: String::from(""),
-                args: vec![],
-                help: false,
-            };
-        }
+#[derive(Subcommand)]
+enum SubCommand {
+    #[clap(name = "commit", about = "Open the commit menu")]
+    #[clap(visible_alias = "c")]
+    Commit(modules::commit::CommitOptions),
+    #[clap(name = "ca", about = "Commit all files")]
+    CommitAll(modules::commit::CommitOptions),
+    #[clap(name = "cf", about = "Commit specific files")]
+    CommitFiles(modules::commit::CommitOptions),
 
-        let mode = args[0].clone();
-
-        if args.len() == 1 {
-            return Args { mode, args: vec![], help: false };
-        }
-
-        let mut args = args[1..].to_vec();
-
-        let mut help = false;
-        for i in 0..args.len() {
-            if args[i] == "--help" || args[i] == "-h" {
-                help = true;
-                args.remove(i);
-                break;
-            }
-        }
-
-        Args { mode, args, help }
-    }
+    #[clap(name = "login", about = "Login to GitHub")]
+    Login,
 }
 
 #[tokio::main]
 async fn main() {
-    let args = Args::new();
+    let args = Cli::parse();
 
-    config::check_prerequisites(&args).await;
-
+    config::check_prerequisites().await;
     setup_ui();
 
-    if args.help && args.mode.len() == 0 {
-        modules::help::print_help(false, args);
-        return;
-    }
-
-    if args.mode.len() == 0 {
-        modules::menu(args);
-        return;
-    }
-
-    match args.mode.as_str() {
-        "commit" | "c" | "ca" | "cf" => {
-            modules::commit::handle_commit(args);
-        }
-        "login" => {
-            let _ = config::login(&args).await;
-        }
-        "version" => modules::help::print_version(),
-
-        _ => {
-            modules::help::print_help(true, args);
+    let subcmd = match args.subcmd {
+        Some(subcmd) => subcmd,
+        None => {
+            return modules::menu();
         }
     };
+
+    match subcmd {
+        SubCommand::Commit(options) => {
+            return modules::commit::commit_menu(options);
+        }
+        SubCommand::CommitAll(options) => {
+            return modules::commit::commit_all_files(options);
+        }
+        SubCommand::CommitFiles(options) => {
+            return modules::commit::commit_specific_files(options);
+        }
+        SubCommand::Login => {
+            return config::login().await;
+        }
+    }
+
+    // if args.help && args.mode.len() == 0 {
+    //     println!("super");
+    //     return;
+
+    //     modules::help::print_help(false, args);
+    //     return;
+    // }
+
+    // if args.mode.len() == 0 {
+    //     modules::menu(args);
+    //     return;
+    // }
+
+    // match args.mode.as_str() {
+    //     "commit" | "c" | "ca" | "cf" => {
+    //         modules::commit::handle_commit(args);
+    //     }
+    //     "login" => {
+    //         let _ = config::login(&args).await;
+    //     }
+    //     "version" => modules::help::print_version(),
+
+    //     _ => {
+    //         modules::help::print_help(true, args);
+    //     }
+    // };
 }
