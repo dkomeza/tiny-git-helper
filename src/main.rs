@@ -55,7 +55,7 @@ async fn main() {
     let subcmd = match args.subcmd {
         Some(subcmd) => subcmd,
         None => {
-            return modules::menu();
+            return modules::menu().await;
         }
     };
 
@@ -73,31 +73,4 @@ async fn main() {
             return config::login().await;
         }
     }
-
-    // if args.help && args.mode.len() == 0 {
-    //     println!("super");
-    //     return;
-
-    //     modules::help::print_help(false, args);
-    //     return;
-    // }
-
-    // if args.mode.len() == 0 {
-    //     modules::menu(args);
-    //     return;
-    // }
-
-    // match args.mode.as_str() {
-    //     "commit" | "c" | "ca" | "cf" => {
-    //         modules::commit::handle_commit(args);
-    //     }
-    //     "login" => {
-    //         let _ = config::login(&args).await;
-    //     }
-    //     "version" => modules::help::print_version(),
-
-    //     _ => {
-    //         modules::help::print_help(true, args);
-    //     }
-    // };
 }
