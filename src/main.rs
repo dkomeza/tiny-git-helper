@@ -41,6 +41,9 @@ enum SubCommand {
     #[clap(name = "cf", about = "Commit specific files")]
     CommitFiles(modules::commit::CommitOptions),
 
+    #[clap(name = "clone", about = "Clone a repository")]
+    Clone(modules::clone::CloneOptions),
+
     #[clap(name = "login", about = "Login to GitHub")]
     Login,
 }
@@ -68,6 +71,9 @@ async fn main() {
         }
         SubCommand::CommitFiles(options) => {
             return modules::commit::commit_specific_files(options);
+        }
+        SubCommand::Clone(options) => {
+            return modules::clone::clone_menu(options).await;
         }
         SubCommand::Login => {
             return config::login().await;
