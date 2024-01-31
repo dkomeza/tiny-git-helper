@@ -35,7 +35,11 @@ check_supported_os() {
 }
 
 check_supported_arch() {
-    if [ "$ARCH" != "x86_64" ] && [ "$ARCH" != "arm64" ] && [ "$ARCH" != "aarch64"]; then
+    if [ "$ARCH" = "aarch64" ]; then
+        ARCH="arm64"
+    fi
+
+    if [ "$ARCH" != "x86_64" ] && [ "$ARCH" != "arm64" ]; then
         echo "Unsupported architecture: $ARCH"
         exit 1
     fi
@@ -60,6 +64,9 @@ download_and_install() {
         echo "Installation complete."
     else
         echo "No suitable version found for your system."
+        echo "OS: $OS"
+        echo "ARCH: $ARCH"
+        echo "VERSION: $VERSION"
         exit 1
     fi
 }
