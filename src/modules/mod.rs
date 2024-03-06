@@ -1,4 +1,5 @@
 pub mod commit;
+pub mod clone;
 pub mod help;
 
 pub async fn menu() {

@@ -113,7 +113,7 @@ fn commit_files(message: String, files: Vec<File>, no_push: bool) {
     }
 
     if no_push {
-        spinner.stop();
+        spinner.stop_with_symbol("✔");
         return;
     }
 
@@ -127,7 +127,7 @@ fn commit_files(message: String, files: Vec<File>, no_push: bool) {
         std::process::exit(1);
     }
 
-    spinner.stop();
+    spinner.stop_with_symbol("✔");
 }
 pub fn commit_all_files(message: String, no_push: bool) {
     let files = get_files_to_commit();
