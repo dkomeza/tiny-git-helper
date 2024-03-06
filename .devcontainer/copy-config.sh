@@ -1,1 +1,0 @@
-cp -r $HOME/.helper-config ./.helper-config
