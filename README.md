@@ -2,6 +2,27 @@
 
 A small tool designed to make process of using git and github easier.
 
+## Usage
+
+```
+tgh --help
+tgh - A GitHub CLI written in Rust
+
+Usage: tgh [COMMAND]
+
+Commands:
+  commit  Open the commit menu [aliases: c]
+  ca      Commit all files
+  cf      Commit specific files
+  clone   Clone a repository
+  login   Login to GitHub
+  help    Print this message or the help of the given subcommand(s)
+
+Options:
+  -h, --help     Print help
+  -V, --version  Print version
+```
+
 ## Installation
 
 ### Linux/Mac OS (Unix)
