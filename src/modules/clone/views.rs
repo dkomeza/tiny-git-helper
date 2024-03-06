@@ -10,14 +10,16 @@ pub async fn clone_menu(options: super::CloneOptions) {
 }
 
 #[derive(serde::Deserialize)]
-struct Repo {
-    name: String,
-    full_name: String,
+pub struct Repo {
+    pub name: String,
+    pub full_name: String,
+    pub ssh_url: String,
+    pub clone_url: String,
 }
 
 impl std::fmt::Display for Repo {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", &self.name)
+        write!(f, "{}", self.full_name)
     }
 }
 
@@ -26,7 +28,6 @@ async fn clone_private_repo() {
     use spinners::{Spinner, Spinners};
 
     let mut spinner = Spinner::new(Spinners::Dots9, "Getting repositories".into());
-
 
     // Get user repositories
     let repos = get_user_repos().await;
@@ -37,7 +38,7 @@ async fn clone_private_repo() {
 
     match prompt {
         Ok(repo) => {
-            println!("{}", repo);
+            super::functions::clone_repo(repo);
         }
         Err(_) => {}
     }

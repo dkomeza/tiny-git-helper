@@ -1,5 +1,6 @@
 use clap::Parser;
 
+mod functions;
 mod views;
 
 pub use views::clone_menu;
