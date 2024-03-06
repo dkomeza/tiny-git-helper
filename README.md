@@ -2,6 +2,78 @@
 
 A small tool designed to make process of using git and github easier.
 
+## Features
+
+- Commit
+  - [x] Commit all files
+  - [x] Commit specific files
+  - [ ] Revert a commit
+  - [ ] Amend a commit
+  - [ ] Show commit history
+  - [ ] Show commit diff
+  - [ ] Show commit details
+  - [ ] Better handling of commit errors
+- Clone
+  - [x] Clone a private repository
+  - [ ] Clone a public repository (by searching)
+  - [ ] Better handling of clone errors
+  - [ ] Clone a repository with a specific branch
+  - [ ] Clone a repository with a specific tag
+- Login
+  - [x] Login to GitHub
+- Branch
+  - [ ] Show the current branch
+  - [ ] Create a new branch
+  - [ ] Switch to a different branch
+  - [ ] Delete a branch
+  - [ ] Rename a branch
+  - [ ] List all branches
+  - [ ] List all branches with their last commit
+  - [ ] List all remote branches
+- Diff
+  - [ ] Show diff of all files
+  - [ ] Show diff of specific files
+  - [ ] Show diff of a specific file
+- Merge
+  - [ ] Merge a branch
+  - [ ] Merge a branch with a specific branch
+  - [ ] Handle merge conflicts
+- Pull
+  - [ ] Pull from a branch
+  - [ ] Pull from a branch with a specific branch
+  - [ ] Handle pull conflicts
+- Push
+  - [ ] Push to a branch
+- Tag
+  - [ ] Create a new tag
+  - [ ] Delete a tag
+  - [ ] List all tags
+- Remote
+  - [ ] Add a remote
+  - [ ] Remove a remote
+  - [ ] List all remotes
+  - [ ] Change a remote URL
+- Stash
+  - [ ] Stash all changes
+  - [ ] Stash specific changes
+  - [ ] Apply a stash
+  - [ ] Drop a stash
+  - [ ] List all stashes
+  - [ ] Show a stash
+  - [ ] Show a stash diff
+  - [ ] Pop a stash
+  - [ ] Clear all stashes
+- Status
+  - [ ] Show status of all files
+  - [ ] Show status of files in the current directory
+  - [ ] Show currently staged files
+- Init
+  - [ ] Initialize a new repository
+  - [ ] Initialize a new repository with a specific license
+  - [ ] Initialize a new repository with a specific gitignore
+  - [ ] Initialize a new repository with a specific README
+  - [ ] Initialize a new repository with a specific branch
+
 ## Usage
 
 ```
