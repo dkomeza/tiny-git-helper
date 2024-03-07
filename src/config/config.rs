@@ -17,7 +17,7 @@ pub fn load_config() -> Config {
     }
 
     out::print_error("Config file not found. Creating one...\n");
-    return create_config();
+    create_config()
 }
 
 pub fn create_config() -> Config {
@@ -42,7 +42,7 @@ pub fn create_config() -> Config {
 
     out::print_success("Successfully created config file.\n");
 
-    return config;
+    config
 }
 
 fn ask_username() -> String {
@@ -52,7 +52,7 @@ fn ask_username() -> String {
         .with_validator(required!("Username is required."))
         .prompt();
 
-    return username.unwrap();
+    username.unwrap()
 }
 fn ask_sort() -> defines::SORTING {
     use inquire::Select;
@@ -92,22 +92,12 @@ fn ask_protocol() -> defines::PROTOCOL {
     };
 }
 fn ask_color() -> defines::COLOR {
-    use inquire::Select;
     use super::defines::COLOR::*;
+    use inquire::Select;
 
     let option = Select::new(
         "Select a color for the output:",
-        vec![
-            NORMAL,
-            RED,
-            GREEN,
-            YELLOW,
-            BLUE,
-            MAGENTA,
-            CYAN,
-            WHITE,
-            GRAY,
-        ],
+        vec![NORMAL, RED, GREEN, YELLOW, BLUE, MAGENTA, CYAN, WHITE, GRAY],
     )
     .with_page_size(5)
     .prompt();
@@ -116,7 +106,7 @@ fn ask_color() -> defines::COLOR {
         Ok(option) => option,
         Err(_) => {
             out::print_error("Invalid input.\n");
-            return ask_color();
+            ask_color()
         }
     }
 }
@@ -131,7 +121,7 @@ fn ask_fancy() -> bool {
         Ok(option) => return option,
         Err(_) => {
             out::print_error("Invalid input.\n");
-            return ask_fancy();
+            ask_fancy()
         }
     }
 }

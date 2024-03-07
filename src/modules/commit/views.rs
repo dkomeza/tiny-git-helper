@@ -1,5 +1,5 @@
-use inquire::{list_option::ListOption, validator::Validation};
 use super::CommitOptions;
+use inquire::{list_option::ListOption, validator::Validation};
 
 pub fn commit_menu(options: CommitOptions) {
     use crate::clear_screen;
@@ -60,6 +60,7 @@ pub fn commit_specific_files(options: CommitOptions) {
 
     commit_specific_files(files, message, options.no_push);
 }
+pub fn commit_history() {}
 
 fn ask_commit_message(options: &CommitOptions) -> String {
     use inquire::{Select, Text};
