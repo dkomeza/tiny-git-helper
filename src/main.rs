@@ -84,7 +84,7 @@ async fn main() {
             return modules::history::commit_history(options);
         }
         SubCommand::Login => {
-            return config::login().await;
+            config::login().await
         }
     }
 }

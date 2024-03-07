@@ -8,7 +8,7 @@ pub use views::commit_history;
 #[derive(Parser)]
 pub struct CommitHistoryOptions {
     /// Limit the number of commits to show
-    #[clap(short, long)]
+    #[clap(short, long, default_value = "10")]
     pub limit: Option<usize>,
 
     /// Author of the commits
@@ -19,7 +19,6 @@ pub struct CommitHistoryOptions {
     #[clap(short, long)]
     pub branch: Option<String>,
 
-    /// Show the commits for a specific file
-    #[clap(short, long)]
+    /// Show the commits for a specific file (optional)
     pub file: Option<String>,
 }
