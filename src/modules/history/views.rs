@@ -18,8 +18,10 @@ struct Commit {
 pub fn commit_history(options: CommitHistoryOptions) {
     use std::process::Command;
 
+    let diff = options.diff;
+
     if options.hash.is_some() {
-        print_commit(options.hash.unwrap().as_str());
+        print_commit(options.hash.unwrap().as_str(), diff);
         return;
     }
 
@@ -167,7 +169,7 @@ pub fn commit_history(options: CommitHistoryOptions) {
                 } else if event.code == crossterm::event::KeyCode::Char('q') {
                     break;
                 } else if event.code == crossterm::event::KeyCode::Enter {
-                    render_commit(&commits[selected_index], window_size);
+                    render_commit(&commits[selected_index], window_size, diff);
                     return;
                 }
             }
@@ -210,7 +212,7 @@ fn render_commits(commits: &Vec<Commit>, index: usize, window_size: usize, selec
     execute!(stdout, MoveLeft(1000)).unwrap();
     stdout.flush().unwrap();
 }
-fn render_commit(commit: &Commit, window_size: usize) {
+fn render_commit(commit: &Commit, window_size: usize, diff: bool) {
     use crossterm::execute;
     use std::io::stdout;
 
@@ -223,10 +225,10 @@ fn render_commit(commit: &Commit, window_size: usize) {
 
     let hash = commit.hash.as_str();
 
-    print_commit(hash);
+    print_commit(hash, diff);
 }
 
-fn print_commit(hash: &str) {
+fn print_commit(hash: &str, diff: bool) {
     use std::process::Command;
 
     let mut binding = Command::new("git");
@@ -234,8 +236,11 @@ fn print_commit(hash: &str) {
         .arg("show")
         .arg(hash)
         .arg("--pretty=format:%H-_-%an-_-%ae-_-%ad-_-%s-_-%b")
-        .arg("--color")
-        .arg("--compact-summary");
+        .arg("--color");
+
+    if !diff {
+        command.arg("--compact-summary");
+    }
 
     let output = command.output().expect("Failed to execute git show");
 

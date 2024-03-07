@@ -24,6 +24,10 @@ pub struct CommitHistoryOptions {
     #[clap(long, conflicts_with = "branch")]
     pub all: bool,
 
+    /// Show the extended commit diff
+    #[clap(short, long)]
+    pub diff: bool,
+
     /// Show the commits for a specific file (optional)
     #[clap(short, long)]
     pub file: Option<String>,
