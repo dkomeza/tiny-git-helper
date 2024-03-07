@@ -35,7 +35,25 @@ pub fn commit_history(options: CommitHistoryOptions) {
 
     if branch.is_empty() {
         branch = super::functions::get_current_branch();
-    }    
+    }
+
+    print!("\nShowing commits");
+    if !file.is_empty() {
+        print!(
+            " for {}",
+            format_color(file.as_str(), crate::utils::out::Color::Green)
+        );
+    }
+    if !author.is_empty() {
+        print!(
+            " made by {}",
+            format_color(author.as_str(), crate::utils::out::Color::Blue)
+        );
+    }
+    println!(
+        " on {}",
+        format_color(branch.as_str(), crate::utils::out::Color::Yellow)
+    );
 
     let output = Command::new("git")
         .arg("log")
@@ -47,6 +65,7 @@ pub fn commit_history(options: CommitHistoryOptions) {
         .arg(format!("-{}", limit))
         .arg(format!("--author={}", author))
         .arg(format!("{}", branch))
+        .arg(format!("{}", file))
         .output()
         .expect("Failed to execute git log");
 
@@ -64,6 +83,11 @@ pub fn commit_history(options: CommitHistoryOptions) {
             }
         })
         .collect();
+
+    if commits.len() == 0 {
+        crate::out::print_error("\nNo commits found\n");
+        return;
+    }
 
     for commit in commits {
         let hash = format_dim(format!("({})", commit.hash).as_str());
