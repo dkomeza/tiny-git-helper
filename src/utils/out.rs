@@ -46,6 +46,10 @@ pub fn format_bold(message: &str) -> String {
     format!("\x1B[1m{}\x1B[m", message)
 }
 
+pub fn format_underline(message: &str) -> String {
+    format!("\x1B[4m{}\x1B[m", message)
+}
+
 pub fn format_color(message: &str, color: Color) -> String {
     let color = match color {
         Color::Red => 31,

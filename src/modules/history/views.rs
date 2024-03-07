@@ -5,7 +5,7 @@ use crossterm::{
     terminal::{self, disable_raw_mode, enable_raw_mode},
 };
 
-use crate::utils::out::{format_color, format_dim};
+use crate::utils::out::{format_bold, format_color, format_dim, format_underline};
 
 use super::CommitHistoryOptions;
 
@@ -102,7 +102,17 @@ pub fn commit_history(options: CommitHistoryOptions) {
         return;
     }
 
-    let window_size = 5;
+    let size = crossterm::terminal::size().unwrap();
+
+    let mut window_size = size.1 as usize - 3;
+
+    if window_size > commits.len() {
+        window_size = commits.len();
+    }
+
+    if window_size > 10 {
+        window_size = 10;
+    }
 
     let mut index = 0;
     let mut selected_index = 0;
@@ -153,6 +163,9 @@ pub fn commit_history(options: CommitHistoryOptions) {
                     render_commits(&commits, index, window_size, selected_index);
                 } else if event.code == crossterm::event::KeyCode::Char('q') {
                     break;
+                } else if event.code == crossterm::event::KeyCode::Enter {
+                    render_commit(&commits[selected_index], window_size);
+                    return;
                 }
             }
             _ => {}
@@ -165,8 +178,6 @@ pub fn commit_history(options: CommitHistoryOptions) {
 fn render_commits(commits: &Vec<Commit>, index: usize, window_size: usize, selected_index: usize) {
     use crossterm::execute;
     use std::io::{stdout, Write};
-
-    enable_raw_mode().unwrap();
 
     let mut stdout = stdout();
 
@@ -195,4 +206,65 @@ fn render_commits(commits: &Vec<Commit>, index: usize, window_size: usize, selec
     }
     execute!(stdout, MoveLeft(1000)).unwrap();
     stdout.flush().unwrap();
+}
+fn render_commit(commit: &Commit, window_size: usize) {
+    use crossterm::execute;
+    use std::io::{stdout, Write};
+    use std::process::Command;
+
+    let mut stdout = stdout();
+
+    let _ = execute!(stdout, MoveUp(window_size as u16));
+    let _ = execute!(stdout, terminal::Clear(terminal::ClearType::FromCursorDown));
+
+    disable_raw_mode().unwrap();
+
+    let hash = commit.hash.as_str();
+
+    let mut binding = Command::new("git");
+    let command = binding
+        .arg("show")
+        .arg(hash)
+        .arg("--pretty=format:%H-_-%an-_-%ae-_-%ad-_-%s-_-%b")
+        .arg("--color")
+        .arg("--compact-summary");
+
+    let output = command.output().expect("Failed to execute git show");
+
+    let out = String::from_utf8(output.stdout).unwrap();
+
+    let binding = out.clone();
+    let header = binding.lines().next().unwrap();
+    let out = out.replace(header, "");
+
+    let parts: Vec<&str> = header.split("-_-").collect();
+
+    let hash = parts[0];
+    let author = parts[1];
+    let email = parts[2];
+    let date = parts[3];
+    let subject = parts[4];
+    let body = parts[5];
+
+    use crate::utils::out::Color;
+
+    println!("");
+    println!("Hash: ({})", format_dim(hash));
+    println!(
+        "Author: {} <{}>",
+        format_color(author, Color::Blue),
+        format_underline(format_color(email, Color::Magenta).as_str())
+    );
+    println!("Date: {}", format_color(date, Color::Green));
+    println!(
+        "Subject: {}",
+        format_bold(format_color(subject, Color::Yellow).as_str())
+    );
+
+    if !body.is_empty() {
+        println!("\nBody: {}", format_color(body, Color::Cyan));
+    }
+
+    print!("\nChanges:");
+    println!("{}", out);
 }
