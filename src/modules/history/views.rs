@@ -1,5 +1,3 @@
-use std::thread;
-
 use crossterm::{
     cursor::{MoveLeft, MoveUp},
     terminal::{self, disable_raw_mode, enable_raw_mode},
@@ -19,6 +17,11 @@ struct Commit {
 
 pub fn commit_history(options: CommitHistoryOptions) {
     use std::process::Command;
+
+    if options.hash.is_some() {
+        print_commit(options.hash.unwrap().as_str());
+        return;
+    }
 
     let limit = match options.limit {
         Some(limit) => limit.to_string(),
@@ -116,7 +119,7 @@ pub fn commit_history(options: CommitHistoryOptions) {
 
     let mut index = 0;
     let mut selected_index = 0;
-    let max_index = commits.len() - 1 - window_size;
+    let max_index = commits.len() - window_size;
 
     for i in index..index + window_size {
         if i < commits.len() {
@@ -209,8 +212,7 @@ fn render_commits(commits: &Vec<Commit>, index: usize, window_size: usize, selec
 }
 fn render_commit(commit: &Commit, window_size: usize) {
     use crossterm::execute;
-    use std::io::{stdout, Write};
-    use std::process::Command;
+    use std::io::stdout;
 
     let mut stdout = stdout();
 
@@ -221,6 +223,12 @@ fn render_commit(commit: &Commit, window_size: usize) {
 
     let hash = commit.hash.as_str();
 
+    print_commit(hash);
+}
+
+fn print_commit(hash: &str) {
+    use std::process::Command;
+
     let mut binding = Command::new("git");
     let command = binding
         .arg("show")
@@ -230,6 +238,11 @@ fn render_commit(commit: &Commit, window_size: usize) {
         .arg("--compact-summary");
 
     let output = command.output().expect("Failed to execute git show");
+
+    if !output.status.success() {
+        crate::out::print_error("\nCommit not found\n");
+        return;
+    }
 
     let out = String::from_utf8(output.stdout).unwrap();
 

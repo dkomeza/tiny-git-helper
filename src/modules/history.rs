@@ -1,4 +1,4 @@
-use clap::Parser;
+use clap::{ArgGroup, Parser};
 
 mod functions;
 mod views;
@@ -6,6 +6,7 @@ mod views;
 pub use views::commit_history;
 
 #[derive(Parser)]
+#[clap(group(ArgGroup::new("fileGroup").args(&["file", "limit", "author", "branch", "all"]).conflicts_with("hash")))]
 pub struct CommitHistoryOptions {
     /// Limit the number of commits to show
     #[clap(short, long, default_value = "10")]
@@ -24,5 +25,10 @@ pub struct CommitHistoryOptions {
     pub all: bool,
 
     /// Show the commits for a specific file (optional)
+    #[clap(short, long)]
     pub file: Option<String>,
+
+    /// Show the commit with the given hash
+    #[clap(long)]
+    pub hash: Option<String>,
 }
