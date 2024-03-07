@@ -23,7 +23,7 @@ pub fn commit_history(options: CommitHistoryOptions) {
         None => "".into(),
     };
 
-    let branch = match options.branch {
+    let mut branch = match options.branch {
         Some(branch) => branch,
         None => "".into(),
     };
@@ -33,16 +33,20 @@ pub fn commit_history(options: CommitHistoryOptions) {
         None => "".into(),
     };
 
+    if branch.is_empty() {
+        branch = super::functions::get_current_branch();
+    }    
+
     let output = Command::new("git")
         .arg("log")
         .arg("--oneline")
         .arg("--decorate")
-        .arg("--all")
         .arg("--color")
-        .arg("--pretty=format:%h_%s_%cr_%an")
+        .arg("--pretty=format:%h-_-%s-_-%cr-_-%an")
         .arg("--full-history")
         .arg(format!("-{}", limit))
         .arg(format!("--author={}", author))
+        .arg(format!("{}", branch))
         .output()
         .expect("Failed to execute git log");
 
@@ -51,7 +55,7 @@ pub fn commit_history(options: CommitHistoryOptions) {
     let commits: Vec<Commit> = out
         .lines()
         .map(|line| {
-            let mut parts = line.split('_');
+            let mut parts = line.split("-_-");
             Commit {
                 hash: parts.next().unwrap().into(),
                 message: parts.next().unwrap().into(),
