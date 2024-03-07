@@ -1,14 +1,14 @@
 use crate::utils::out;
 use serde::{Deserialize, Serialize};
 
+mod config;
 pub mod defines;
-pub mod utils;
 mod git;
 mod github;
-mod config;
+pub mod utils;
 
-pub use github::login;
 pub use config::load_config;
+pub use github::login;
 
 #[derive(Serialize, Deserialize, Clone)]
 pub struct Config {
@@ -51,6 +51,6 @@ pub async fn check_prerequisites() {
         out::print_error("Error: GitHub token invalid.\n");
         login().await;
 
-        std::thread::sleep(std::time::Duration::from_secs(2));
+        std::thread::sleep(std::time::Duration::from_secs(1));
     }
 }
