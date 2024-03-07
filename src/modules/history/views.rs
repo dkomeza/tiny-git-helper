@@ -1,4 +1,4 @@
-use crate::utils::out::format_dim;
+use crate::utils::out::{format_color, format_dim};
 
 use super::CommitHistoryOptions;
 
@@ -64,8 +64,8 @@ pub fn commit_history(options: CommitHistoryOptions) {
     for commit in commits {
         let hash = format_dim(format!("({})", commit.hash).as_str());
         let message = commit.message;
-        let date = commit.date;
-        let author = commit.author;
+        let date = format_color(commit.date.as_str(), crate::utils::out::Color::Green);
+        let author = format_color(commit.author.as_str(), crate::utils::out::Color::Blue);
 
         println!("{} - {} ({}) ~ {}", hash, message, date, author);
     }
