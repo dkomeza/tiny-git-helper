@@ -16,8 +16,12 @@ pub struct CommitHistoryOptions {
     pub author: Option<String>,
 
     /// Branch to show commits from
-    #[clap(short, long)]
+    #[clap(short, long, conflicts_with = "all")]
     pub branch: Option<String>,
+
+    /// Show commits from all branches
+    #[clap(long, conflicts_with = "branch")]
+    pub all: bool,
 
     /// Show the commits for a specific file (optional)
     pub file: Option<String>,

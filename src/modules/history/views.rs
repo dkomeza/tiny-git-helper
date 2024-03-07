@@ -33,7 +33,9 @@ pub fn commit_history(options: CommitHistoryOptions) {
         None => "".into(),
     };
 
-    if branch.is_empty() {
+    let all = options.all;
+
+    if branch.is_empty() && !all {
         branch = super::functions::get_current_branch();
     }
 
@@ -55,7 +57,8 @@ pub fn commit_history(options: CommitHistoryOptions) {
         format_color(branch.as_str(), crate::utils::out::Color::Yellow)
     );
 
-    let output = Command::new("git")
+    let mut binding = Command::new("git");
+    let command = binding
         .arg("log")
         .arg("--oneline")
         .arg("--decorate")
@@ -64,10 +67,13 @@ pub fn commit_history(options: CommitHistoryOptions) {
         .arg("--full-history")
         .arg(format!("-{}", limit))
         .arg(format!("--author={}", author))
-        .arg(format!("{}", branch))
-        .arg(format!("{}", file))
-        .output()
-        .expect("Failed to execute git log");
+        .arg(format!("{}", branch));
+
+    if !file.is_empty() {
+        command.arg(format!("{}", file));
+    }
+
+    let output = command.output().expect("Failed to execute git log");
 
     let out = String::from_utf8(output.stdout).unwrap();
 
