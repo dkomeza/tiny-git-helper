@@ -40,10 +40,10 @@ A small tool designed to make process of using git and github easier.
   - [ ] Handle merge conflicts
 - Pull
   - [ ] Pull from a branch
-  - [ ] Pull from a branch with a specific branch
   - [ ] Handle pull conflicts
 - Push
   - [ ] Push to a branch
+  - [ ] Handle push errors
 - Tag
   - [ ] Create a new tag
   - [ ] Delete a tag
@@ -68,11 +68,11 @@ A small tool designed to make process of using git and github easier.
   - [ ] Show status of files in the current directory
   - [ ] Show currently staged files
 - Init
-  - [ ] Initialize a new repository
-  - [ ] Initialize a new repository with a specific license
-  - [ ] Initialize a new repository with a specific gitignore
-  - [ ] Initialize a new repository with a specific README
-  - [ ] Initialize a new repository with a specific branch
+  - [ ] Initialise a new repository
+  - [ ] Initialise a new repository with a specific license
+  - [ ] Initialise a new repository with a specific gitignore
+  - [ ] Initialise a new repository with a specific README
+  - [ ] Initialise a new repository with a specific branch
 
 ## Usage
 
