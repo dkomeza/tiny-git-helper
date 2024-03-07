@@ -105,6 +105,7 @@ pub fn commit_history(options: CommitHistoryOptions) {
     let window_size = 5;
 
     let mut index = 0;
+    let mut selected_index = 0;
     let max_index = commits.len() - 1 - window_size;
 
     for i in index..index + window_size {
@@ -114,6 +115,12 @@ pub fn commit_history(options: CommitHistoryOptions) {
             let message = commit.message.as_str();
             let date = format_color(commit.date.as_str(), crate::utils::out::Color::Green);
             let author = format_color(commit.author.as_str(), crate::utils::out::Color::Blue);
+
+            if i == selected_index {
+                print!("> ");
+            } else {
+                print!("  ");
+            }
 
             println!("{} - {} ({}) ~ {}", hash, message, date, author);
         }
@@ -125,17 +132,25 @@ pub fn commit_history(options: CommitHistoryOptions) {
         match crossterm::event::read().unwrap() {
             crossterm::event::Event::Key(event) => {
                 if event.code == crossterm::event::KeyCode::Down {
-                    if index < max_index {
+                    if selected_index < commits.len() - 1 {
+                        selected_index += 1;
+                    }
+
+                    if index < max_index && selected_index >= index + window_size {
                         index += 1;
                     }
 
-                    render_commits(&commits, index, window_size);
+                    render_commits(&commits, index, window_size, selected_index);
                 } else if event.code == crossterm::event::KeyCode::Up {
-                    if index > 0 {
+                    if selected_index > 0 {
+                        selected_index -= 1;
+                    }
+
+                    if index > 0 && selected_index < index {
                         index -= 1;
                     }
 
-                    render_commits(&commits, index, window_size);
+                    render_commits(&commits, index, window_size, selected_index);
                 } else if event.code == crossterm::event::KeyCode::Char('q') {
                     break;
                 }
@@ -147,7 +162,7 @@ pub fn commit_history(options: CommitHistoryOptions) {
     disable_raw_mode().unwrap();
 }
 
-fn render_commits(commits: &Vec<Commit>, index: usize, window_size: usize) {
+fn render_commits(commits: &Vec<Commit>, index: usize, window_size: usize, selected_index: usize) {
     use crossterm::execute;
     use std::io::{stdout, Write};
 
@@ -167,6 +182,14 @@ fn render_commits(commits: &Vec<Commit>, index: usize, window_size: usize) {
             let author = format_color(commit.author.as_str(), crate::utils::out::Color::Blue);
 
             execute!(stdout, MoveLeft(1000)).unwrap();
+
+            if i == selected_index {
+                execute!(stdout, terminal::Clear(terminal::ClearType::CurrentLine)).unwrap();
+                print!("> ");
+            } else {
+                execute!(stdout, terminal::Clear(terminal::ClearType::CurrentLine)).unwrap();
+                print!("  ");
+            }
             writeln!(stdout, "{} - {} ({}) ~ {}", hash, message, date, author).unwrap();
         }
     }
