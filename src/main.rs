@@ -44,6 +44,10 @@ enum SubCommand {
     #[clap(name = "clone", about = "Clone a repository")]
     Clone(modules::clone::CloneOptions),
 
+    #[clap(name = "history", about = "Show commit history")]
+    #[clap(visible_alias = "log")]
+    History(modules::history::CommitHistoryOptions),
+
     #[clap(name = "login", about = "Login to GitHub")]
     Login,
 }
@@ -75,6 +79,9 @@ async fn main() {
         }
         SubCommand::Clone(options) => {
             return modules::clone::clone_menu(options).await;
+        }
+        SubCommand::History(options) => {
+            return modules::history::commit_history(options);
         }
         SubCommand::Login => {
             return config::login().await;

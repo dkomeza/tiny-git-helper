@@ -6,16 +6,6 @@ pub fn commit_menu(options: CommitOptions) {
     use inquire::Select;
     use std::process;
 
-    match options.subcmd {
-        Some(subcmd) => match subcmd {
-            super::SubCommand::History(_) => {
-                commit_history();
-                return;
-            }
-        },
-        None => {}
-    }
-
     clear_screen();
 
     super::functions::is_valid_commit();
