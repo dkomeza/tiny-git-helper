@@ -58,7 +58,8 @@ async fn main() {
     let subcmd = match args.subcmd {
         Some(subcmd) => subcmd,
         None => {
-            return modules::menu().await;
+            out::print_error("\nNo subcommand provided\n");
+            return;
         }
     };
 

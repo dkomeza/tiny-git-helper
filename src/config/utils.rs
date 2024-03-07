@@ -16,7 +16,7 @@ pub fn get_config_path() -> String {
     let home = home_dir().unwrap();
     let config_path = format!("{}/.config/tgh/config.json", home.display());
 
-    return config_path;
+    config_path
 }
 
 pub fn config_exists() -> bool {
@@ -25,7 +25,7 @@ pub fn config_exists() -> bool {
     let config_path = get_config_path();
     let config_path = Path::new(&config_path);
 
-    return config_path.exists();
+    config_path.exists()
 }
 
 pub fn read_config_content() -> String {
@@ -38,14 +38,14 @@ pub fn read_config_content() -> String {
 
     config_file.read_to_string(&mut config_contents).unwrap();
 
-    return config_contents;
+    config_contents
 }
 
 pub fn read_config() -> crate::config::Config {
     let config_contents = read_config_content();
     let config: crate::config::Config = serde_json::from_str(&config_contents).unwrap();
 
-    return config;
+    config
 }
 
 pub fn validate_config_file() -> bool {
@@ -85,7 +85,7 @@ pub fn validate_config_file() -> bool {
         return false;
     }
 
-    return true;
+    true
 }
 
 pub fn save_config_file(config: crate::config::Config) {
@@ -119,7 +119,7 @@ pub fn validate_email(
         ));
     }
 
-    return Ok(inquire::validator::Validation::Valid);
+    Ok(inquire::validator::Validation::Valid)
 }
 
 #[derive(Clone, Debug)]
@@ -310,5 +310,5 @@ pub fn get_labels() -> Vec<CommitLabel> {
         emoji: "🚚".into(),
     });
 
-    return labels;
+    labels
 }
