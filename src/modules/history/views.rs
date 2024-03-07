@@ -1,3 +1,10 @@
+use std::thread;
+
+use crossterm::{
+    cursor::{MoveLeft, MoveUp},
+    terminal::{self, disable_raw_mode, enable_raw_mode},
+};
+
 use crate::utils::out::{format_color, format_dim};
 
 use super::CommitHistoryOptions;
@@ -95,12 +102,74 @@ pub fn commit_history(options: CommitHistoryOptions) {
         return;
     }
 
-    for commit in commits {
-        let hash = format_dim(format!("({})", commit.hash).as_str());
-        let message = commit.message;
-        let date = format_color(commit.date.as_str(), crate::utils::out::Color::Green);
-        let author = format_color(commit.author.as_str(), crate::utils::out::Color::Blue);
+    let window_size = 5;
 
-        println!("{} - {} ({}) ~ {}", hash, message, date, author);
+    let mut index = 0;
+    let max_index = commits.len() - 1 - window_size;
+
+    for i in index..index + window_size {
+        if i < commits.len() {
+            let commit = &commits[i];
+            let hash = format_dim(format!("({})", commit.hash).as_str());
+            let message = commit.message.as_str();
+            let date = format_color(commit.date.as_str(), crate::utils::out::Color::Green);
+            let author = format_color(commit.author.as_str(), crate::utils::out::Color::Blue);
+
+            println!("{} - {} ({}) ~ {}", hash, message, date, author);
+        }
     }
+
+    enable_raw_mode().unwrap();
+
+    loop {
+        match crossterm::event::read().unwrap() {
+            crossterm::event::Event::Key(event) => {
+                if event.code == crossterm::event::KeyCode::Down {
+                    if index < max_index {
+                        index += 1;
+                    }
+
+                    render_commits(&commits, index, window_size);
+                } else if event.code == crossterm::event::KeyCode::Up {
+                    if index > 0 {
+                        index -= 1;
+                    }
+
+                    render_commits(&commits, index, window_size);
+                } else if event.code == crossterm::event::KeyCode::Char('q') {
+                    break;
+                }
+            }
+            _ => {}
+        }
+    }
+
+    disable_raw_mode().unwrap();
+}
+
+fn render_commits(commits: &Vec<Commit>, index: usize, window_size: usize) {
+    use crossterm::execute;
+    use std::io::{stdout, Write};
+
+    enable_raw_mode().unwrap();
+
+    let mut stdout = stdout();
+
+    let _ = execute!(stdout, MoveUp(window_size as u16));
+    let _ = execute!(stdout, terminal::Clear(terminal::ClearType::FromCursorDown));
+
+    for i in index..index + window_size {
+        if i < commits.len() {
+            let commit = &commits[i];
+            let hash = format_dim(format!("({})", commit.hash).as_str());
+            let message = commit.message.as_str();
+            let date = format_color(commit.date.as_str(), crate::utils::out::Color::Green);
+            let author = format_color(commit.author.as_str(), crate::utils::out::Color::Blue);
+
+            execute!(stdout, MoveLeft(1000)).unwrap();
+            writeln!(stdout, "{} - {} ({}) ~ {}", hash, message, date, author).unwrap();
+        }
+    }
+    execute!(stdout, MoveLeft(1000)).unwrap();
+    stdout.flush().unwrap();
 }
