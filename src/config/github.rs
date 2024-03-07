@@ -13,7 +13,7 @@ pub fn check_token() -> bool {
         return false;
     }
 
-    return true;
+    true
 }
 
 /// Authenticate user with GitHub.

@@ -9,9 +9,6 @@ A small tool designed to make process of using git and github easier.
   - [x] Commit specific files
   - [ ] Revert a commit
   - [ ] Amend a commit
-  - [ ] Show commit history
-  - [ ] Show commit diff
-  - [ ] Show commit details
   - [ ] Better handling of commit errors
 - Clone
   - [x] Clone a private repository
@@ -40,10 +37,10 @@ A small tool designed to make process of using git and github easier.
   - [ ] Handle merge conflicts
 - Pull
   - [ ] Pull from a branch
-  - [ ] Pull from a branch with a specific branch
   - [ ] Handle pull conflicts
 - Push
   - [ ] Push to a branch
+  - [ ] Handle push errors
 - Tag
   - [ ] Create a new tag
   - [ ] Delete a tag
@@ -68,11 +65,15 @@ A small tool designed to make process of using git and github easier.
   - [ ] Show status of files in the current directory
   - [ ] Show currently staged files
 - Init
-  - [ ] Initialize a new repository
-  - [ ] Initialize a new repository with a specific license
-  - [ ] Initialize a new repository with a specific gitignore
-  - [ ] Initialize a new repository with a specific README
-  - [ ] Initialize a new repository with a specific branch
+  - [ ] Initialise a new repository
+  - [ ] Initialise a new repository with a specific license
+  - [ ] Initialise a new repository with a specific gitignore
+  - [ ] Initialise a new repository with a specific README
+  - [ ] Initialise a new repository with a specific branch
+- History
+  - [x] Show commit history
+  - [x] Show commit diff
+  - [x] Show commit details
 
 ## Usage
 

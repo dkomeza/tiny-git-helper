@@ -1,3 +1,14 @@
+pub enum Color {
+    Red,
+    Green,
+    Yellow,
+    Blue,
+    Magenta,
+    Cyan,
+    White,
+    Black,
+}
+
 pub fn print_error(message: &str) {
     println!("{}", format_error(message));
 }
@@ -33,4 +44,23 @@ pub fn format_dim(message: &str) -> String {
 
 pub fn format_bold(message: &str) -> String {
     format!("\x1B[1m{}\x1B[m", message)
+}
+
+pub fn format_underline(message: &str) -> String {
+    format!("\x1B[4m{}\x1B[m", message)
+}
+
+pub fn format_color(message: &str, color: Color) -> String {
+    let color = match color {
+        Color::Red => 31,
+        Color::Green => 32,
+        Color::Yellow => 33,
+        Color::Blue => 34,
+        Color::Magenta => 35,
+        Color::Cyan => 36,
+        Color::White => 37,
+        Color::Black => 30,
+    };
+
+    format!("\x1B[{}m{}\x1B[m", color, message)
 }
