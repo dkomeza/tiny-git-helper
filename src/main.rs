@@ -48,6 +48,9 @@ enum SubCommand {
     #[clap(visible_alias = "log")]
     History(modules::history::CommitHistoryOptions),
 
+    #[clap(name = "diff", about = "Show the current diff")]
+    Diff(modules::diff::DiffOptions),
+
     #[clap(name = "login", about = "Login to GitHub")]
     Login,
 }
@@ -83,8 +86,9 @@ async fn main() {
         SubCommand::History(options) => {
             return modules::history::commit_history(options);
         }
-        SubCommand::Login => {
-            config::login().await
+        SubCommand::Diff(options) => {
+            return modules::diff::show_diff(options);
         }
+        SubCommand::Login => config::login().await,
     }
 }
