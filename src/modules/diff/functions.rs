@@ -24,3 +24,20 @@ pub fn get_diff_files() -> Vec<String> {
 
     files
 }
+
+pub fn is_file_in_diff(file: &str) -> bool {
+    let files = get_diff_files();
+    files.contains(&file.to_string())
+}
+
+pub fn validate_file_selection(
+    files: &[inquire::list_option::ListOption<&String>],
+) -> Result<inquire::validator::Validation, inquire::CustomUserError> {
+    if files.len() == 0 {
+        return Ok(inquire::validator::Validation::Invalid(
+            "You must select at least one file".into(),
+        ));
+    }
+
+    Ok(inquire::validator::Validation::Valid)
+}
