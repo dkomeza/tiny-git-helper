@@ -11,7 +11,6 @@ pub fn get_diff_files() -> Vec<String> {
     let files = String::from_utf8_lossy(&output.stdout);
 
     if files.is_empty() {
-        out::print_error("No changes");
         return vec![];
     }
 
