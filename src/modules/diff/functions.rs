@@ -1,5 +1,4 @@
 pub fn get_diff_files() -> Vec<String> {
-    use crate::out;
     use std::process::Command;
 
     let output = Command::new("git")

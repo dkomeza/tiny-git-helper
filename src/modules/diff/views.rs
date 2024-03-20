@@ -33,10 +33,7 @@ pub fn show_diff(options: super::DiffOptions) {
         return;
     }
 
-    println!("Showing diff for:");
-    for file in &files {
-        println!("{}", file);
-    }
+    show_diff_for_files(files, options.extended);
 }
 
 fn handle_diff_selector(files: Vec<String>) -> Vec<String> {
@@ -53,4 +50,27 @@ fn handle_diff_selector(files: Vec<String>) -> Vec<String> {
             std::process::exit(1);
         }
     }
+}
+
+fn show_diff_for_files(files: Vec<String>, extended: bool) {
+    use std::process::Command;
+
+    let mut command = Command::new("git");
+    command.arg("diff");
+    command.arg("--color");
+
+    if extended {
+    } else {
+        command.arg("--minimal");
+        command.arg("--compact-summary");
+    }
+
+    for file in files {
+        command.arg(file);
+    }
+
+    let output = command.output().expect("Failed to execute git diff");
+
+    let diff = String::from_utf8_lossy(&output.stdout);
+    println!("{}", diff);
 }
