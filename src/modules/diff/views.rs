@@ -59,8 +59,7 @@ fn show_diff_for_files(files: Vec<String>, extended: bool) {
     command.arg("diff");
     command.arg("--color");
 
-    if extended {
-    } else {
+    if !extended {
         command.arg("--minimal");
         command.arg("--compact-summary");
     }
