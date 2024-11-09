@@ -1,5 +1,6 @@
 # Tiny git helper
 
+[![Codacy Badge](https://app.codacy.com/project/badge/Grade/d588595e2823486190d05dccabe88b49)](https://app.codacy.com/gh/dkomeza/tiny-git-helper/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_grade) <br>
 A small tool designed to make process of using git and github easier.
 
 ## Features

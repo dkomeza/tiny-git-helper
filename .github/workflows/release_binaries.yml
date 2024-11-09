@@ -19,7 +19,7 @@ jobs:
             host: "ubuntu-latest"
           - release_for: X86_64 Linux
             target: x86_64-unknown-linux-gnu
-            binary: "tgh-linux-x86_64"
+            binary: "tgh-linux-x64"
             host: "ubuntu-latest"
 
     runs-on: ubuntu-latest
@@ -40,12 +40,15 @@ jobs:
       - name: Build
         run: cross build --release --target ${{ matrix.platform.target }}
 
+      - name: Compress binary
+        run: tar -czf target/${{ matrix.platform.binary }}.tar.gz target/${{ matrix.platform.target }}/release/tgh
+
       - name: Upload binaries to release
         uses: svenstaro/upload-release-action@v2
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
-          file: target/${{ matrix.platform.target }}/release/tgh
-          asset_name: ${{ matrix.platform.binary }}-${{ github.ref_name }}
+          file: target/${{ matrix.platform.binary }}.tar.gz
+          asset_name: ${{ matrix.platform.binary }}.tar.gz
           tag: ${{ github.ref }}
 
   release-windows:
@@ -69,7 +72,7 @@ jobs:
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           file: target/release/tgh.exe
-          asset_name: tgh-windows-x86_64-${{ github.ref_name }}.exe
+          asset_name: tgh-windows-x64.exe
           tag: ${{ github.ref }}
 
   release-macos:
@@ -78,11 +81,11 @@ jobs:
         platform:
           - release_for: X86_64 macOS
             target: x86_64-apple-darwin
-            binary: "tgh-macos-x86_64"
+            binary: "tgh-darwin-x64"
             host: "macos-latest"
           - release_for: ARM64 macOS
             target: aarch64-apple-darwin
-            binary: "tgh-macos-arm64"
+            binary: "tgh-darwin-arm64"
             host: "macos-latest"
 
     runs-on: macos-latest
@@ -103,10 +106,13 @@ jobs:
       - name: Build
         run: cross build --release --target ${{ matrix.platform.target }}
 
+      - name: Compress binary
+        run: tar -czf target/${{ matrix.platform.binary }}.tar.gz target/${{ matrix.platform.target }}/release/tgh
+
       - name: Upload binaries to release
         uses: svenstaro/upload-release-action@v2
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
-          file: target/${{ matrix.platform.target }}/release/tgh
-          asset_name: ${{ matrix.platform.binary }}-${{ github.ref_name }}
+          file: target/${{ matrix.platform.binary }}.tar.gz
+          asset_name: ${{ matrix.platform.binary }}.tar.gz
           tag: ${{ github.ref }}
