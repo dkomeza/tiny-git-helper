@@ -16,7 +16,7 @@ crossterm = "0.27.0"
 home = "0.5.5"
 inquire = "0.7.0"
 regex = "1.10.2"
-openssl = {version="0.10.34", features = ["vendored"]}
+openssl = {version="0.10.66", features = ["vendored"]}
 reqwest = {version="0.11.22", features = ["json"]}
 serde = {version="1.0.192", features = ["derive"]}
 serde_json = "1.0.108"
