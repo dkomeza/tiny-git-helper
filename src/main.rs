@@ -7,22 +7,7 @@ use utils::out::clear_screen;
 mod config;
 mod functions;
 mod modules;
-
-fn setup_ui() {
-    use inquire::ui::{Attributes, Color, RenderConfig, StyleSheet};
-
-    let mut render_config = RenderConfig::default();
-    if config::load_config().color != config::defines::COLOR::NORMAL {
-        render_config.prompt =
-            StyleSheet::new().with_fg(config::load_config().color.as_inquire_color());
-    }
-    render_config.answer = StyleSheet::new()
-        .with_fg(Color::Grey)
-        .with_attr(Attributes::BOLD);
-    render_config.help_message = StyleSheet::new().with_fg(Color::DarkGrey);
-
-    inquire::set_global_render_config(render_config);
-}
+mod view;
 
 #[derive(Parser)]
 #[command(name = "tgh", author, version, about)]
@@ -56,13 +41,13 @@ enum SubCommand {
 async fn main() {
     let args = Cli::parse();
 
+    view::setup_view_controller();
     config::check_prerequisites().await;
-    setup_ui();
 
     let subcmd = match args.subcmd {
         Some(subcmd) => subcmd,
         None => {
-            out::print_error("\nNo subcommand provided\n");
+            view::no_subcommand_error();
             return;
         }
     };
@@ -83,8 +68,8 @@ async fn main() {
         SubCommand::History(options) => {
             return modules::history::commit_history(options);
         }
-        SubCommand::Login => {
-            config::login().await
-        }
+        SubCommand::Login => config::login().await,
     }
+
+    view::clean_up();
 }
