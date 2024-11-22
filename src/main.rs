@@ -3,6 +3,7 @@ use clap::{Parser, Subcommand};
 mod utils;
 use utils::out;
 use utils::out::clear_screen;
+use view::printer;
 
 mod config;
 mod functions;
