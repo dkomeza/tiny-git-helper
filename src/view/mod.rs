@@ -100,7 +100,7 @@ This function is used to print a string with special effects. The special effect
 - $bc: background cyan color
 - $bw: background white color
 
-- />: tab (4 spaces)
+- &>: tab (4 spaces)
  */
 pub fn printer(content: &str) {
     let chars = content.chars();
@@ -155,7 +155,7 @@ pub fn printer(content: &str) {
             continue;
         }
 
-        if c == '/' {
+        if c == '&' {
             i += 1;
 
             if i >= n {
