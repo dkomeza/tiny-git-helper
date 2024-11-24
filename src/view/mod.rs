@@ -48,6 +48,7 @@ fn match_effect(effect: &str) -> Vec<VisualEffect> {
             "b" => effects.push(VisualEffect::SetAttribute(Attribute::Bold)),
             "i" => effects.push(VisualEffect::SetAttribute(Attribute::Italic)),
             "u" => effects.push(VisualEffect::SetAttribute(Attribute::Underlined)),
+            "s" => effects.push(VisualEffect::SetAttribute(Attribute::Dim)),
 
             "cr" => effects.push(VisualEffect::SetForegroundColor(Color::Red)),
             _ => {}

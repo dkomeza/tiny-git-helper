@@ -1,4 +1,5 @@
 use crate::{utils::out, view};
+use git::check_git_config;
 use serde::{Deserialize, Serialize};
 
 mod config;
@@ -65,10 +66,42 @@ pub async fn check_prerequisites() {
     }
 
     // Check for git config
-    git::check_git_config();
+    match check_git_config() {
+        Ok(_) => {}
+        Err(err) => match err {
+            git::GitConfigError::NameNotFound => {
+                let msg = r#"
+                    $b$cr `error`: Git user.name not found.
+
+                    You can set it using the following command:
+                    $i ` git config user.name "Your Name"`
+                    
+                    or globally:
+                    $i ` git config --global user.name "Your Name"`
+                    $i$s `this will not work if you set it locally`
+                "#;
+                view::printer(msg);
+                std::process::exit(1);
+            }
+            git::GitConfigError::EmailNotFound => {
+                let msg = r#"
+                    $b$cr `error`: Git user.email not found.
+
+                    You can set it using the following command:
+                    $i ` git config user.email "`
+
+                    or globally:
+                    $i ` git config --global user.email "`
+                    $i$s `this will not work if you set it locally`
+                "#;
+                view::printer(msg);
+                std::process::exit(1);
+            }
+        },
+    }
 
     // Check for a config file
-    if !utils::config_exists() || true {
+    if !utils::config_exists() {
         view::printer("\n$b$cr `error`: Config file not found. Creating a new one...\n");
         config::create_config();
     } else if !utils::validate_config_file() {
