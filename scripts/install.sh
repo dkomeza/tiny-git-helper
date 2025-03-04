@@ -90,7 +90,7 @@ if [[ ! -d $bin_dir ]]; then
 fi
 
 # Download the compressed tar file from github
-curl --fail --location --progress-bar --output "$exe" "$tgh_uri" ||
+curl --fail --location --progress-bar --output "$exe.tar.gz" "$tgh_uri" ||
     error "Failed to download tgh from \"$tgh_uri\""
 
 # Extract the tar file and remove it

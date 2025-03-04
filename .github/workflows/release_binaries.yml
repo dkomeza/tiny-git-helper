@@ -41,7 +41,7 @@ jobs:
         run: cross build --release --target ${{ matrix.platform.target }}
 
       - name: Compress binary
-        run: tar -czf target/${{ matrix.platform.binary }}.tar.gz target/${{ matrix.platform.target }}/release/tgh
+        run: tar -czf target/${{ matrix.platform.binary }}.tar.gz -C target/${{ matrix.platform.target }}/release tgh
 
       - name: Upload binaries to release
         uses: svenstaro/upload-release-action@v2
@@ -107,7 +107,7 @@ jobs:
         run: cross build --release --target ${{ matrix.platform.target }}
 
       - name: Compress binary
-        run: tar -czf target/${{ matrix.platform.binary }}.tar.gz target/${{ matrix.platform.target }}/release/tgh
+        run: tar -czf target/${{ matrix.platform.binary }}.tar.gz -C target/${{ matrix.platform.target }}/release tgh
 
       - name: Upload binaries to release
         uses: svenstaro/upload-release-action@v2
