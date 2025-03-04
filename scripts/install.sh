@@ -94,7 +94,7 @@ curl --fail --location --progress-bar --output "$exe.tar.gz" "$tgh_uri" ||
     error "Failed to download tgh from \"$tgh_uri\""
 
 # Extract the tar file and remove it
-tar -xzf "$exe.tar.gz" -C "$install_dir" && rm -f "$exe.tar.gz"
+tar -xzf "$exe.tar.gz" -C "$bin_dir" && rm -f "$exe.tar.gz"
 
 # Make the file executable
 chmod +x "$exe" || error "Failed to make $exe executable"
