@@ -1,4 +1,5 @@
-#!/bin/bash
+#!/usr/bin/env bash
+set -euo pipefail
 
 # Reset
 Color_Off=''
@@ -14,10 +15,10 @@ Bold_Green=''
 
 if [[ -t 1 ]]; then
     # Reset
-    Color_Off='\033[0m' # Text Reset
+    Color_Off='\e[0m' # Text Reset
 
     # Regular Colors
-    Red='\033[0;31m'   # Red
+    Red='\e[31m'   # Red
     Green='\033[0;32m' # Green
     Dim='\033[0;2m'    # White
 
@@ -27,20 +28,20 @@ if [[ -t 1 ]]; then
 fi
 
 error() {
-    echo "${Red}error${Color_Off}:" "$@" >&2
+    echo -e "${Red}error${Color_Off}:" "$@" >&2
     exit 1
 }
 
 info() {
-    echo "${Dim}$@ ${Color_Off}"
+    echo -e "${Dim}$@ ${Color_Off}"
 }
 
 info_bold() {
-    echo "${Bold_White}$@ ${Color_Off}"
+    echo -e "${Bold_White}$@ ${Color_Off}"
 }
 
 success() {
-    echo "${Green}$@ ${Color_Off}"
+    echo -e "${Green}$@ ${Color_Off}"
 }
 
 platform=$(uname -ms)
@@ -129,7 +130,8 @@ fish)
 
     if [[ -w $fish_config ]]; then
         {
-            echo '\n# tgh'
+            echo ''
+            echo "# tgh"
 
             for command in "${commands[@]}"; do
                 echo "$command"
@@ -158,7 +160,8 @@ zsh)
 
     if [[ -w $zsh_config ]]; then
         {
-            echo '\n# tgh'
+            echo ''
+            echo '# tgh'
 
             for command in "${commands[@]}"; do
                 echo "$command"
@@ -202,7 +205,8 @@ bash)
 
         if [[ -w $bash_config ]]; then
             {
-                echo '\n# tgh'
+                echo ''
+                echo '# tgh'
 
                 for command in "${commands[@]}"; do
                     echo "$command"
