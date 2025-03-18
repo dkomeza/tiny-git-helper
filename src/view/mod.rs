@@ -51,6 +51,20 @@ fn match_effect(effect: &str) -> Vec<VisualEffect> {
             "s" => effects.push(VisualEffect::SetAttribute(Attribute::Dim)),
 
             "cr" => effects.push(VisualEffect::SetForegroundColor(Color::Red)),
+            "cg" => effects.push(VisualEffect::SetForegroundColor(Color::Green)),
+            "cb" => effects.push(VisualEffect::SetForegroundColor(Color::Blue)),
+            "cy" => effects.push(VisualEffect::SetForegroundColor(Color::Yellow)),
+            "cm" => effects.push(VisualEffect::SetForegroundColor(Color::Magenta)),
+            "cc" => effects.push(VisualEffect::SetForegroundColor(Color::Cyan)),
+            "cw" => effects.push(VisualEffect::SetForegroundColor(Color::White)),
+
+            "br" => effects.push(VisualEffect::SetBackgroundColor(Color::Red)),
+            "bg" => effects.push(VisualEffect::SetBackgroundColor(Color::Green)),
+            "bb" => effects.push(VisualEffect::SetBackgroundColor(Color::Blue)),
+            "by" => effects.push(VisualEffect::SetBackgroundColor(Color::Yellow)),
+            "bm" => effects.push(VisualEffect::SetBackgroundColor(Color::Magenta)),
+            "bc" => effects.push(VisualEffect::SetBackgroundColor(Color::Cyan)),
+            "bw" => effects.push(VisualEffect::SetBackgroundColor(Color::White)),
             _ => {}
         }
 
