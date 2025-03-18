@@ -49,6 +49,25 @@ $i ` sudo port install git`
 Xcode also includes git. You can install it from the App Store.
 "#;
 
+#[cfg(target_os = "linux")]
+static GIT_NOT_INSTALLED: &str = r#"
+$b$cr `error`: $b `git` is not installed.
+
+You can install it using your package manager.
+
+For example, on Ubuntu:
+$i ` sudo apt install git`
+
+On Fedora:
+$i ` sudo dnf install git`
+
+On Arch Linux:
+$i ` sudo pacman -S git`
+
+You can also download it from the official website:
+$b ` `$u `https://git-scm.com/download/linux`
+"#;
+
 /// Checks if the prerequisites for tgh are installed.
 /// If not, it will print an error and exit.
 pub async fn check_prerequisites() {

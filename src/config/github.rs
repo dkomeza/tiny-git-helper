@@ -1,6 +1,7 @@
 use super::utils;
 use super::Config;
 use crate::out;
+use crate::view;
 
 pub fn check_token() -> bool {
     if !utils::config_exists() || !utils::validate_config_file() {
@@ -47,10 +48,10 @@ pub async fn authenticate() -> Result<String, reqwest::Error> {
     let login_url = text_split[4].replace("%3A", ":").replace("%2F", "/");
     let grant_type = "urn:ietf:params:oauth:grant-type:device_code";
 
-    println!(
-        "Please visit this URL to authenticate: \x1B[4m{}\x1B[m",
+    view::printer(&format!(
+        "\nPlease visit this URL to authenticate: $u `{}`\n",
         login_url
-    );
+    ));
 
     let clipboard = Clipboard::new();
     match clipboard {
@@ -63,7 +64,7 @@ pub async fn authenticate() -> Result<String, reqwest::Error> {
         }
         Err(_) => {
             println!(
-                "Error copying to clipboard, copy the code manually: {}",
+                "Could not copy the code to the clipboard, copy the code manually: {}",
                 user_code
             );
         }
