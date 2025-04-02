@@ -6,6 +6,8 @@ use crossterm::{
 };
 use std::io::stdout;
 
+pub mod input;
+
 pub fn setup_view_controller() {
     enable_raw_mode().unwrap();
 
@@ -196,6 +198,11 @@ pub fn printer(content: &str) {
     execute!(stdout, Print('\n'), MoveToNextLine(1)).unwrap();
 
     disable_raw_mode().unwrap();
+}
+
+pub fn print(content: &str) {
+    let mut stdout = stdout();
+    execute!(stdout, Print(content), Print("\n\r")).unwrap(); // Print the content and move to the next line
 }
 
 pub fn no_subcommand_error() {
