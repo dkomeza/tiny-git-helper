@@ -167,7 +167,7 @@ impl GitConfigError {
     }
 }
 
-/// Checks if the user has a git config. (user.name, user.email)
+/// Checks if the user has a valid git config. (user.name, user.email)
 pub fn check_git_config() -> Result<(), GitConfigError> {
     let mut command = std::process::Command::new("git");
     command.args(["config", "user.name"]);
