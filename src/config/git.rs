@@ -42,7 +42,7 @@ impl GitError {
         match self {
             GitError::NotInstalled => {
                 #[cfg(target_os = "linux")] // For Linux, use the dynamic message (based on distro)
-                let message = utils::get_git_installation_instructions();
+                let message = get_git_installation_instructions();
 
                 #[cfg(not(target_os = "linux"))] // For other OSes, use the static message
                 let message = GIT_INSTALL_INSTRUCTIONS;
@@ -58,7 +58,7 @@ impl GitError {
 
             GitError::VersionNotSupported { current, min } => {
                 #[cfg(target_os = "linux")]
-                let install_cmd = utils::get_git_installation_instructions();
+                let install_cmd = get_git_installation_instructions();
 
                 #[cfg(not(target_os = "linux"))]
                 let install_cmd = GIT_INSTALL_INSTRUCTIONS;
@@ -161,4 +161,69 @@ pub fn check_git_config() -> Result<(), GitConfigError> {
     }
 
     Ok(())
+}
+
+#[cfg(target_os = "linux")]
+fn get_git_installation_instructions() -> String {
+    let install_cmd;
+
+    // Get the distribution
+    let binding = match std::fs::read_to_string("/etc/os-release") {
+        Ok(binding) => binding,
+        Err(_) => {
+            return r#"
+            $b$cr `error`: $b `git` is not installed.
+            
+            You can download it from the official website:
+            $b ` `$u `https://git-scm.com/download/linux`
+            "#
+            .into();
+        }
+    };
+    let distro = binding
+        .lines()
+        .find(|line| line.starts_with("ID="))
+        .unwrap()
+        .split('=')
+        .last()
+        .unwrap();
+
+    match distro {
+        "ubuntu" | "debian" => {
+            install_cmd = "sudo apt install git";
+        }
+        "fedora" | "centos" | "rhel" => {
+            install_cmd = "sudo dnf install git";
+        }
+        "arch" | "manjaro" => {
+            install_cmd = "sudo pacman -S git";
+        }
+        "alpine" => {
+            install_cmd = "apk add git";
+        }
+        _ => {
+            return r#"
+            $b$cr `error`: $b `git` is not installed.
+            
+            You can download it from the official website:
+            $b ` `$u `https://git-scm.com/download/linux`
+            "#
+            .into();
+        }
+    }
+
+    let instructions = format!(
+        r#"
+        $b$cr `error`: $b `git` is not installed.
+
+        You can install it using your package manager:
+        $i ` {}`
+
+        Or you can download it from the official website:
+        $b ` `$u `https://git-scm.com/download/linux`
+        "#,
+        install_cmd
+    );
+
+    instructions
 }
