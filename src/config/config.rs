@@ -2,8 +2,7 @@ use super::{defines, utils, Config};
 use crate::out;
 
 /// Loads the config file.
-/// If the config file doesn't exist, it will create one.
-/// If the config file is invalid, it will create a new one.
+/// If the config file doesn't exist or is invalid, it will create a new one.
 ///
 /// ### Returns
 /// A Config struct.
@@ -124,75 +123,4 @@ fn ask_fancy() -> bool {
             ask_fancy()
         }
     }
-}
-
-fn update_username(username: String) {
-    let config = utils::read_config();
-
-    let new_config = Config {
-        username,
-        token: config.token,
-        sort: config.sort,
-        protocol: config.protocol,
-        color: config.color,
-        fancy: config.fancy,
-    };
-
-    utils::save_config_file(new_config);
-}
-fn update_sort(sort: defines::SORTING) {
-    let config = utils::read_config();
-
-    let new_config = Config {
-        username: config.username,
-        token: config.token,
-        sort,
-        protocol: config.protocol,
-        color: config.color,
-        fancy: config.fancy,
-    };
-
-    utils::save_config_file(new_config);
-}
-fn update_protocol(protocol: defines::PROTOCOL) {
-    let config = utils::read_config();
-
-    let new_config = Config {
-        username: config.username,
-        token: config.token,
-        sort: config.sort,
-        protocol,
-        color: config.color,
-        fancy: config.fancy,
-    };
-
-    utils::save_config_file(new_config);
-}
-fn update_color(color: defines::COLOR) {
-    let config = utils::read_config();
-
-    let new_config = Config {
-        username: config.username,
-        token: config.token,
-        sort: config.sort,
-        protocol: config.protocol,
-        color,
-        fancy: config.fancy,
-    };
-
-    utils::save_config_file(new_config);
-}
-fn update_fancy(fancy: bool) {
-    let config = utils::read_config();
-
-    let new_config = Config {
-        username: config.username,
-        token: config.token,
-        sort: config.sort,
-        protocol: config.protocol,
-        color: config.color,
-        fancy,
-    };
-
-    utils::save_config_file(new_config);
 }
