@@ -35,36 +35,10 @@ pub async fn check_prerequisites() {
     // Check for git config
     match check_git_config() {
         Ok(_) => {}
-        Err(err) => match err {
-            git::GitConfigError::NameNotFound => {
-                let msg = r#"
-                    $b$cr `error`: Git user.name not found.
-
-                    You can set it using the following command:
-                    $i ` git config user.name "Your Name"`
-                    
-                    or globally:
-                    $i ` git config --global user.name "Your Name"`
-                    $i$s `this will not work if you set it locally`
-                "#;
-                view::printer(msg);
-                std::process::exit(1);
-            }
-            git::GitConfigError::EmailNotFound => {
-                let msg = r#"
-                    $b$cr `error`: Git user.email not found.
-
-                    You can set it using the following command:
-                    $i ` git config user.email "`
-
-                    or globally:
-                    $i ` git config --global user.email "`
-                    $i$s `this will not work if you set it locally`
-                "#;
-                view::printer(msg);
-                std::process::exit(1);
-            }
-        },
+        Err(err) => {
+            view::printer(&err.to_string());
+            std::process::exit(1);
+        }
     }
 
     // Check for a config file

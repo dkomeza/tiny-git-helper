@@ -2,7 +2,7 @@ const MIN_GIT_VERSION: &str = "2.20.0";
 
 // Create an error message for when git is not installed depending on the OS
 #[cfg(target_os = "windows")]
-static GIT_INSTALL_INSTRUCTIONS: &str = r#"
+const GIT_INSTALL_INSTRUCTIONS: &str = r#"
 You can install it using Chocolatey:
 $i ` choco install git`
 
@@ -14,7 +14,7 @@ $b ` `$u `https://git-scm.com/download/win`
 "#;
 
 #[cfg(target_os = "macos")]
-static GIT_INSTALL_INSTRUCTIONS: &str = r#"
+const GIT_INSTALL_INSTRUCTIONS: &str = r#"
 You can install it using Homebrew:
 $i ` brew install git`
 
@@ -25,11 +25,33 @@ Xcode also includes git. You can install it from the App Store.
 "#;
 
 #[cfg(not(any(target_os = "windows", target_os = "macos", target_os = "linux")))]
-static GIT_INSTALL_INSTRUCTIONS: &str = r#"
+const GIT_INSTALL_INSTRUCTIONS: &str = r#"
 You can install it using your package manager.
 
 Or you can download it from the official website:
 $b ` `$u `https://git-scm.com/`
+"#;
+
+const GIT_NAME_NOT_FOUND: &str = r#"
+    $b$cr `error`: Git user.name not found.
+
+    You can set it using the following command:
+    $i ` git config user.name "Your Name"`
+
+    or globally:
+    $i ` git config --global user.name "Your Name"`
+    $i$s `this will not work if you set it locally`
+"#;
+
+const GIT_EMAIL_NOT_FOUND: &str = r#"
+    $b$cr `error`: Git user.email not found.
+
+    You can set it using the following command:
+    $i ` git config user.email "`
+
+    or globally:
+    $i ` git config --global user.email "`
+    $i$s `this will not work if you set it locally`
 "#;
 
 pub enum GitError {
@@ -134,6 +156,15 @@ pub fn validate_git_install() -> Result<(), GitError> {
 pub enum GitConfigError {
     NameNotFound,
     EmailNotFound,
+}
+
+impl GitConfigError {
+    pub fn to_string(&self) -> String {
+        match self {
+            GitConfigError::NameNotFound => GIT_NAME_NOT_FOUND.to_string(),
+            GitConfigError::EmailNotFound => GIT_EMAIL_NOT_FOUND.to_string(),
+        }
+    }
 }
 
 /// Checks if the user has a git config. (user.name, user.email)
