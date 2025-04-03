@@ -6,7 +6,9 @@ use crossterm::{
 };
 use std::io::{self, Write};
 
-use crate::view::{print, printer};
+use crate::view::print;
+
+use super::PrintSize;
 
 pub enum ReturnType {
     Cancel,
@@ -32,7 +34,7 @@ fn get_user_text_input(prompt: &str, input_type: TextInputType) -> Result<String
     let mut input = String::new();
     let mut cursor_position = 0;
 
-    print!("{}: ", prompt);
+    let PrintSize{cols: prompt_length, rows: _} = print(format!("{}", prompt));
     io::stdout().flush().unwrap();
 
     loop {
@@ -69,7 +71,7 @@ fn get_user_text_input(prompt: &str, input_type: TextInputType) -> Result<String
                                 }
                             }
 
-                            let column = prompt.len() + 2 + cursor_position;
+                            let column = prompt_length + cursor_position;
                             execute!(io::stdout(), MoveToColumn(column as u16)).unwrap();
                         }
                         KeyCode::Char('f') => {
@@ -100,7 +102,7 @@ fn get_user_text_input(prompt: &str, input_type: TextInputType) -> Result<String
                                 }
                             }
 
-                            let column = prompt.len() + 2 + cursor_position;
+                            let column = prompt_length + cursor_position;
                             execute!(io::stdout(), MoveToColumn(column as u16)).unwrap();
                         }
                         _ => {}
@@ -114,13 +116,13 @@ fn get_user_text_input(prompt: &str, input_type: TextInputType) -> Result<String
                         KeyCode::Char('a') => {
                             // Move to the beginning of the line
                             cursor_position = 0;
-                            let column = prompt.len() + 2 + cursor_position;
+                            let column = prompt_length + cursor_position;
                             execute!(io::stdout(), MoveToColumn(column as u16)).unwrap();
                         }
                         KeyCode::Char('e') => {
                             // Move to the end of the line
                             cursor_position = input.len();
-                            let column = prompt.len() + 2 + cursor_position;
+                            let column = prompt_length + cursor_position;
                             execute!(io::stdout(), MoveToColumn(column as u16)).unwrap();
                         }
                         KeyCode::Char('u') => {
@@ -134,11 +136,11 @@ fn get_user_text_input(prompt: &str, input_type: TextInputType) -> Result<String
                             input.drain(..cursor_position);
                             cursor_position = 0;
 
-                            print!("{}: {}", prompt, input);
+                            print(format!("{}{}", prompt, input));
                             io::stdout().flush().unwrap();
                             execute!(
                                 io::stdout(),
-                                MoveToColumn((prompt.len() + 2 + cursor_position) as u16)
+                                MoveToColumn((prompt_length + cursor_position) as u16)
                             )
                             .unwrap();
                         }
@@ -168,11 +170,11 @@ fn get_user_text_input(prompt: &str, input_type: TextInputType) -> Result<String
                                 terminal::Clear(ClearType::CurrentLine)
                             )
                             .unwrap();
-                            print!("{}: {}", prompt, input);
+                            print(format!("{}{}", prompt, input));
                             io::stdout().flush().unwrap();
                             execute!(
                                 io::stdout(),
-                                MoveToColumn((prompt.len() + 2 + cursor_position) as u16)
+                                MoveToColumn((prompt_length + cursor_position) as u16)
                             )
                             .unwrap();
                         }
@@ -186,7 +188,7 @@ fn get_user_text_input(prompt: &str, input_type: TextInputType) -> Result<String
                                 terminal::Clear(ClearType::CurrentLine)
                             )
                             .unwrap();
-                            printer(&format!("{}: $cr `canceled`\n", prompt));
+                            print(format!("{}$cr `canceled`\n", prompt));
 
                             disable_raw_mode().unwrap();
                             return Err(ReturnType::Cancel);
@@ -201,24 +203,32 @@ fn get_user_text_input(prompt: &str, input_type: TextInputType) -> Result<String
 
                                 execute!(io::stdout(), terminal::Clear(ClearType::CurrentLine))
                                     .unwrap();
-                                print!("\r{}: {}", prompt, input);
+
+                                match input_type {
+                                    TextInputType::Text => {
+                                        print(format!("\r{}{}", prompt, input));
+                                    }
+                                    TextInputType::Password => {
+                                        print(format!("\r{}{}", prompt, "*".repeat(input.len())));
+                                    }
+                                }
                                 io::stdout().flush().unwrap();
 
-                                let column = prompt.len() + 2 + cursor_position;
+                                let column = prompt_length + cursor_position;
                                 execute!(io::stdout(), MoveToColumn(column as u16)).unwrap();
                             }
                         }
                         KeyCode::Left => {
                             if cursor_position > 0 {
                                 cursor_position -= 1;
-                                let column = prompt.len() + 2 + cursor_position;
+                                let column = prompt_length + cursor_position;
                                 execute!(io::stdout(), MoveToColumn(column as u16)).unwrap();
                             }
                         }
                         KeyCode::Right => {
                             if cursor_position < input.len() {
                                 cursor_position += 1;
-                                let column = prompt.len() + 2 + cursor_position;
+                                let column = prompt_length + cursor_position;
                                 execute!(io::stdout(), MoveToColumn(column as u16)).unwrap();
                             }
                         }
@@ -227,16 +237,16 @@ fn get_user_text_input(prompt: &str, input_type: TextInputType) -> Result<String
                             cursor_position += 1;
                             match input_type {
                                 TextInputType::Text => {
-                                    print!("\r{}: {}", prompt, input);
+                                    print(format!("\r{}{}", prompt, input));
                                 }
                                 TextInputType::Password => {
-                                    print!("\r{}: {}", prompt, "*".repeat(input.len()));
+                                    print(format!("\r{}{}", prompt, "*".repeat(input.len())));
                                 }
                             }
 
                             io::stdout().flush().unwrap();
 
-                            let column = prompt.len() + 2 + cursor_position;
+                            let column = prompt_length + cursor_position;
                             execute!(io::stdout(), MoveToColumn(column as u16)).unwrap();
                         }
                         _ => {}

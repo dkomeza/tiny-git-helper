@@ -8,17 +8,6 @@ use std::io::stdout;
 
 pub mod input;
 
-pub fn setup_view_controller() {
-    enable_raw_mode().unwrap();
-
-    let default_panic = std::panic::take_hook();
-    std::panic::set_hook(Box::new(move |panic_info| {
-        disable_raw_mode().unwrap();
-        println!();
-        default_panic(panic_info);
-    }));
-}
-
 pub fn clean_up() {
     disable_raw_mode().unwrap();
 }
@@ -95,6 +84,11 @@ fn set_new_effects(stdout: &mut std::io::Stdout, effects: &Vec<Vec<VisualEffect>
     }
 }
 
+pub struct PrintSize {
+    pub cols: usize,
+    pub rows: usize,
+}
+
 /**
 This function is used to print a string with special effects. The special effects are defined by the following syntax:
 - $b: bold
@@ -119,9 +113,43 @@ This function is used to print a string with special effects. The special effect
 
 - &>: tab (4 spaces)
  */
-pub fn printer(content: &str) {
+pub fn printer(content: impl AsRef<str>) -> PrintSize {
     enable_raw_mode().unwrap();
+    let size = print(content);
+    disable_raw_mode().unwrap();
 
+    size
+}
+
+/** Print the content with correct formatting, but without going into raw mode
+This function is used to print a string with special effects. The special effects are defined by the following syntax:
+- $b: bold
+- $i: italic
+- $u: underline
+
+- $cr: red color
+- $cg: green color
+- $cb: blue color
+- $cy: yellow color
+- $cm: magenta color
+- $cc: cyan color
+- $cw: white color
+
+- $br: background red color
+- $bg: background green color
+- $bb: background blue color
+- $by: background yellow color
+- $bm: background magenta color
+- $bc: background cyan color
+- $bw: background white color
+
+- &>: tab (4 spaces)
+*/
+pub fn print(content: impl AsRef<str>) -> PrintSize {
+    let mut size = PrintSize { cols: 0, rows: 0 };
+    let mut current_width: usize = 0;
+
+    let content = content.as_ref();
     let chars = content.chars();
     let n = chars.count();
     let mut stdout = stdout();
@@ -162,11 +190,17 @@ pub fn printer(content: &str) {
 
         // Print a new line and clear the spaces
         if c == '\n' {
+            if current_width > size.cols {
+                size.cols = current_width;
+                size.rows += 1;
+            }
+
             execute!(stdout, Print('\n'), MoveToNextLine(1)).unwrap();
             i += 1;
 
             while i < n && content.chars().nth(i).unwrap() == ' ' {
                 i += 1;
+                size.rows += 1;
             }
 
             continue;
@@ -190,18 +224,18 @@ pub fn printer(content: &str) {
             continue;
         }
 
+        current_width += 1;
         execute!(stdout, Print(c)).unwrap();
 
         i += 1;
     }
 
-    // execute!(stdout, Print('\n'), MoveToNextLine(1)).unwrap();
-    disable_raw_mode().unwrap();
-}
+    if current_width > size.cols {
+        size.cols = current_width;
+        size.rows += 1;
+    }
 
-pub fn print(content: &str) {
-    let mut stdout = stdout();
-    execute!(stdout, Print(content), Print("\n\r")).unwrap(); // Print the content and move to the next line
+    size
 }
 
 pub fn no_subcommand_error() {

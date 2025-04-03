@@ -42,20 +42,18 @@ enum SubCommand {
 async fn main() {
     let args = Cli::parse();
 
-    let password = match input::password("Enter your GitHub password") {
+    let password = match input::text("$cg `>` $cw `Enter your GitHub password: `") {
         Ok(password) => password,
-        Err(err) => {
-            match err {
-                input::ReturnType::Cancel => {
-                    println!("Cancelled");
-                    return;
-                }
-                input::ReturnType::Exit => {
-                    println!("Exiting");
-                    return;
-                }
+        Err(err) => match err {
+            input::ReturnType::Cancel => {
+                println!("Cancelled");
+                return;
             }
-        }
+            input::ReturnType::Exit => {
+                println!("Exiting");
+                return;
+            }
+        },
     };
     println!("Password: {}", password);
 
