@@ -120,13 +120,13 @@ This function is used to print a string with special effects. The special effect
 - &>: tab (4 spaces)
  */
 pub fn printer(content: &str) {
+    enable_raw_mode().unwrap();
+
     let chars = content.chars();
     let n = chars.count();
     let mut stdout = stdout();
 
     let mut effects: Vec<Vec<VisualEffect>> = Vec::new();
-
-    enable_raw_mode().unwrap();
 
     let mut i = 0;
     while i < n {
@@ -195,8 +195,7 @@ pub fn printer(content: &str) {
         i += 1;
     }
 
-    execute!(stdout, Print('\n'), MoveToNextLine(1)).unwrap();
-
+    // execute!(stdout, Print('\n'), MoveToNextLine(1)).unwrap();
     disable_raw_mode().unwrap();
 }
 

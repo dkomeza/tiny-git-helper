@@ -42,7 +42,24 @@ enum SubCommand {
 async fn main() {
     let args = Cli::parse();
 
-    view::setup_view_controller();
+    let password = match input::password("Enter your GitHub password") {
+        Ok(password) => password,
+        Err(err) => {
+            match err {
+                input::ReturnType::Cancel => {
+                    println!("Cancelled");
+                    return;
+                }
+                input::ReturnType::Exit => {
+                    println!("Exiting");
+                    return;
+                }
+            }
+        }
+    };
+    println!("Password: {}", password);
+
+    return;
     config::check_prerequisites().await;
 
     let subcmd = match args.subcmd {
