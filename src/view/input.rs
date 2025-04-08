@@ -284,6 +284,7 @@ where
         rows: _,
     } = print(format!("{}\n", prompt));
 
+    let mut text_input = TextInput::new(prompt_length, TextInputType::Text);
     let total_rows = items.len();
     let available_rows = terminal::size().unwrap().1 as usize - 1; // 1 for the prompt
 
@@ -344,14 +345,16 @@ where
                             selected += 1;
                         }
                     }
-                    KeyCode::Char('c') => {
-                        if event.modifiers == KeyModifiers::CONTROL {
+                    KeyCode::Char(c) => {
+                        if event.modifiers == KeyModifiers::CONTROL && c == 'c' {
                             write!(io::stdout(), "\n\r").unwrap();
                             disable_raw_mode().unwrap();
                             return Err(ReturnType::Exit);
                         }
+
+                        text_input.handle_event(event);
                     }
-                    _ => {}
+                    _ => text_input.handle_event(event),
                 },
                 _ => {}
             }
@@ -373,7 +376,7 @@ where
                 terminal::Clear(ClearType::FromCursorDown)
             )
             .unwrap();
-            print(format!("{} {}", prompt, diff));
+            print(format!("{}{}", prompt, text_input.input));
             execute!(io::stdout(), MoveDown(1), MoveToColumn(0)).unwrap();
 
             // Render the list
@@ -396,7 +399,7 @@ where
             execute!(
                 io::stdout(),
                 MoveUp((usable_rows + 1) as u16),
-                MoveToColumn((prompt_length) as u16)
+                MoveToColumn((prompt_length + text_input.cursor_position) as u16)
             )
             .unwrap();
 

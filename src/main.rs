@@ -42,47 +42,47 @@ enum SubCommand {
 async fn main() {
     let args = Cli::parse();
 
-    let password = match input::text("$cg `>` $cw `Enter your GitHub password: `") {
-        Ok(password) => password,
-        Err(err) => match err {
-            input::ReturnType::Cancel => {
-                println!("Cancelled");
-                return;
-            }
-            input::ReturnType::Exit => {
-                println!("Exiting");
-                return;
-            }
-        },
-    };
-    println!("Password: {}", password);
+    // let password = match input::text("$cg `>` $cw `Enter your GitHub password: `") {
+    //     Ok(password) => password,
+    //     Err(err) => match err {
+    //         input::ReturnType::Cancel => {
+    //             println!("Cancelled");
+    //             return;
+    //         }
+    //         input::ReturnType::Exit => {
+    //             println!("Exiting");
+    //             return;
+    //         }
+    //     },
+    // };
+    // println!("Password: {}", password);
 
-    // let choice = input::list(
-    //     "$cg `>` $cw `Enter your GitHub password: `",
-    //     vec![
-    //         "Option 1",
-    //         "Option 2",
-    //         "Option 3",
-    //         "Option 4",
-    //         "Option 5",
-    //         "Option 6",
-    //         "Option 7",
-    //         "Option 8",
-    //         "Option 9",
-    //         "Option 10",
-    //         "Option 11",
-    //         "Option 12",
-    //         "Option 13",
-    //         "Option 14",
-    //         "Option 15",
-    //         "Option 16",
-    //         "Option 17",
-    //         "Option 18",
-    //         "Option 19",
-    //         "Option 20",
-    //     ],
-    // ).unwrap_or("");
-    // println!("Choice: {:?}", choice);
+    let choice = input::list(
+        "$cg `>` $cw `Enter your GitHub password: `",
+        vec![
+            "Option 1",
+            "Option 2",
+            "Option 3",
+            "Option 4",
+            "Option 5",
+            "Option 6",
+            "Option 7",
+            "Option 8",
+            "Option 9",
+            "Option 10",
+            "Option 11",
+            "Option 12",
+            "Option 13",
+            "Option 14",
+            "Option 15",
+            "Option 16",
+            "Option 17",
+            "Option 18",
+            "Option 19",
+            "Option 20",
+        ],
+    ).unwrap_or("");
+    println!("Choice: {:?}", choice);
 
     return;
     config::check_prerequisites().await;
