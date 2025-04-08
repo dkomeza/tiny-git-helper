@@ -1,6 +1,6 @@
 use crossterm::{
     cursor::{MoveDown, MoveToColumn, MoveUp},
-    event::{self, KeyCode, KeyModifiers},
+    event::{self, KeyCode, KeyEvent, KeyModifiers},
     execute,
     terminal::{self, disable_raw_mode, enable_raw_mode, ClearType},
 };
@@ -21,6 +21,234 @@ pub enum ReturnType {
 enum TextInputType {
     Text,
     Password,
+}
+
+/**
+## A struct to handle text input
+#### It handles the input, cursor position, and input type (text or password), it only handles input (special actions (like Ctrl+C) are handled in the main function)
+*/
+struct TextInput {
+    input: String,
+    position: usize,
+    input_type: TextInputType,
+    cursor_position: usize,
+}
+
+impl TextInput {
+    fn new(position: usize, input_type: TextInputType) -> Self {
+        Self {
+            input: String::new(),
+            position,
+            input_type,
+            cursor_position: 0,
+        }
+    }
+
+    fn handle_event(&mut self, event: KeyEvent) {
+        match event.modifiers {
+            KeyModifiers::ALT => match event.code {
+                KeyCode::Char('b') => {
+                    // Move to the beginning of the word
+                    // If input type is password, go to the beginning of the line
+                    match self.input_type {
+                        TextInputType::Text => {
+                            // Check if the previous character is a whitespace
+                            if self.cursor_position > 0
+                                && self.input[self.cursor_position - 1..self.cursor_position]
+                                    .chars()
+                                    .next()
+                                    .unwrap()
+                                    .is_whitespace()
+                            {
+                                self.cursor_position -= 1;
+                            }
+
+                            if let Some(pos) =
+                                self.input[..self.cursor_position].rfind(char::is_whitespace)
+                            {
+                                self.cursor_position = pos + 1;
+                            } else {
+                                self.cursor_position = 0;
+                            }
+                        }
+                        TextInputType::Password => {
+                            self.cursor_position = 0;
+                        }
+                    }
+
+                    let column = self.position + self.cursor_position;
+                    execute!(io::stdout(), MoveToColumn(column as u16)).unwrap();
+                }
+                KeyCode::Char('f') => {
+                    match self.input_type {
+                        TextInputType::Text => {
+                            // Move to the end of the word
+                            // Check if the cursor is on a whitespace
+                            if self.cursor_position < self.input.len()
+                                && self.input[self.cursor_position..]
+                                    .chars()
+                                    .next()
+                                    .unwrap()
+                                    .is_whitespace()
+                            {
+                                self.cursor_position += 1;
+                            }
+
+                            if let Some(pos) =
+                                self.input[self.cursor_position..].find(char::is_whitespace)
+                            {
+                                self.cursor_position += pos;
+                            } else {
+                                self.cursor_position = self.input.len();
+                            }
+                        }
+                        TextInputType::Password => {
+                            self.cursor_position = self.input.len();
+                        }
+                    }
+
+                    let column = self.position + self.cursor_position;
+                    execute!(io::stdout(), MoveToColumn(column as u16)).unwrap();
+                }
+                _ => {}
+            },
+            KeyModifiers::CONTROL => match event.code {
+                KeyCode::Char('a') => {
+                    // Move to the beginning of the line
+                    self.cursor_position = 0;
+                    let column = self.position + self.cursor_position;
+                    execute!(io::stdout(), MoveToColumn(column as u16)).unwrap();
+                }
+                KeyCode::Char('e') => {
+                    // Move to the end of the line
+                    self.cursor_position = self.input.len();
+                    let column = self.position + self.cursor_position;
+                    execute!(io::stdout(), MoveToColumn(column as u16)).unwrap();
+                }
+                KeyCode::Char('u') => {
+                    // Remove all text before the cursor
+                    execute!(
+                        io::stdout(),
+                        MoveToColumn(self.position as u16),
+                        terminal::Clear(ClearType::UntilNewLine)
+                    )
+                    .unwrap();
+                    self.input.drain(..self.cursor_position);
+                    self.cursor_position = 0;
+
+                    print(format!("{}", self.input));
+                    io::stdout().flush().unwrap();
+                    execute!(
+                        io::stdout(),
+                        MoveToColumn((self.position + self.cursor_position) as u16)
+                    )
+                    .unwrap();
+                }
+                KeyCode::Char('h') | KeyCode::Char('w') => {
+                    match self.input_type {
+                        TextInputType::Text => {
+                            // Remove the word before the cursor
+                            if let Some(pos) =
+                                self.input[..self.cursor_position].rfind(char::is_whitespace)
+                            {
+                                self.input.drain(pos..self.cursor_position);
+                                self.cursor_position = pos;
+                            } else {
+                                self.input.drain(..self.cursor_position);
+                                self.cursor_position = 0;
+                            }
+                        }
+                        TextInputType::Password => {
+                            // Move to the beginning of the line
+                            self.cursor_position = 0;
+                            self.input.clear();
+                        }
+                    }
+                    execute!(
+                        io::stdout(),
+                        MoveToColumn(self.position as u16),
+                        terminal::Clear(ClearType::UntilNewLine)
+                    )
+                    .unwrap();
+                    print(format!("{}", self.input));
+                    io::stdout().flush().unwrap();
+                    execute!(
+                        io::stdout(),
+                        MoveToColumn((self.position + self.cursor_position) as u16)
+                    )
+                    .unwrap();
+                }
+                _ => {}
+            },
+            KeyModifiers::NONE => match event.code {
+                KeyCode::Backspace => {
+                    if self.cursor_position > 0 {
+                        self.cursor_position -= 1;
+                        self.input.remove(self.cursor_position);
+
+                        execute!(
+                            io::stdout(),
+                            MoveToColumn(self.position as u16),
+                            terminal::Clear(ClearType::UntilNewLine)
+                        )
+                        .unwrap();
+
+                        match self.input_type {
+                            TextInputType::Text => {
+                                print(format!("{}", self.input));
+                            }
+                            TextInputType::Password => {
+                                print(format!("{}", "*".repeat(self.input.len())));
+                            }
+                        }
+                        io::stdout().flush().unwrap();
+
+                        let column = self.position + self.cursor_position;
+                        execute!(io::stdout(), MoveToColumn(column as u16)).unwrap();
+                    }
+                }
+                KeyCode::Left => {
+                    if self.cursor_position > 0 {
+                        self.cursor_position -= 1;
+                        let column = self.position + self.cursor_position;
+                        execute!(io::stdout(), MoveToColumn(column as u16)).unwrap();
+                    }
+                }
+                KeyCode::Right => {
+                    if self.cursor_position < self.input.len() {
+                        self.cursor_position += 1;
+                        let column = self.position + self.cursor_position;
+                        execute!(io::stdout(), MoveToColumn(column as u16)).unwrap();
+                    }
+                }
+                KeyCode::Char(c) => {
+                    self.input.insert(self.cursor_position, c);
+                    self.cursor_position += 1;
+                    execute!(
+                        io::stdout(),
+                        MoveToColumn(self.position as u16),
+                        terminal::Clear(ClearType::UntilNewLine)
+                    )
+                    .unwrap();
+                    match self.input_type {
+                        TextInputType::Text => {
+                            print(format!("{}", self.input));
+                        }
+                        TextInputType::Password => {
+                            print(format!("{}", "*".repeat(self.input.len())));
+                        }
+                    }
+
+                    io::stdout().flush().unwrap();
+
+                    let column = self.position + self.cursor_position;
+                    execute!(io::stdout(), MoveToColumn(column as u16)).unwrap();
+                }
+                _ => {}
+            },
+            _ => {}
+        }
+    }
 }
 
 pub fn text(prompt: &str) -> Result<String, ReturnType> {
@@ -184,151 +412,19 @@ where
 fn get_user_text_input(position: usize, input_type: TextInputType) -> Result<String, ReturnType> {
     enable_raw_mode().unwrap();
 
-    let mut input = String::new();
-    let mut cursor_position = 0;
+    let mut text_input = TextInput::new(position, input_type);
 
     loop {
         if let Ok(event) = event::read() {
             match event {
                 event::Event::Key(event) => match event.modifiers {
-                    KeyModifiers::ALT => match event.code {
-                        KeyCode::Char('b') => {
-                            // Move to the beginning of the word
-                            // If input type is password, go to the beginning of the line
-                            match input_type {
-                                TextInputType::Text => {
-                                    // Check if the previous character is a whitespace
-                                    if cursor_position > 0
-                                        && input[cursor_position - 1..cursor_position]
-                                            .chars()
-                                            .next()
-                                            .unwrap()
-                                            .is_whitespace()
-                                    {
-                                        cursor_position -= 1;
-                                    }
-
-                                    if let Some(pos) =
-                                        input[..cursor_position].rfind(char::is_whitespace)
-                                    {
-                                        cursor_position = pos + 1;
-                                    } else {
-                                        cursor_position = 0;
-                                    }
-                                }
-                                TextInputType::Password => {
-                                    cursor_position = 0;
-                                }
-                            }
-
-                            let column = position + cursor_position;
-                            execute!(io::stdout(), MoveToColumn(column as u16)).unwrap();
-                        }
-                        KeyCode::Char('f') => {
-                            match input_type {
-                                TextInputType::Text => {
-                                    // Move to the end of the word
-                                    // Check if the cursor is on a whitespace
-                                    if cursor_position < input.len()
-                                        && input[cursor_position..]
-                                            .chars()
-                                            .next()
-                                            .unwrap()
-                                            .is_whitespace()
-                                    {
-                                        cursor_position += 1;
-                                    }
-
-                                    if let Some(pos) =
-                                        input[cursor_position..].find(char::is_whitespace)
-                                    {
-                                        cursor_position += pos;
-                                    } else {
-                                        cursor_position = input.len();
-                                    }
-                                }
-                                TextInputType::Password => {
-                                    cursor_position = input.len();
-                                }
-                            }
-
-                            let column = position + cursor_position;
-                            execute!(io::stdout(), MoveToColumn(column as u16)).unwrap();
-                        }
-                        _ => {}
-                    },
                     KeyModifiers::CONTROL => match event.code {
                         KeyCode::Char('c') => {
                             write!(io::stdout(), "\n\r").unwrap();
                             disable_raw_mode().unwrap();
                             return Err(ReturnType::Exit);
                         }
-                        KeyCode::Char('a') => {
-                            // Move to the beginning of the line
-                            cursor_position = 0;
-                            let column = position + cursor_position;
-                            execute!(io::stdout(), MoveToColumn(column as u16)).unwrap();
-                        }
-                        KeyCode::Char('e') => {
-                            // Move to the end of the line
-                            cursor_position = input.len();
-                            let column = position + cursor_position;
-                            execute!(io::stdout(), MoveToColumn(column as u16)).unwrap();
-                        }
-                        KeyCode::Char('u') => {
-                            // Remove all text before the cursor
-                            execute!(
-                                io::stdout(),
-                                MoveToColumn(position as u16),
-                                terminal::Clear(ClearType::UntilNewLine)
-                            )
-                            .unwrap();
-                            input.drain(..cursor_position);
-                            cursor_position = 0;
-
-                            print(format!("{}", input));
-                            io::stdout().flush().unwrap();
-                            execute!(
-                                io::stdout(),
-                                MoveToColumn((position + cursor_position) as u16)
-                            )
-                            .unwrap();
-                        }
-                        KeyCode::Char('h') | KeyCode::Char('w') => {
-                            match input_type {
-                                TextInputType::Text => {
-                                    // Remove the word before the cursor
-                                    if let Some(pos) =
-                                        input[..cursor_position].rfind(char::is_whitespace)
-                                    {
-                                        input.drain(pos..cursor_position);
-                                        cursor_position = pos;
-                                    } else {
-                                        input.drain(..cursor_position);
-                                        cursor_position = 0;
-                                    }
-                                }
-                                TextInputType::Password => {
-                                    // Move to the beginning of the line
-                                    cursor_position = 0;
-                                    input.clear();
-                                }
-                            }
-                            execute!(
-                                io::stdout(),
-                                MoveToColumn(position as u16),
-                                terminal::Clear(ClearType::UntilNewLine)
-                            )
-                            .unwrap();
-                            print(format!("{}", input));
-                            io::stdout().flush().unwrap();
-                            execute!(
-                                io::stdout(),
-                                MoveToColumn((position + cursor_position) as u16)
-                            )
-                            .unwrap();
-                        }
-                        _ => {}
+                        _ => text_input.handle_event(event),
                     },
                     KeyModifiers::NONE => match event.code {
                         KeyCode::Esc => {
@@ -346,72 +442,9 @@ fn get_user_text_input(position: usize, input_type: TextInputType) -> Result<Str
                         KeyCode::Enter => {
                             break;
                         }
-                        KeyCode::Backspace => {
-                            if cursor_position > 0 {
-                                cursor_position -= 1;
-                                input.remove(cursor_position);
-
-                                execute!(
-                                    io::stdout(),
-                                    MoveToColumn(position as u16),
-                                    terminal::Clear(ClearType::UntilNewLine)
-                                )
-                                .unwrap();
-
-                                match input_type {
-                                    TextInputType::Text => {
-                                        print(format!("{}", input));
-                                    }
-                                    TextInputType::Password => {
-                                        print(format!("{}", "*".repeat(input.len())));
-                                    }
-                                }
-                                io::stdout().flush().unwrap();
-
-                                let column = position + cursor_position;
-                                execute!(io::stdout(), MoveToColumn(column as u16)).unwrap();
-                            }
-                        }
-                        KeyCode::Left => {
-                            if cursor_position > 0 {
-                                cursor_position -= 1;
-                                let column = position + cursor_position;
-                                execute!(io::stdout(), MoveToColumn(column as u16)).unwrap();
-                            }
-                        }
-                        KeyCode::Right => {
-                            if cursor_position < input.len() {
-                                cursor_position += 1;
-                                let column = position + cursor_position;
-                                execute!(io::stdout(), MoveToColumn(column as u16)).unwrap();
-                            }
-                        }
-                        KeyCode::Char(c) => {
-                            input.insert(cursor_position, c);
-                            cursor_position += 1;
-                            execute!(
-                                io::stdout(),
-                                MoveToColumn(position as u16),
-                                terminal::Clear(ClearType::UntilNewLine)
-                            )
-                            .unwrap();
-                            match input_type {
-                                TextInputType::Text => {
-                                    print(format!("{}", input));
-                                }
-                                TextInputType::Password => {
-                                    print(format!("{}", "*".repeat(input.len())));
-                                }
-                            }
-
-                            io::stdout().flush().unwrap();
-
-                            let column = position + cursor_position;
-                            execute!(io::stdout(), MoveToColumn(column as u16)).unwrap();
-                        }
-                        _ => {}
+                        _ => text_input.handle_event(event),
                     },
-                    _ => {}
+                    _ => text_input.handle_event(event),
                 },
                 _ => {}
             }
@@ -423,5 +456,5 @@ fn get_user_text_input(position: usize, input_type: TextInputType) -> Result<Str
     write!(io::stdout(), "\n\r").unwrap();
 
     disable_raw_mode().unwrap();
-    Ok(input)
+    Ok(text_input.input)
 }
