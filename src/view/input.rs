@@ -4,6 +4,7 @@ use crossterm::{
     execute,
     terminal::{self, disable_raw_mode, enable_raw_mode, ClearType},
 };
+use fuzzy_matcher::{skim::SkimMatcherV2, FuzzyMatcher};
 use std::{
     fmt::Display,
     io::{self, Write},
@@ -18,6 +19,7 @@ pub enum ReturnType {
     Exit,
 }
 
+#[derive(PartialEq, Clone, Copy)]
 enum TextInputType {
     Text,
     Password,
@@ -275,9 +277,17 @@ pub fn list<T>(prompt: &str, items: Vec<T>) -> Result<T, ReturnType>
 where
     T: Display + Clone,
 {
+    use fuzzy_matcher::skim::SkimMatcherV2;
+
+    if items.is_empty() {
+        return Err(ReturnType::Cancel);
+    }
+
     enable_raw_mode().unwrap();
+
     let mut selected = 0;
-    let mut offset = 0;
+    let matcher = SkimMatcherV2::default();
+    let mut render_buffer = items.clone();
 
     let PrintSize {
         cols: prompt_length,
@@ -285,36 +295,32 @@ where
     } = print(format!("{}\n", prompt));
 
     let mut text_input = TextInput::new(prompt_length, TextInputType::Text);
-    let total_rows = items.len();
-    let available_rows = terminal::size().unwrap().1 as usize - 1; // 1 for the prompt
-
-    let mut usable_rows = if total_rows > available_rows {
-        available_rows
-    } else {
-        total_rows
-    };
-    if usable_rows > MAX_ROWS {
-        usable_rows = MAX_ROWS;
+    let mut available_rows = terminal::size().unwrap().1 as usize - 1; // 1 for the prompt
+    if available_rows > MAX_ROWS {
+        available_rows = MAX_ROWS;
     }
 
-    for i in offset..usable_rows + offset {
-        if i == selected {
-            print(format!("$cc `>` {}\n", items[i]));
-        } else {
-            if i == usable_rows + offset - 1 && total_rows > usable_rows {
-                print(format!("▼ {}\n", items[i]));
-            } else {
-                print(format!("  {}\n", items[i]));
-            }
-        }
+    render_buffer.truncate(available_rows);
+    let usable_rows = render_buffer.len();
+
+    for _ in 0..render_buffer.len() {
+        print(format!("\n\r"));
     }
+    execute!(
+        io::stdout(),
+        MoveUp(render_buffer.len() as u16),
+        MoveToColumn(0)
+    )
+    .unwrap();
+    let rendered = render_list(&render_buffer, 0, &matcher, text_input.input.clone());
 
     execute!(
         io::stdout(),
-        MoveUp((usable_rows + 1) as u16),
+        MoveUp((rendered + 1) as u16),
         MoveToColumn((prompt_length) as u16)
     )
     .unwrap();
+    io::stdout().flush().unwrap();
 
     loop {
         if let Ok(event) = event::read() {
@@ -341,7 +347,7 @@ where
                         }
                     }
                     KeyCode::Down => {
-                        if selected < total_rows - 1 {
+                        if selected < render_buffer.len() - 1 {
                             selected += 1;
                         }
                     }
@@ -359,16 +365,6 @@ where
                 _ => {}
             }
 
-            let diff = (selected + 1) as isize - (usable_rows / 2) as isize;
-            if diff <= 0 {
-                offset = 0;
-            } else if diff > 0 {
-                offset = diff as usize;
-            }
-            if offset > total_rows - usable_rows {
-                offset = total_rows - usable_rows;
-            }
-
             // Render the prompt
             execute!(
                 io::stdout(),
@@ -380,25 +376,36 @@ where
             execute!(io::stdout(), MoveDown(1), MoveToColumn(0)).unwrap();
 
             // Render the list
-            for i in offset..usable_rows + offset {
-                if i == selected {
-                    print(format!("$cc `>` {}", items[i]));
-                } else {
-                    if i == usable_rows + offset - 1 && total_rows > usable_rows + offset {
-                        print(format!("▼ {}", items[i]));
-                    } else if offset > 0 && i == offset {
-                        print(format!("▲ {}", items[i]));
-                    } else {
-                        print(format!("  {}", items[i]));
+            let mut new_selected = 0;
+            render_buffer.clear();
+            for i in 0..items.len() {
+                if let Some(matched) = matcher.fuzzy_match(&items[i].to_string(), &text_input.input)
+                {
+                    render_buffer.push(items[i].clone());
+                    if i == selected {
+                        new_selected = render_buffer.len() - 1;
                     }
                 }
-                execute!(io::stdout(), MoveDown(1), MoveToColumn(0)).unwrap();
             }
+
+            // let diff = (selected + 1) as isize - (usable_rows / 2) as isize;
+            // let mut offset = 0;
+            // if diff <= 0 {
+            //     offset = 0;
+            // } else if diff > 0 {
+            //     offset = diff as usize;
+            // }
+            // if offset > total_rows - usable_rows {
+            //     offset = total_rows - usable_rows;
+            // }
+
+            let rendered =
+                render_list(&render_buffer, selected, &matcher, text_input.input.clone());
 
             // Go back to the prompt
             execute!(
                 io::stdout(),
-                MoveUp((usable_rows + 1) as u16),
+                MoveUp((rendered + 1) as u16),
                 MoveToColumn((prompt_length + text_input.cursor_position) as u16)
             )
             .unwrap();
@@ -409,7 +416,24 @@ where
 
     disable_raw_mode().unwrap();
 
-    Ok(items[selected].clone())
+    Ok(render_buffer[selected].clone())
+}
+
+/// Render the list of items
+/// This function assumes that the items are already filtered, and correctly offset, and uses the matcher to color the items
+fn render_list<T>(items: &Vec<T>, selected: usize, matcher: &SkimMatcherV2, input: String) -> usize
+where
+    T: Display + Clone,
+{
+    for i in 0..items.len() {
+        if i == selected {
+            print("> ");
+        }
+
+        execute!(io::stdout(), MoveDown(1), MoveToColumn(0)).unwrap();
+    }
+
+    items.len()
 }
 
 fn get_user_text_input(position: usize, input_type: TextInputType) -> Result<String, ReturnType> {
@@ -443,6 +467,17 @@ fn get_user_text_input(position: usize, input_type: TextInputType) -> Result<Str
                             return Err(ReturnType::Cancel);
                         }
                         KeyCode::Enter => {
+                            execute!(
+                                io::stdout(),
+                                MoveToColumn(position as u16),
+                                terminal::Clear(ClearType::UntilNewLine)
+                            )
+                            .unwrap();
+                            if input_type == TextInputType::Password {
+                                print(format!("$cw$b `{}`", "*".repeat(text_input.input.len())));
+                            } else {
+                                print(format!("$cw$b `{}`", text_input.input));
+                            }
                             break;
                         }
                         _ => text_input.handle_event(event),
