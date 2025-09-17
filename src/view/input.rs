@@ -6,7 +6,7 @@ use crossterm::{
 };
 use fuzzy_matcher::{skim::SkimMatcherV2, FuzzyMatcher};
 use std::{
-    fmt::Display,
+    fmt::{write, Debug, Display},
     io::{self, Write},
 };
 
@@ -253,6 +253,18 @@ impl TextInput {
     }
 }
 
+struct ListValue<T: Display + Clone> {
+    key: usize,
+    value: T,
+    matched: bool,
+}
+
+impl<T: Display + Clone> Display for ListValue<T> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.value)
+    }
+}
+
 pub fn text(prompt: &str) -> Result<String, ReturnType> {
     let PrintSize {
         cols: prompt_length,
@@ -283,11 +295,20 @@ where
         return Err(ReturnType::Cancel);
     }
 
+    let mut kv_items: Vec<ListValue<T>> = items
+        .iter()
+        .enumerate()
+        .map(|(i, x)| ListValue {
+            key: i,
+            value: x.clone(),
+            matched: true,
+        })
+        .collect();
+
     enable_raw_mode().unwrap();
 
     let mut selected = 0;
     let matcher = SkimMatcherV2::default();
-    let mut render_buffer = items.clone();
 
     let PrintSize {
         cols: prompt_length,
@@ -300,19 +321,26 @@ where
         available_rows = MAX_ROWS;
     }
 
-    render_buffer.truncate(available_rows);
-    let usable_rows = render_buffer.len();
+    let usable_rows;
+    if kv_items.len() < available_rows {
+        usable_rows = kv_items.len()
+    } else {
+        usable_rows = available_rows;
+    }
 
-    for _ in 0..render_buffer.len() {
+    for _ in 0..usable_rows {
         print(format!("\n\r"));
     }
-    execute!(
-        io::stdout(),
-        MoveUp(render_buffer.len() as u16),
-        MoveToColumn(0)
-    )
-    .unwrap();
-    let rendered = render_list(&render_buffer, 0, &matcher, text_input.input.clone());
+    execute!(io::stdout(), MoveUp(usable_rows as u16), MoveToColumn(0)).unwrap();
+
+    let rendered = render_list(
+        &kv_items,
+        0,
+        0,
+        usable_rows,
+        &matcher,
+        text_input.input.clone(),
+    );
 
     execute!(
         io::stdout(),
@@ -345,10 +373,18 @@ where
                         if selected > 0 {
                             selected -= 1;
                         }
+
+                        while selected > 0 && !kv_items[selected].matched {
+                            selected -= 1;
+                        }
                     }
                     KeyCode::Down => {
-                        if selected < render_buffer.len() - 1 {
+                        if selected < kv_items.len() - 1 {
                             selected += 1;
+
+                            while selected < kv_items.len() - 1 && !kv_items[selected].matched {
+                                selected += 1;
+                            }
                         }
                     }
                     KeyCode::Char(c) => {
@@ -376,31 +412,42 @@ where
             execute!(io::stdout(), MoveDown(1), MoveToColumn(0)).unwrap();
 
             // Render the list
-            let mut new_selected = 0;
-            render_buffer.clear();
-            for i in 0..items.len() {
-                if let Some(matched) = matcher.fuzzy_match(&items[i].to_string(), &text_input.input)
-                {
-                    render_buffer.push(items[i].clone());
-                    if i == selected {
-                        new_selected = render_buffer.len() - 1;
-                    }
+            kv_items.iter_mut().for_each(|x| {
+                x.matched = matcher
+                    .fuzzy_match(&x.value.to_string(), &text_input.input)
+                    .is_some()
+            });
+            let visible = kv_items.iter().filter(|x| x.matched).count();
+
+            if !kv_items[selected].matched {
+                if let Some(found) = kv_items.iter().find(|&x| x.matched) {
+                    selected = found.key;
+                } else {
+                    selected = 0;
                 }
             }
 
-            // let diff = (selected + 1) as isize - (usable_rows / 2) as isize;
-            // let mut offset = 0;
-            // if diff <= 0 {
-            //     offset = 0;
-            // } else if diff > 0 {
-            //     offset = diff as usize;
-            // }
-            // if offset > total_rows - usable_rows {
-            //     offset = total_rows - usable_rows;
-            // }
+            let diff = (selected + 1) as isize - (usable_rows / 2) as isize;
+            let mut offset = 0;
+            if diff <= 0 {
+                offset = 0;
+            } else if diff > 0 {
+                offset = diff as usize;
+            }
+            if visible < usable_rows {
+                offset = 0;
+            } else if offset > visible - usable_rows {
+                offset = visible - usable_rows;
+            }
 
-            let rendered =
-                render_list(&render_buffer, selected, &matcher, text_input.input.clone());
+            let rendered = render_list(
+                &kv_items,
+                selected,
+                offset,
+                usable_rows,
+                &matcher,
+                text_input.input.clone(),
+            );
 
             // Go back to the prompt
             execute!(
@@ -416,24 +463,67 @@ where
 
     disable_raw_mode().unwrap();
 
-    Ok(render_buffer[selected].clone())
+    Ok(items[selected].clone())
 }
 
 /// Render the list of items
 /// This function assumes that the items are already filtered, and correctly offset, and uses the matcher to color the items
-fn render_list<T>(items: &Vec<T>, selected: usize, matcher: &SkimMatcherV2, input: String) -> usize
+fn render_list<T>(
+    items: &Vec<ListValue<T>>,
+    selected: usize,
+    offset: usize,
+    usable_rows: usize,
+    matcher: &SkimMatcherV2,
+    input: String,
+) -> usize
 where
     T: Display + Clone,
 {
-    for i in 0..items.len() {
-        if i == selected {
-            print("> ");
+    let mut rendered = 0;
+    let mut i = offset;
+    while rendered < usable_rows {
+        if i >= items.len() {
+            break;
         }
+
+        if !items[i].matched {
+            i += 1;
+            continue;
+        }
+
+        if items[i].key == selected {
+            print("$cc `>` ");
+        } else if rendered == 0 && offset > 0 {
+            print("⌃ ");
+        } else if rendered == usable_rows - 1 && i < items.len() - 1 {
+            print("⌄ ");
+        } else {
+            print("  ");
+        }
+
+        let matched_letters = matcher
+            .fuzzy_indices(&items[i].value.to_string(), &input)
+            .unwrap_or((0, vec![]))
+            .1;
+
+        let word = items[i].value.to_string();
+
+        for i in 0..word.len() {
+            let letter = word.get(i..i + 1).unwrap_or("");
+            if matched_letters.iter().find(|&&x| x == i).is_some() {
+                print(format!("$cc `{}`", letter));
+            } else {
+                print(format!("{}", letter));
+            }
+        }
+
+        rendered += 1;
+        i += 1;
 
         execute!(io::stdout(), MoveDown(1), MoveToColumn(0)).unwrap();
     }
 
-    items.len()
+    rendered
 }
 
 fn get_user_text_input(position: usize, input_type: TextInputType) -> Result<String, ReturnType> {

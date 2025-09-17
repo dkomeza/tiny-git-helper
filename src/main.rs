@@ -81,7 +81,8 @@ async fn main() {
             "Option 19",
             "Option 20",
         ],
-    ).unwrap_or("");
+    )
+    .unwrap_or("");
     println!("Choice: {:?}", choice);
 
     return;
