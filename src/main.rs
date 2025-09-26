@@ -26,66 +26,31 @@ enum SubCommand {
     CommitAll(modules::commit::CommitOptions),
     #[clap(name = "cf", about = "Commit specific files")]
     CommitFiles(modules::commit::CommitOptions),
+    // #[clap(name = "clone", about = "Clone a repository")]
+    // Clone(modules::clone::CloneOptions),
 
-    #[clap(name = "clone", about = "Clone a repository")]
-    Clone(modules::clone::CloneOptions),
+    // #[clap(name = "history", about = "Show commit history")]
+    // #[clap(visible_alias = "log")]
+    // History(modules::history::CommitHistoryOptions),
 
-    #[clap(name = "history", about = "Show commit history")]
-    #[clap(visible_alias = "log")]
-    History(modules::history::CommitHistoryOptions),
-
-    #[clap(name = "login", about = "Login to GitHub")]
-    Login,
+    // #[clap(name = "login", about = "Login to GitHub")]
+    // Login,
 }
 
 #[tokio::main]
 async fn main() {
-    let args = Cli::parse();
+    let mut spinner = view::spinner::Spinner::new("Loading...");
 
-    // let password = match input::password("$cg `>` $cw `Enter your GitHub password: `") {
-    //     Ok(password) => password,
-    //     Err(err) => match err {
-    //         input::ReturnType::Cancel => {
-    //             println!("Cancelled");
-    //             return;
-    //         }
-    //         input::ReturnType::Exit => {
-    //             println!("Exiting");
-    //             return;
-    //         }
-    //     },
-    // };
-    // println!("Password: {}", password);
+    tokio::time::sleep(std::time::Duration::from_secs(2)).await;
 
-    let choice = input::list(
-        "$cg `>` $cw `Enter your GitHub password: `",
-        vec![
-            "Option 1",
-            "Option 2",
-            "Option 3",
-            "Option 4",
-            "Option 5",
-            "Option 6",
-            "Option 7",
-            "Option 8",
-            "Option 9",
-            "Option 10",
-            "Option 11",
-            "Option 12",
-            "Option 13",
-            "Option 14",
-            "Option 15",
-            "Option 16",
-            "Option 17",
-            "Option 18",
-            "Option 19",
-            "Option 20",
-        ],
-    )
-    .unwrap_or("");
-    println!("Choice: {:?}", choice);
+    spinner.stop_with_message("Done!");
+
+    tokio::time::sleep(std::time::Duration::from_secs(2)).await;
 
     return;
+
+    let args = Cli::parse();
+
     config::check_prerequisites().await;
 
     let subcmd = match args.subcmd {
@@ -105,14 +70,13 @@ async fn main() {
         }
         SubCommand::CommitFiles(options) => {
             return modules::commit::commit_specific_files(options);
-        }
-        SubCommand::Clone(options) => {
-            return modules::clone::clone_menu(options).await;
-        }
-        SubCommand::History(options) => {
-            return modules::history::commit_history(options);
-        }
-        SubCommand::Login => config::login().await,
+        } // SubCommand::Clone(options) => {
+          //     return modules::clone::clone_menu(options).await;
+          // }
+          // SubCommand::History(options) => {
+          //     return modules::history::commit_history(options);
+          // }
+          // SubCommand::Login => config::login().await,
     }
 
     view::clean_up();

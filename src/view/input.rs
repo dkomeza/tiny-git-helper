@@ -305,7 +305,7 @@ where
         })
         .collect();
 
-    enable_raw_mode().unwrap();
+    super::init();
 
     let mut selected = 0;
     let matcher = SkimMatcherV2::default();
@@ -527,7 +527,7 @@ where
 }
 
 fn get_user_text_input(position: usize, input_type: TextInputType) -> Result<String, ReturnType> {
-    enable_raw_mode().unwrap();
+    super::init();
 
     let mut text_input = TextInput::new(position, input_type);
 

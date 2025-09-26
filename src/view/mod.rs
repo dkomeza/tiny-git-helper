@@ -1,12 +1,17 @@
 use crossterm::{
-    cursor::MoveToNextLine,
+    cursor::{MoveToColumn, MoveToNextLine},
     execute,
     style::{Attribute, Color, Print, SetAttribute, SetBackgroundColor, SetForegroundColor},
-    terminal::{disable_raw_mode, enable_raw_mode},
+    terminal::{disable_raw_mode, enable_raw_mode, Clear, ClearType},
 };
 use std::io::stdout;
 
 pub mod input;
+pub mod spinner;
+
+pub fn init() {
+    enable_raw_mode().unwrap();
+}
 
 pub fn clean_up() {
     disable_raw_mode().unwrap();
@@ -90,7 +95,9 @@ pub struct PrintSize {
 }
 
 /**
-This function is used to print a string with special effects. The special effects are defined by the following syntax:
+This function is used to print a string with special effects.
+
+The special effects are defined by the following syntax: $effect `content`
 - $b: bold
 - $i: italic
 - $u: underline
@@ -112,6 +119,8 @@ This function is used to print a string with special effects. The special effect
 - $bw: background white color
 
 - &>: tab (4 spaces)
+
+Multiple effects can be combined, ex. $b$u - bold underline, or $b `Bold and $u `underline``
  */
 pub fn printer(content: impl AsRef<str>) -> PrintSize {
     enable_raw_mode().unwrap();
@@ -122,7 +131,9 @@ pub fn printer(content: impl AsRef<str>) -> PrintSize {
 }
 
 /** Print the content with correct formatting, but without going into raw mode
-This function is used to print a string with special effects. The special effects are defined by the following syntax:
+This function is used to print a string with special effects.
+
+The special effects are defined by the following syntax: $effect `content`
 - $b: bold
 - $i: italic
 - $u: underline
@@ -144,6 +155,8 @@ This function is used to print a string with special effects. The special effect
 - $bw: background white color
 
 - &>: tab (4 spaces)
+
+Multiple effects can be combined, ex. $b$u - bold underline, or $b `Bold and $u `underline``
 */
 pub fn print(content: impl AsRef<str>) -> PrintSize {
     let mut size = PrintSize { cols: 0, rows: 0 };
@@ -236,6 +249,16 @@ pub fn print(content: impl AsRef<str>) -> PrintSize {
     }
 
     size
+}
+
+pub fn clear_line() {
+    execute!(
+        stdout(),
+        MoveToColumn(0),
+        Clear(ClearType::CurrentLine),
+        MoveToColumn(0)
+    )
+    .unwrap();
 }
 
 pub fn no_subcommand_error() {

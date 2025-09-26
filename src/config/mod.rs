@@ -1,4 +1,4 @@
-use crate::{utils::out, view};
+use crate::view;
 use git::check_git_config;
 use serde::{Deserialize, Serialize};
 
@@ -31,6 +31,8 @@ pub async fn check_prerequisites() {
             std::process::exit(1);
         }
     }
+
+    return;
 
     // Check for git config
     match check_git_config() {

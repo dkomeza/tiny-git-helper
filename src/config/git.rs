@@ -1,3 +1,5 @@
+use regex::Regex;
+
 const MIN_GIT_VERSION: &str = "2.20.0";
 
 // Create an error message for when git is not installed depending on the OS
@@ -117,19 +119,31 @@ pub fn validate_git_install() -> Result<(), GitError> {
         return Err(GitError::NotInstalled);
     }
 
-    let version = s.split(" ").last().unwrap();
+    let re = Regex::new(r"(\d+\.\d+\.\d+)").unwrap();
+    let version;
+
+    if let Some(captures) = re.captures(s) {
+        if let Some(v) = captures.get(1) {
+            version = v.as_str();
+        } else {
+            return Err(GitError::NotInstalled);
+        }
+    } else {
+        return Err(GitError::NotInstalled);
+    }
+
     let version_u32 = version
         .split(".")
         .collect::<Vec<&str>>()
         .iter()
-        .map(|s| s.parse::<u32>().unwrap())
+        .map(|s| s.parse::<u32>().unwrap_or(0))
         .collect::<Vec<u32>>();
 
     let min_version = MIN_GIT_VERSION
         .split(".")
         .collect::<Vec<&str>>()
         .iter()
-        .map(|s| s.parse::<u32>().unwrap())
+        .map(|s| s.parse::<u32>().unwrap_or(0))
         .collect::<Vec<u32>>();
 
     if version_u32.len() != 3 || min_version.len() != 3 {
