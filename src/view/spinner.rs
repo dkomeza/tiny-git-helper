@@ -42,8 +42,9 @@ impl<'a> Spinner<'a> {
     }
 
     pub fn stop(&mut self) {
-        if let Some(handle) = &self.thread_handle {
+        if let Some(handle) = self.thread_handle.take() {
             *(self.should_stop.lock().unwrap()) = true;
+            let _ = handle.join();
         }
     }
 
@@ -51,7 +52,7 @@ impl<'a> Spinner<'a> {
         self.stop();
         clear_line();
         printer(message.to_string());
-        if (message.ends_with('\n')) == false {
+        if !message.ends_with('\n') {
             print!("\n");
         }
     }

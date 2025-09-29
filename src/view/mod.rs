@@ -177,7 +177,7 @@ pub fn print(content: impl AsRef<str>) -> PrintSize {
         if c == '$' {
             let mut special = String::new();
 
-            while content.chars().nth(i).unwrap() != ' ' {
+            while i < n && content.chars().nth(i).unwrap() != ' ' {
                 special.push(content.chars().nth(i).unwrap());
                 i += 1;
             }
@@ -213,7 +213,6 @@ pub fn print(content: impl AsRef<str>) -> PrintSize {
 
             while i < n && content.chars().nth(i).unwrap() == ' ' {
                 i += 1;
-                size.rows += 1;
             }
 
             continue;

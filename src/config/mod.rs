@@ -32,7 +32,6 @@ pub async fn check_prerequisites() {
         }
     }
 
-    return;
 
     // Check for git config
     match check_git_config() {

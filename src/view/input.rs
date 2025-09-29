@@ -6,7 +6,7 @@ use crossterm::{
 };
 use fuzzy_matcher::{skim::SkimMatcherV2, FuzzyMatcher};
 use std::{
-    fmt::{write, Debug, Display},
+    fmt::{Debug, Display},
     io::{self, Write},
 };
 
@@ -508,12 +508,11 @@ where
 
         let word = items[i].value.to_string();
 
-        for i in 0..word.len() {
-            let letter = word.get(i..i + 1).unwrap_or("");
-            if matched_letters.iter().find(|&&x| x == i).is_some() {
-                print(format!("$cc `{}`", letter));
+        for (byte_idx, ch) in word.char_indices() {
+            if matched_letters.iter().any(|&x| x == byte_idx) {
+                print(format!("$cc `{}`", ch));
             } else {
-                print(format!("{}", letter));
+                print(format!("{}", ch));
             }
         }
 
