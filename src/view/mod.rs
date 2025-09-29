@@ -261,7 +261,7 @@ pub fn clear_line() {
 }
 
 pub fn no_subcommand_error() {
-    let eror_message = r#"
+    let error_message = r#"
         $b$cr `error`: no subcommand provided
 
         $b$u `Usage`: $b `tgh` [COMMAND]
@@ -269,5 +269,5 @@ pub fn no_subcommand_error() {
         For more information try $b `'tgh --help'`
     "#;
 
-    printer(eror_message);
+    printer(error_message);
 }
