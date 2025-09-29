@@ -100,28 +100,6 @@ pub fn save_config_file(config: crate::config::Config) {
     config_file.write_all(config_contents.as_bytes()).unwrap();
 }
 
-pub fn validate_email(
-    email: &str,
-) -> Result<inquire::validator::Validation, inquire::CustomUserError> {
-    use regex::Regex;
-
-    let re = Regex::new(r"^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$").unwrap();
-
-    if email.len() == 0 {
-        return Ok(inquire::validator::Validation::Invalid(
-            "Email cannot be empty".into(),
-        ));
-    }
-
-    if !re.is_match(email) {
-        return Ok(inquire::validator::Validation::Invalid(
-            "Invalid email".into(),
-        ));
-    }
-
-    Ok(inquire::validator::Validation::Valid)
-}
-
 #[derive(Clone, Debug)]
 pub struct CommitLabel {
     pub label: String,
@@ -312,3 +290,4 @@ pub fn get_labels() -> Vec<CommitLabel> {
 
     labels
 }
+
