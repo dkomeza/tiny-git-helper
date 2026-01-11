@@ -38,9 +38,11 @@ fn tokio_check_for_updates() -> Result<String, Box<dyn std::error::Error + Send 
 
         if latest > current {
             let update_msg = format!(
-                "\n$cg$b `📦 New Update Available`
+                r#"
+                $cg$b `📦 New Update Available`
                  &> $cy `{}` $cw `➜` $cg$b `{}`
-                 &> Run $cc$i `tgh update` $cw `to upgrade`\n",
+                 &> Run $cc$i `tgh update` $cw `to upgrade`
+                "#,
                 current_version, release.version
             );
             return Ok(update_msg);
