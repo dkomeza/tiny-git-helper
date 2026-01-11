@@ -93,12 +93,12 @@ jobs:
         run: cargo build --release --target ${{ matrix.target }}
 
       - name: Compress binary
-        run: tar -czf target/${{ matrix.target }}.tar.gz -C target/${{ matrix.target }}/release tgh
+        run: zip -j target/${{ matrix.target }}.zip target/${{ matrix.target }}/release/tgh
 
       - name: Upload binaries to release
         uses: svenstaro/upload-release-action@v2
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
-          file: target/${{ matrix.target }}.tar.gz
-          asset_name: tgh-${{ matrix.target }}.tar.gz
+          file: target/${{ matrix.target }}.zip
+          asset_name: tgh-${{ matrix.target }}.zip
           tag: ${{ github.ref }}
