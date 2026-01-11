@@ -1,3 +1,5 @@
+use std::time::SystemTime;
+
 use crate::view;
 use git::check_git_config;
 use serde::{Deserialize, Serialize};
@@ -6,6 +8,7 @@ mod config;
 pub mod defines;
 mod git;
 mod github;
+mod update;
 pub mod utils;
 
 pub use config::load_config;
@@ -21,6 +24,20 @@ pub struct Config {
     pub fancy: bool,
 }
 
+#[derive(Serialize, Deserialize, Clone)]
+pub struct Metadata {
+    pub last_checked: String,
+}
+
+impl Default for Metadata {
+    fn default() -> Self {
+        Metadata {
+            last_checked: chrono::DateTime::<chrono::Utc>::from(SystemTime::UNIX_EPOCH)
+                .to_rfc3339(),
+        }
+    }
+}
+
 /// Checks if the prerequisites for tgh are installed.
 /// If not, it will print an error and exit.
 pub async fn check_prerequisites() {
@@ -31,7 +48,6 @@ pub async fn check_prerequisites() {
             std::process::exit(1);
         }
     }
-
 
     // Check for git config
     match check_git_config() {
@@ -57,5 +73,21 @@ pub async fn check_prerequisites() {
         login().await;
 
         std::thread::sleep(std::time::Duration::from_secs(1));
+    }
+
+    if utils::should_check_for_updates() {
+        match update::check_for_updates().await {
+            Ok(msg) => {
+                if msg.len() > 0 {
+                    view::printer(msg);
+                }
+            }
+            Err(err) => {
+                view::printer(&format!(
+                    "\n$b$cr `error`: Failed to check for updates: {}\n",
+                    err.to_string()
+                ));
+            }
+        }
     }
 }
