@@ -1,7 +1,7 @@
 [package]
 name = "tiny-git-helper"
 description = "tgh - A GitHub CLI written in Rust"
-version = "0.1.5"
+version = "0.0.5"
 edition = "2021"
 
 [[bin]]
@@ -24,3 +24,6 @@ spinners = "4.1.1"
 tokio = { version = "1.34.0", features = ["full"] }
 clap = { version = "4.4.11", features = ["derive", "unicode"] }
 fuzzy-matcher = "0.3.7"
+chrono = "0.4.42"
+self_update = { version = "0.39", features = ["archive-zip", "archive-tar"] }
+semver = "1.0.27"
