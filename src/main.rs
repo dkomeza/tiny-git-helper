@@ -22,6 +22,9 @@ enum SubCommand {
     CommitFiles(modules::commit::CommitOptions),
     #[clap(name = "ca", about = "Commit all files")]
     CommitAll(modules::commit::CommitOptions),
+
+    #[clap(name = "update", about = "Update tgh to the latest version")]
+    Update,
 }
 
 #[tokio::main]
@@ -44,6 +47,9 @@ async fn main() {
         }
         SubCommand::CommitFiles(options) => {
             modules::commit::commit_specific_files(options);
+        }
+        SubCommand::Update => {
+            config::update::perform_self_update().await;
         }
     }
 

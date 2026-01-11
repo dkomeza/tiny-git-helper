@@ -8,7 +8,7 @@ mod config;
 pub mod defines;
 mod git;
 mod github;
-mod update;
+pub mod update;
 pub mod utils;
 
 pub use config::load_config;
