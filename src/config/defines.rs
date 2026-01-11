@@ -40,21 +40,8 @@ impl COLOR {
         }
         .to_string()
     }
-
-    pub fn as_inquire_color(&self) -> inquire::ui::Color {
-        match self {
-            COLOR::RED => inquire::ui::Color::LightRed,
-            COLOR::GREEN => inquire::ui::Color::LightGreen,
-            COLOR::YELLOW => inquire::ui::Color::LightYellow,
-            COLOR::BLUE => inquire::ui::Color::LightBlue,
-            COLOR::MAGENTA => inquire::ui::Color::LightMagenta,
-            COLOR::CYAN => inquire::ui::Color::LightCyan,
-            COLOR::WHITE => inquire::ui::Color::White,
-            COLOR::GRAY => inquire::ui::Color::Grey,
-            _ => inquire::ui::Color::White,
-        }
-    }
 }
+
 impl std::fmt::Display for COLOR {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
         let color = match self {

@@ -10,13 +10,22 @@ pub fn handle_config_folder() {
     create_dir_all(config_path).unwrap();
 }
 
-pub fn get_config_path() -> String {
+fn get_config_path() -> String {
     use home::home_dir;
 
     let home = home_dir().unwrap();
     let config_path = format!("{}/.config/tgh/config.json", home.display());
 
     config_path
+}
+
+fn get_metadata_path() -> String {
+    use home::home_dir;
+
+    let home = home_dir().unwrap();
+    let metadata_path = format!("{}/.config/tgh/metadata.json", home.display());
+
+    metadata_path
 }
 
 pub fn config_exists() -> bool {
@@ -28,30 +37,59 @@ pub fn config_exists() -> bool {
     config_path.exists()
 }
 
-pub fn read_config_content() -> String {
+fn read_file_content(path: String) -> Result<String, std::io::Error> {
     use std::fs::File;
     use std::io::prelude::*;
 
-    let config_path = get_config_path();
-    let mut config_file = File::open(config_path).unwrap();
+    let mut config_file = File::open(path)?;
     let mut config_contents = String::new();
 
-    config_file.read_to_string(&mut config_contents).unwrap();
+    config_file.read_to_string(&mut config_contents)?;
 
-    config_contents
+    Ok(config_contents)
 }
 
 pub fn read_config() -> crate::config::Config {
-    let config_contents = read_config_content();
-    let config: crate::config::Config = serde_json::from_str(&config_contents).unwrap();
+    let config_contents = read_file_content(get_config_path());
+
+    let conf = match config_contents {
+        Err(_) => {
+            panic!("Failed to read config file.");
+        }
+        Ok(contents) => contents,
+    };
+
+    let config: crate::config::Config = serde_json::from_str(&conf).unwrap();
 
     config
+}
+
+pub fn read_metadata() -> crate::config::Metadata {
+    let metadata_path = get_metadata_path();
+
+    let metadata_contents = read_file_content(metadata_path);
+
+    let metadata = match metadata_contents {
+        Err(_) => {
+            let metadata = crate::config::Metadata::default();
+            save_metadata_file(metadata.clone());
+            metadata
+        }
+        Ok(contents) => serde_json::from_str(&contents).unwrap_or_default(),
+    };
+
+    metadata
 }
 
 pub fn validate_config_file() -> bool {
     use crate::config::Config;
 
-    let config_contents = read_config_content();
+    let config_contents = match read_file_content(get_config_path()) {
+        Ok(contents) => contents,
+        Err(_) => {
+            return false;
+        }
+    };
 
     if config_contents.len() == 0 {
         return false;
@@ -98,28 +136,6 @@ pub fn save_config_file(config: crate::config::Config) {
     let config_contents = serde_json::to_string_pretty(&config).unwrap();
 
     config_file.write_all(config_contents.as_bytes()).unwrap();
-}
-
-pub fn validate_email(
-    email: &str,
-) -> Result<inquire::validator::Validation, inquire::CustomUserError> {
-    use regex::Regex;
-
-    let re = Regex::new(r"^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$").unwrap();
-
-    if email.len() == 0 {
-        return Ok(inquire::validator::Validation::Invalid(
-            "Email cannot be empty".into(),
-        ));
-    }
-
-    if !re.is_match(email) {
-        return Ok(inquire::validator::Validation::Invalid(
-            "Invalid email".into(),
-        ));
-    }
-
-    Ok(inquire::validator::Validation::Valid)
 }
 
 #[derive(Clone, Debug)]
@@ -311,4 +327,40 @@ pub fn get_labels() -> Vec<CommitLabel> {
     });
 
     labels
+}
+
+pub fn should_check_for_updates() -> bool {
+    let metadata = read_metadata();
+
+    let now = chrono::Utc::now();
+    let last_checked = chrono::DateTime::parse_from_rfc3339(&metadata.last_checked)
+        .unwrap()
+        .to_utc();
+
+    let time_diff = now.signed_duration_since(last_checked).num_days();
+
+    if time_diff >= 1 {
+        return true;
+    }
+
+    false
+}
+
+pub fn save_metadata_file(metadata: crate::config::Metadata) {
+    use std::{fs::File, io::prelude::*};
+
+    let metadata_path = get_metadata_path();
+
+    let mut metadata_file = match (File::create(metadata_path)) {
+        Ok(file) => file,
+        Err(err) => {
+            panic!("Failed to create metadata file: {}", err.to_string());
+        }
+    };
+
+    let metadata_contents = serde_json::to_string_pretty(&metadata).unwrap();
+
+    metadata_file
+        .write_all(metadata_contents.as_bytes())
+        .unwrap();
 }
