@@ -1,114 +1,79 @@
-# Tiny git helper
+# Tiny Git Helper (tgh)
 
-[![Codacy Badge](https://app.codacy.com/project/badge/Grade/d588595e2823486190d05dccabe88b49)](https://app.codacy.com/gh/dkomeza/tiny-git-helper/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_grade)
-[![Build binaries](https://github.com/dkomeza/tiny-git-helper/actions/workflows/build_binaries.yml/badge.svg)](https://github.com/dkomeza/tiny-git-helper/actions/workflows/build_binaries.yml)
-[![Release](https://github.com/dkomeza/tiny-git-helper/actions/workflows/release_binaries.yml/badge.svg)](https://github.com/dkomeza/tiny-git-helper/actions/workflows/release_binaries.yml)
+<p align="center">
+  <a href="https://app.codacy.com/gh/dkomeza/tiny-git-helper/dashboard">
+    <img src="https://app.codacy.com/project/badge/Grade/d588595e2823486190d05dccabe88b49" alt="Codacy Badge"/>
+  </a>
+  <a href="https://github.com/dkomeza/tiny-git-helper/actions/workflows/build_binaries.yml">
+    <img src="https://github.com/dkomeza/tiny-git-helper/actions/workflows/build_binaries.yml/badge.svg" alt="Build Status"/>
+  </a>
+  <a href="https://github.com/dkomeza/tiny-git-helper/actions/workflows/release_binaries.yml">
+    <img src="https://github.com/dkomeza/tiny-git-helper/actions/workflows/release_binaries.yml/badge.svg" alt="Release Status"/>
+  </a>
+</p>
 
-A small tool designed to make process of using git and github easier.
+<p align="center">
+  <b>Streamline your daily Git & GitHub workflow.</b><br/>
+  A blazing fast CLI tool written in Rust designed to make common git operations effortless.
+</p>
 
-## Usage
+---
+
+## 📦 Installation
+
+`tgh` runs on **macOS**, **Linux**, and **Windows**.
+
+### 🍎 macOS & 🐧 Linux
+
+Run the following command in your terminal. It automatically detects your architecture (including Apple Silicon) and sets up your shell path.
+
+#### Install latest version
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/dkomeza/tiny-git-helper/main/scripts/install.sh | bash
+```
+
+#### OR Install a specific version
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/dkomeza/tiny-git-helper/main/scripts/install.sh | bash -s -- v0.1.5
+```
+
+### 🪟 Windows
+
+Run the following command in PowerShell:
+
+```powershell
+# Install latest version
+irm https://raw.githubusercontent.com/dkomeza/tiny-git-helper/main/scripts/install.ps1 | iex
+```
+
+## 🚀 Usage
+
+Once installed, simply run `tgh --help` to see the available commands.
 
 ```
-tgh --help
 tgh - A GitHub CLI written in Rust
 
 Usage: tgh [COMMAND]
 
 Commands:
-  commit  Open the commit menu [aliases: c]
-  ca      Commit all files
-  cf      Commit specific files
-  clone   Clone a repository
-  login   Login to GitHub
-  help    Print this message or the help of the given subcommand(s)
+  commit   Commit changes to the repository [aliases: cf]
+  ca       Commit all files (Stage All + Commit)
+  update   Update tgh to the latest version
+  help     Print this message or the help of the given subcommand(s)
 
 Options:
   -h, --help     Print help
   -V, --version  Print version
 ```
 
-## Installation
+### ✨ Self-Updating
 
-### Linux/Mac OS (Unix)
+You don't need to run the install script again to get new features. tgh includes a built-in updater:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/dkomeza/tiny-git-helper/main/scripts/install.sh | bash
+tgh update
 ```
 
-### Windows
-
-Currently the only way to install tgh on Windows is to download the binary from [releases](https://github.com/dkomeza/tiny-git-helper/releases) page and add it to your PATH.
-For example you can create a folder `C:\Program Files\tgh` and add it to your PATH.
-
-## Features
-
-- Commit
-  - [x] Commit all files
-  - [x] Commit specific files
-  - [ ] Revert a commit
-  - [ ] Amend a commit
-  - [ ] Better handling of commit errors
-- Clone
-  - [x] Clone a private repository
-  - [ ] Clone a public repository (by searching)
-  - [ ] Better handling of clone errors
-  - [ ] Clone a repository with a specific branch
-  - [ ] Clone a repository with a specific tag
-- Login
-  - [x] Login to GitHub
-- Branch
-  - [ ] Show the current branch
-  - [ ] Create a new branch
-  - [ ] Switch to a different branch
-  - [ ] Delete a branch
-  - [ ] Rename a branch
-  - [ ] List all branches
-  - [ ] List all branches with their last commit
-  - [ ] List all remote branches
-- Diff
-  - [ ] Show diff of all files
-  - [ ] Show diff of specific files
-  - [ ] Show diff of a specific file
-- Merge
-  - [ ] Merge a branch
-  - [ ] Merge a branch with a specific branch
-  - [ ] Handle merge conflicts
-- Pull
-  - [ ] Pull from a branch
-  - [ ] Handle pull conflicts
-- Push
-  - [ ] Push to a branch
-  - [ ] Handle push errors
-- Tag
-  - [ ] Create a new tag
-  - [ ] Delete a tag
-  - [ ] List all tags
-- Remote
-  - [ ] Add a remote
-  - [ ] Remove a remote
-  - [ ] List all remotes
-  - [ ] Change a remote URL
-- Stash
-  - [ ] Stash all changes
-  - [ ] Stash specific changes
-  - [ ] Apply a stash
-  - [ ] Drop a stash
-  - [ ] List all stashes
-  - [ ] Show a stash
-  - [ ] Show a stash diff
-  - [ ] Pop a stash
-  - [ ] Clear all stashes
-- Status
-  - [ ] Show status of all files
-  - [ ] Show status of files in the current directory
-  - [ ] Show currently staged files
-- Init
-  - [ ] Initialise a new repository
-  - [ ] Initialise a new repository with a specific license
-  - [ ] Initialise a new repository with a specific gitignore
-  - [ ] Initialise a new repository with a specific README
-  - [ ] Initialise a new repository with a specific branch
-- History
-  - [x] Show commit history
-  - [x] Show commit diff
-  - [x] Show commit details
+This will check for the latest release on GitHub, download it, and safely replace your current binary.
