@@ -57,3 +57,44 @@ impl<'a> Spinner<'a> {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::time::Duration;
+
+    #[test]
+    fn test_spinner_lifecycle() {
+        let mut spinner = Spinner::new("Testing spinner...");
+        std::thread::sleep(Duration::from_millis(200));
+
+        spinner.stop();
+
+        // Verify state after stop
+        assert!(
+            *spinner.should_stop.lock().unwrap(),
+            "Spinner should be marked as stopped after stop()"
+        );
+        assert!(
+            spinner.thread_handle.is_none(),
+            "Thread handle should be None after stop()"
+        );
+    }
+
+    #[test]
+    fn test_spinner_stop_with_message() {
+        let mut spinner = Spinner::new("Testing spinner with message...");
+
+        std::thread::sleep(Duration::from_millis(200));
+        spinner.stop_with_message("Done!");
+
+        assert!(
+            *spinner.should_stop.lock().unwrap(),
+            "Spinner should be marked as stopped after stop_with_message()"
+        );
+        assert!(
+            spinner.thread_handle.is_none(),
+            "Thread handle should be None after stop_with_message()"
+        );
+    }
+}

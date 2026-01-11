@@ -1,54 +1,6 @@
 use super::CommitOptions;
 use inquire::{list_option::ListOption, validator::Validation};
 
-pub fn commit_menu(options: CommitOptions) {
-    use crate::clear_screen;
-    use inquire::Select;
-    use std::process;
-
-    clear_screen();
-
-    super::functions::is_valid_commit();
-
-    let choice;
-
-    let menu = Select::new(
-        "What do you want to commit?",
-        vec!["Commit specific files", "Commit all files"],
-    )
-    .prompt();
-
-    match menu {
-        Ok(option) => {
-            choice = option;
-        }
-        Err(_) => {
-            process::exit(0);
-        }
-    }
-
-    match choice {
-        "Commit specific files" => {
-            commit_specific_files(options);
-        }
-        "Commit all files" => {
-            commit_all_files(options);
-        }
-        _ => {
-            println!("Invalid option");
-        }
-    }
-}
-
-pub fn commit_all_files(options: CommitOptions) {
-    use super::functions::{commit_all_files, is_valid_commit};
-
-    is_valid_commit();
-
-    let message = ask_commit_message(&options);
-
-    commit_all_files(message, options.no_push);
-}
 pub fn commit_specific_files(options: CommitOptions) {
     use super::functions::{commit_specific_files, is_valid_commit};
 
@@ -60,7 +12,6 @@ pub fn commit_specific_files(options: CommitOptions) {
 
     commit_specific_files(files, message, options.no_push);
 }
-pub fn commit_history() {}
 
 fn ask_commit_message(options: &CommitOptions) -> String {
     use inquire::{Select, Text};
