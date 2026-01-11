@@ -10,19 +10,15 @@ env:
 
 jobs:
   release-linux:
+    runs-on: ubuntu-latest
     strategy:
       matrix:
         platform:
-          - release_for: ARM64 Linux
-            target: aarch64-unknown-linux-gnu
+          - target: aarch64-unknown-linux-gnu
             binary: "tgh-linux-arm64"
-            host: "ubuntu-latest"
-          - release_for: X86_64 Linux
-            target: x86_64-unknown-linux-gnu
+          - target: x86_64-unknown-linux-gnu
             binary: "tgh-linux-x64"
-            host: "ubuntu-latest"
 
-    runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -41,19 +37,18 @@ jobs:
         run: cross build --release --target ${{ matrix.platform.target }}
 
       - name: Compress binary
-        run: tar -czf target/${{ matrix.platform.binary }}.tar.gz -C target/${{ matrix.platform.target }}/release tgh
+        run: tar -czf target/${{ matrix.platform.target }}.tar.gz -C target/${{ matrix.platform.target }}/release tgh
 
       - name: Upload binaries to release
         uses: svenstaro/upload-release-action@v2
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
-          file: target/${{ matrix.platform.binary }}.tar.gz
-          asset_name: ${{ matrix.platform.binary }}.tar.gz
+          file: target/${{ matrix.platform.target }}.tar.gz
+          asset_name: tgh-${{ matrix.platform.target }}.tar.gz
           tag: ${{ github.ref }}
 
   release-windows:
     runs-on: windows-latest
-
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -67,28 +62,22 @@ jobs:
       - name: Build
         run: cargo build --release
 
+      - name: Compress binary
+        run: Compress-Archive -Path target/release/tgh.exe -DestinationPath target/tgh-pc-windows-msvc.zip
+
       - name: Upload binaries to release
         uses: svenstaro/upload-release-action@v2
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
-          file: target/release/tgh.exe
-          asset_name: tgh-windows-x64.exe
+          file: target/tgh-pc-windows-msvc.zip
+          asset_name: tgh-x86_64-pc-windows-msvc.zip
           tag: ${{ github.ref }}
 
   release-macos:
+    runs-on: macos-latest
     strategy:
       matrix:
-        platform:
-          - release_for: X86_64 macOS
-            target: x86_64-apple-darwin
-            binary: "tgh-darwin-x64"
-            host: "macos-latest"
-          - release_for: ARM64 macOS
-            target: aarch64-apple-darwin
-            binary: "tgh-darwin-arm64"
-            host: "macos-latest"
-
-    runs-on: macos-latest
+        target: [x86_64-apple-darwin, aarch64-apple-darwin]
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -98,21 +87,18 @@ jobs:
         with:
           toolchain: stable
           override: true
-          target: ${{ matrix.platform.target }}
-
-      - name: Setup cross-compilation
-        run: cargo install -f cross
+          target: ${{ matrix.target }}
 
       - name: Build
-        run: cross build --release --target ${{ matrix.platform.target }}
+        run: cargo build --release --target ${{ matrix.target }}
 
       - name: Compress binary
-        run: tar -czf target/${{ matrix.platform.binary }}.tar.gz -C target/${{ matrix.platform.target }}/release tgh
+        run: tar -czf target/${{ matrix.target }}.tar.gz -C target/${{ matrix.target }}/release tgh
 
       - name: Upload binaries to release
         uses: svenstaro/upload-release-action@v2
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
-          file: target/${{ matrix.platform.binary }}.tar.gz
-          asset_name: ${{ matrix.platform.binary }}.tar.gz
+          file: target/${{ matrix.target }}.tar.gz
+          asset_name: tgh-${{ matrix.target }}.tar.gz
           tag: ${{ github.ref }}
