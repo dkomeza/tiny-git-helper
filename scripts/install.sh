@@ -1,116 +1,162 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Reset
-Color_Off=''
-
-# Regular Colors
-Red=''
-Green=''
-Dim='' # White
-
-# Bold
-Bold_White=''
-Bold_Green=''
-
+# -------------------------------------------------------------------------
+# Formatting & Colors
+# -------------------------------------------------------------------------
 if [[ -t 1 ]]; then
-    # Reset
-    Color_Off='\e[0m' # Text Reset
-
-    # Regular Colors
-    Red='\e[31m'   # Red
-    Green='\033[0;32m' # Green
-    Dim='\033[0;2m'    # White
-
-    # Bold
-    Bold_Green='\033[1;32m' # Bold Green
-    Bold_White='\033[1m'    # Bold White
+    Reset='\033[0m'
+    Red='\033[31m'
+    Green='\033[32m'
+    Dim='\033[2m'
+    Bold_White='\033[1m'
+    Bold_Green='\033[1;32m'
+else
+    Reset=''
+    Red=''
+    Green=''
+    Dim=''
+    Bold_White=''
+    Bold_Green=''
 fi
 
 error() {
-    echo -e "${Red}error${Color_Off}:" "$@" >&2
+    printf "${Red}error${Reset}: %b\n" "$*" >&2
     exit 1
 }
 
 info() {
-    echo -e "${Dim}$@ ${Color_Off}"
+    printf "${Dim}%b ${Reset}\n" "$*"
 }
 
 info_bold() {
-    echo -e "${Bold_White}$@ ${Color_Off}"
+    printf "${Bold_White}%b ${Reset}\n" "$*"
 }
 
 success() {
-    echo -e "${Green}$@ ${Color_Off}"
+    printf "${Green}%b ${Reset}\n" "$*"
 }
 
-platform=$(uname -ms)
+# -------------------------------------------------------------------------
+# Argument Parsing (Positional Tag)
+# -------------------------------------------------------------------------
+VERSION="latest"
 
-if [[ ${OS:-} = Windows_NT ]]; then
-    echo "There is no install script for your platform: $platform"
-    exit $?
+# Check if first argument exists and doesn't start with '-'
+if [[ $# -gt 0 && ! "$1" =~ ^- ]]; then
+    VERSION="$1"
 fi
 
-case $platform in
-'Darwin x86_64')
-    target=darwin-x64
-    ;;
-'Darwin arm64')
-    target=darwin-arm64
-    ;;
-'Linux aarch64' | 'Linux arm64')
-    target=linux-arm64
-    ;;
-'Linux x86_64' | *)
-    target=linux-x64
-    ;;
+# -------------------------------------------------------------------------
+# Platform & Architecture Detection
+# -------------------------------------------------------------------------
+os=$(uname -s)
+arch=$(uname -m)
+target=""
+ext=""
+
+case $os in
+    Darwin)
+        ext="zip"
+        case $arch in
+            x86_64)
+                if [[ $(sysctl -n sysctl.proc_translated 2>/dev/null) == "1" ]]; then
+                    target="aarch64-apple-darwin"
+                    info "Running in Rosetta 2. Selecting native Apple Silicon binary."
+                else
+                    target="x86_64-apple-darwin"
+                fi
+                ;;
+            arm64)
+                target="aarch64-apple-darwin"
+                ;;
+            *)
+                error "Unsupported macOS architecture: $arch"
+                ;;
+        esac
+        ;;
+    Linux)
+        ext="tar.gz"
+        case $arch in
+            x86_64)
+                target="x86_64-unknown-linux-gnu"
+                ;;
+            aarch64|arm64)
+                target="aarch64-unknown-linux-gnu"
+                ;;
+            *)
+                error "Unsupported Linux architecture: $arch"
+                ;;
+        esac
+        ;;
+    *)
+        error "Unsupported OS: $os"
+        ;;
 esac
 
-if [[ $target = darwin-x64 ]]; then
-    # Is this process running in Rosetta?
-    # redirect stderr to devnull to avoid error message when not running in Rosetta
-    if [[ $(sysctl -n sysctl.proc_translated 2>/dev/null) = 1 ]]; then
-        target=darwin-aarch64
-        info "Your shell is running in Rosetta 2. Downloading bun for $target instead"
-    fi
+# -------------------------------------------------------------------------
+# Configuration
+# -------------------------------------------------------------------------
+REPO_URL="https://github.com/dkomeza/tiny-git-helper"
+
+if [[ "$VERSION" == "latest" ]]; then
+    DOWNLOAD_URL="$REPO_URL/releases/latest/download/tgh-$target.$ext"
+else
+    DOWNLOAD_URL="$REPO_URL/releases/download/$VERSION/tgh-$target.$ext"
 fi
 
 install_env=TGH_INSTALL
 bin_env=\$$install_env/bin
 
-repo="https://github.com/dkomeza/tiny-git-helper"
-tgh_uri="$repo/releases/latest/download/tgh-$target.tar.gz"
-exe_name="tgh"
+install_dir=${TGH_INSTALL:-"$HOME/.tgh"}
+bin_dir="$install_dir/bin"
+exe="$bin_dir/tgh"
 
-install_dir=$HOME/.tgh
-bin_dir=$install_dir/bin
-exe=$bin_dir/$exe_name
+# -------------------------------------------------------------------------
+# Installation
+# -------------------------------------------------------------------------
+info_bold "Installing tgh ($VERSION) for $target..."
 
 if [[ ! -d $bin_dir ]]; then
     mkdir -p "$bin_dir"
 fi
 
-# Download the compressed tar file from github
-curl --fail --location --progress-bar --output "$exe.tar.gz" "$tgh_uri" ||
-    error "Failed to download tgh from \"$tgh_uri\""
+# Download
+echo
+info "Downloading from $DOWNLOAD_URL"
+if ! curl --fail --location --progress-bar --output "tgh_download.$ext" "$DOWNLOAD_URL"; then
+    echo
+    error "Download failed. Please check version '$VERSION' exists or your internet connection."
+fi
 
-# Extract the tar file and remove it
-tar -xzf "$exe.tar.gz" -C "$bin_dir" && rm -f "$exe.tar.gz"
+# Extract based on extension
+echo
+info "Extracting..."
+if [[ "$ext" == "zip" ]]; then
+    unzip -q -o -j "tgh_download.$ext" -d "$bin_dir" || error "Failed to unzip archive"
+else
+    tar -xzf "tgh_download.$ext" -C "$bin_dir" || error "Failed to extract tar archive"
+fi
 
-# Make the file executable
-chmod +x "$exe" || error "Failed to make $exe executable"
+# Cleanup
+rm -f "tgh_download.$ext"
 
+# Make executable
+chmod +x "$exe" || error "Failed to make binary executable"
+
+# -------------------------------------------------------------------------
+# Shell Configuration
+# -------------------------------------------------------------------------
 tildify() {
     if [[ $1 = $HOME/* ]]; then
         local replacement=\~/
-
         echo "${1/$HOME\//$replacement}"
     else
         echo "$1"
     fi
 }
 
-success "tgh was installed successfully to $Bold_Green$(tildify "$exe")"
+success "tgh ($VERSION) was installed successfully to $Bold_Green$(tildify "$exe")"
 
 refresh_command=''
 tilde_bin_dir=$(tildify "$bin_dir")
@@ -118,7 +164,9 @@ quoted_install_dir=\"${install_dir//\"/\\\"}\"
 
 echo
 
-case $(basename "$SHELL") in
+shell_name=$(basename "$SHELL")
+
+case $shell_name in
 fish)
     commands=(
         "set --export $install_env $quoted_install_dir"
@@ -129,21 +177,21 @@ fish)
     tilde_fish_config=$(tildify "$fish_config")
 
     if [[ -w $fish_config ]]; then
-        {
-            echo ''
-            echo "# tgh"
-
-            for command in "${commands[@]}"; do
-                echo "$command"
-            done
-        } >>"$fish_config"
-
-        info "Added \"$tilde_bin_dir\" to \$PATH in \"$tilde_fish_config\""
-
+        if ! grep -q "$install_env" "$fish_config"; then
+            {
+                echo ''
+                echo "# tgh"
+                for command in "${commands[@]}"; do
+                    echo "$command"
+                done
+            } >>"$fish_config"
+            info "Added \"$tilde_bin_dir\" to \$PATH in \"$tilde_fish_config\""
+        else
+            info "Path already configured in \"$tilde_fish_config\""
+        fi
         refresh_command="source $tilde_fish_config"
     else
-        echo "Manually add the directory to $tilde_fish_config (or similar):"
-
+        echo "Manually add the directory to $tilde_fish_config:"
         for command in "${commands[@]}"; do
             info_bold "  $command"
         done
@@ -159,21 +207,21 @@ zsh)
     tilde_zsh_config=$(tildify "$zsh_config")
 
     if [[ -w $zsh_config ]]; then
-        {
-            echo ''
-            echo '# tgh'
-
-            for command in "${commands[@]}"; do
-                echo "$command"
-            done
-        } >>"$zsh_config"
-
-        info "Added \"$tilde_bin_dir\" to \$PATH in \"$tilde_zsh_config\""
-
+        if ! grep -q "$install_env" "$zsh_config"; then
+            {
+                echo ''
+                echo '# tgh'
+                for command in "${commands[@]}"; do
+                    echo "$command"
+                done
+            } >>"$zsh_config"
+            info "Added \"$tilde_bin_dir\" to \$PATH in \"$tilde_zsh_config\""
+        else
+            info "Path already configured in \"$tilde_zsh_config\""
+        fi
         refresh_command="exec $SHELL"
     else
-        echo "Manually add the directory to $tilde_zsh_config (or similar):"
-
+        echo "Manually add the directory to $tilde_zsh_config:"
         for command in "${commands[@]}"; do
             info_bold "  $command"
         done
@@ -184,37 +232,30 @@ bash)
         "export $install_env=$quoted_install_dir"
         "export PATH=$bin_env:\$PATH"
     )
-
+    
     bash_configs=(
         "$HOME/.bashrc"
         "$HOME/.bash_profile"
     )
 
-    if [[ ${XDG_CONFIG_HOME:-} ]]; then
-        bash_configs+=(
-            "$XDG_CONFIG_HOME/.bash_profile"
-            "$XDG_CONFIG_HOME/.bashrc"
-            "$XDG_CONFIG_HOME/bash_profile"
-            "$XDG_CONFIG_HOME/bashrc"
-        )
-    fi
-
     set_manually=true
     for bash_config in "${bash_configs[@]}"; do
-        tilde_bash_config=$(tildify "$bash_config")
-
         if [[ -w $bash_config ]]; then
-            {
-                echo ''
-                echo '# tgh'
-
-                for command in "${commands[@]}"; do
-                    echo "$command"
-                done
-            } >>"$bash_config"
-
-            info "Added \"$tilde_bin_dir\" to \$PATH in \"$tilde_bash_config\""
-
+            tilde_bash_config=$(tildify "$bash_config")
+            
+            if ! grep -q "$install_env" "$bash_config"; then
+                {
+                    echo ''
+                    echo '# tgh'
+                    for command in "${commands[@]}"; do
+                        echo "$command"
+                    done
+                } >>"$bash_config"
+                info "Added \"$tilde_bin_dir\" to \$PATH in \"$tilde_bash_config\""
+            else
+                info "Path already configured in \"$tilde_bash_config\""
+            fi
+            
             refresh_command="source $bash_config"
             set_manually=false
             break
@@ -222,15 +263,14 @@ bash)
     done
 
     if [[ $set_manually = true ]]; then
-        echo "Manually add the directory to $tilde_bash_config (or similar):"
-
+        echo "Manually add the directory to your bash config:"
         for command in "${commands[@]}"; do
             info_bold "  $command"
         done
     fi
     ;;
 *)
-    echo 'Manually add the directory to ~/.bashrc (or similar):'
+    echo 'Manually add the directory to your shell config:'
     info_bold "  export $install_env=$quoted_install_dir"
     info_bold "  export PATH=\"$bin_env:\$PATH\""
     ;;
@@ -245,3 +285,4 @@ if [[ $refresh_command ]]; then
 fi
 
 info_bold "  tgh --help"
+echo
