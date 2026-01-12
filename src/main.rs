@@ -31,6 +31,9 @@ enum SubCommand {
 async fn main() {
     let args = Cli::parse();
 
+    let _ = view::input::list("Label: ", config::utils::get_labels());
+    return;
+
     config::check_prerequisites().await;
 
     let subcmd = match args.subcmd {

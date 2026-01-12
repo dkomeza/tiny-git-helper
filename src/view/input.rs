@@ -354,20 +354,26 @@ where
         if let Ok(event) = event::read() {
             match event {
                 event::Event::Key(event) => match event.code {
-                    KeyCode::Esc => {
+                    KeyCode::Esc | KeyCode::Enter => {
                         execute!(
                             io::stdout(),
                             MoveToColumn(0),
                             terminal::Clear(ClearType::FromCursorDown)
                         )
                         .unwrap();
-                        print(format!("{}$cr$b `canceled`\n", prompt));
+
+                        if event.code == KeyCode::Enter {
+                            print(format!("{}$cw$b `{}`\n", prompt, items[selected]));
+                        } else {
+                            print(format!("{}$cr$b `canceled`\n", prompt));
+                        }
 
                         disable_raw_mode().unwrap();
-                        return Err(ReturnType::Cancel);
-                    }
-                    KeyCode::Enter => {
-                        break;
+                        return if event.code == KeyCode::Enter {
+                            Ok(items[selected].clone())
+                        } else {
+                            Err(ReturnType::Cancel)
+                        };
                     }
                     KeyCode::Up => {
                         if selected > 0 {
