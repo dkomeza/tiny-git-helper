@@ -358,10 +358,10 @@ where
                         execute!(
                             io::stdout(),
                             MoveToColumn(0),
-                            terminal::Clear(ClearType::CurrentLine)
+                            terminal::Clear(ClearType::FromCursorDown)
                         )
                         .unwrap();
-                        print(format!("{}$cr `canceled`\n", prompt));
+                        print(format!("{}$cr$b `canceled`\n", prompt));
 
                         disable_raw_mode().unwrap();
                         return Err(ReturnType::Cancel);
