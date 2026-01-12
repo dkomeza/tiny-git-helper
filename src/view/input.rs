@@ -389,7 +389,7 @@ where
                     }
                     KeyCode::Char(c) => {
                         if event.modifiers == KeyModifiers::CONTROL && c == 'c' {
-                            write!(io::stdout(), "\n\r").unwrap();
+                            print("\n");
                             disable_raw_mode().unwrap();
                             return Err(ReturnType::Exit);
                         }
