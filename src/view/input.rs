@@ -182,7 +182,7 @@ impl TextInput {
                 }
                 _ => {}
             },
-            KeyModifiers::NONE => match event.code {
+            KeyModifiers::NONE | KeyModifiers::SHIFT => match event.code {
                 KeyCode::Backspace => {
                     if self.cursor_position > 0 {
                         self.cursor_position -= 1;
