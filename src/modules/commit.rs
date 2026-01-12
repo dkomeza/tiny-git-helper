@@ -39,25 +39,19 @@ impl Default for CommitOptions {
 pub fn commit_all_files(options: CommitOptions) {
     functions::is_valid_commit();
 
-    let message = ask_commit_message(&options);
-
-    match message {
+    match ask_commit_message(&options) {
         Ok(msg) => {
-            println!("Committing all files with message: {}", msg);
-            // functions::commit_all_files(msg, options.no_push);
+            functions::commit_all_files(msg, options.no_push);
         }
         Err(err) => match err {
             ReturnType::Cancel => {
-                println!("Commit cancelled by user.");
                 return;
             }
             ReturnType::Exit => {
-                return;
+                std::process::exit(1);
             }
         },
     }
-
-    // commit_all_files(message, options.no_push);
 }
 
 fn ask_commit_message(options: &CommitOptions) -> Result<String, ReturnType> {
