@@ -466,10 +466,6 @@ where
             io::stdout().flush().unwrap();
         }
     }
-
-    disable_raw_mode().unwrap();
-
-    Ok(items[selected].clone())
 }
 
 /// Render the list of items
@@ -485,6 +481,8 @@ fn render_list<T>(
 where
     T: Display + Clone,
 {
+    use unicode_segmentation::UnicodeSegmentation;
+
     let mut rendered = 0;
     let mut i = offset;
     while rendered < usable_rows {
@@ -507,19 +505,29 @@ where
             print("  ");
         }
 
-        let matched_letters = matcher
-            .fuzzy_indices(&items[i].value.to_string(), &input)
-            .unwrap_or((0, vec![]))
-            .1;
-
         let word = items[i].value.to_string();
 
-        for (byte_idx, ch) in word.char_indices() {
-            if matched_letters.iter().any(|&x| x == byte_idx) {
-                print(format!("$cc `{}`", ch));
+        let mut matched_bytes = matcher
+            .fuzzy_indices(&word, &input)
+            .map(|(_, v)| v)
+            .unwrap_or_default();
+
+        matched_bytes.sort_unstable();
+
+        let mut match_idx = 0;
+        let mut word_idx = 0;
+        for (_byte_start, grapheme) in word.grapheme_indices(true) {
+            let is_matched =
+                match_idx < matched_bytes.len() && word_idx == matched_bytes[match_idx];
+
+            if is_matched {
+                match_idx += 1;
+                print(format!("$cc `{}`", grapheme));
             } else {
-                print(format!("{}", ch));
+                print(format!("{}", grapheme));
             }
+
+            word_idx += 1;
         }
 
         rendered += 1;
