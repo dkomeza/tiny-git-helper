@@ -5,6 +5,8 @@ mod views;
 
 pub use views::commit_specific_files;
 
+use crate::view::input::ReturnType;
+
 #[derive(Parser)]
 pub struct CommitOptions {
     /// Don't push changes to the remote
@@ -39,16 +41,31 @@ pub fn commit_all_files(options: CommitOptions) {
 
     let message = ask_commit_message(&options);
 
-    println!("Committing all files with message: {}", message);
+    match message {
+        Ok(msg) => {
+            functions::commit_all_files(msg, options.no_push);
+        }
+        Err(_) => {
+            crate::out::print_error("Error getting commit message");
+            std::process::exit(1);
+        }
+    }
 
     // commit_all_files(message, options.no_push);
 }
 
-fn ask_commit_message(options: &CommitOptions) -> String {
+fn ask_commit_message(options: &CommitOptions) -> Result<String, ReturnType> {
+    use crate::view::input;
+
     if let Some(message) = &options.commit_message {
-        return message.clone();
+        return Ok(message.clone());
     }
 
     let config = crate::config::load_config();
-    String::from("dummy message") // Temporary fix to allow compilation
+
+    if options.force_fancy || (config.fancy && !options.skip_fancy) {
+        // let labels = crate::config::utils::get_labels();
+    }
+
+    input::text("Enter commit message: ")
 }
