@@ -5,6 +5,8 @@ mod views;
 
 pub use views::commit_specific_files;
 
+use crate::view::input::ReturnType;
+
 #[derive(Parser)]
 pub struct CommitOptions {
     /// Don't push changes to the remote
@@ -39,16 +41,63 @@ pub fn commit_all_files(options: CommitOptions) {
 
     let message = ask_commit_message(&options);
 
-    println!("Committing all files with message: {}", message);
+    match message {
+        Ok(msg) => {
+            println!("Committing all files with message: {}", msg);
+            // functions::commit_all_files(msg, options.no_push);
+        }
+        Err(err) => match err {
+            ReturnType::Cancel => {
+                println!("Commit cancelled by user.");
+                return;
+            }
+            ReturnType::Exit => {
+                return;
+            }
+        },
+    }
 
     // commit_all_files(message, options.no_push);
 }
 
-fn ask_commit_message(options: &CommitOptions) -> String {
+fn ask_commit_message(options: &CommitOptions) -> Result<String, ReturnType> {
+    use crate::view::input;
+
     if let Some(message) = &options.commit_message {
-        return message.clone();
+        return Ok(message.clone());
     }
 
     let config = crate::config::load_config();
-    String::from("dummy message") // Temporary fix to allow compilation
+
+    if options.force_fancy || (config.fancy && !options.skip_fancy) {
+        let mut message = String::new();
+        let labels = crate::config::utils::get_labels();
+
+        match input::list("Commit type: ", labels) {
+            Ok(label) => {
+                message.push_str(&label.emoji);
+            }
+            Err(err) => return Err(err),
+        }
+
+        match input::text("Commit message: ") {
+            Ok(msg) => {
+                message.push_str(&format!(" {}", msg));
+            }
+            Err(err) => return Err(err),
+        }
+
+        match input::text("Commit description (optional): ") {
+            Ok(desc) => {
+                if !desc.is_empty() {
+                    message.push_str(&format!("\n\n{}", desc));
+                }
+            }
+            Err(err) => return Err(err),
+        }
+
+        return Ok(message);
+    }
+
+    input::text("Enter commit message: ")
 }
