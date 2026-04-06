@@ -39,19 +39,19 @@ impl Default for CommitOptions {
 pub fn commit_all_files(options: CommitOptions) {
     functions::is_valid_commit();
 
-    let message = ask_commit_message(&options);
-
-    match message {
+    match ask_commit_message(&options) {
         Ok(msg) => {
             functions::commit_all_files(msg, options.no_push);
         }
-        Err(_) => {
-            crate::out::print_error("Error getting commit message");
-            std::process::exit(1);
-        }
+        Err(err) => match err {
+            ReturnType::Cancel => {
+                return;
+            }
+            ReturnType::Exit => {
+                std::process::exit(1);
+            }
+        },
     }
-
-    // commit_all_files(message, options.no_push);
 }
 
 fn ask_commit_message(options: &CommitOptions) -> Result<String, ReturnType> {
@@ -64,7 +64,33 @@ fn ask_commit_message(options: &CommitOptions) -> Result<String, ReturnType> {
     let config = crate::config::load_config();
 
     if options.force_fancy || (config.fancy && !options.skip_fancy) {
-        // let labels = crate::config::utils::get_labels();
+        let mut message = String::new();
+        let labels = crate::config::utils::get_labels();
+
+        match input::list("Commit type: ", labels) {
+            Ok(label) => {
+                message.push_str(&label.emoji);
+            }
+            Err(err) => return Err(err),
+        }
+
+        match input::text("Commit message: ") {
+            Ok(msg) => {
+                message.push_str(&format!(" {}", msg));
+            }
+            Err(err) => return Err(err),
+        }
+
+        match input::text("Commit description (optional): ") {
+            Ok(desc) => {
+                if !desc.is_empty() {
+                    message.push_str(&format!("\n\n{}", desc));
+                }
+            }
+            Err(err) => return Err(err),
+        }
+
+        return Ok(message);
     }
 
     input::text("Enter commit message: ")

@@ -27,3 +27,4 @@ fuzzy-matcher = "0.3.7"
 chrono = "0.4.42"
 self_update = { version = "0.42", features = ["archive-zip", "archive-tar", "compression-zip-deflate"] }
 semver = "1.0.27"
+unicode-segmentation = "1.12.0"

@@ -2,7 +2,7 @@ use crossterm::{
     cursor::{MoveDown, MoveToColumn, MoveUp},
     event::{self, KeyCode, KeyEvent, KeyModifiers},
     execute,
-    terminal::{self, disable_raw_mode, enable_raw_mode, ClearType},
+    terminal::{self, disable_raw_mode, enable_raw_mode, Clear, ClearType},
 };
 use fuzzy_matcher::{skim::SkimMatcherV2, FuzzyMatcher};
 use std::{
@@ -13,6 +13,10 @@ use std::{
 use super::{print, PrintSize};
 
 const MAX_ROWS: usize = 12;
+
+const QUESTION_PREFIX: &str = "$b$cg `?`";
+const SUCCESS_PREFIX: &str = "$b$cg `→`";
+const ERROR_PREFIX: &str = "$b$cr `✖`";
 
 pub enum ReturnType {
     Cancel,
@@ -182,7 +186,7 @@ impl TextInput {
                 }
                 _ => {}
             },
-            KeyModifiers::NONE => match event.code {
+            KeyModifiers::NONE | KeyModifiers::SHIFT => match event.code {
                 KeyCode::Backspace => {
                     if self.cursor_position > 0 {
                         self.cursor_position -= 1;
@@ -266,23 +270,27 @@ impl<T: Display + Clone> Display for ListValue<T> {
 }
 
 pub fn text(prompt: &str) -> Result<String, ReturnType> {
+    super::init();
+
     let PrintSize {
         cols: prompt_length,
         rows: _,
-    } = print(format!("{}", prompt));
+    } = print(format!("{} {}", QUESTION_PREFIX, prompt));
     io::stdout().flush().unwrap();
 
-    get_user_text_input(prompt_length, TextInputType::Text)
+    get_user_text_input(prompt, prompt_length, TextInputType::Text)
 }
 
 pub fn password(prompt: &str) -> Result<String, ReturnType> {
+    super::init();
+
     let PrintSize {
         cols: prompt_length,
         rows: _,
-    } = print(format!("{}", prompt));
+    } = print(format!("{} {}", QUESTION_PREFIX, prompt));
     io::stdout().flush().unwrap();
 
-    get_user_text_input(prompt_length, TextInputType::Password)
+    get_user_text_input(prompt, prompt_length, TextInputType::Password)
 }
 
 pub fn list<T>(prompt: &str, items: Vec<T>) -> Result<T, ReturnType>
@@ -313,7 +321,7 @@ where
     let PrintSize {
         cols: prompt_length,
         rows: _,
-    } = print(format!("{}\n", prompt));
+    } = print(format!("{} {}\n", QUESTION_PREFIX, prompt));
 
     let mut text_input = TextInput::new(prompt_length, TextInputType::Text);
     let mut available_rows = terminal::size().unwrap().1 as usize - 1; // 1 for the prompt
@@ -354,20 +362,29 @@ where
         if let Ok(event) = event::read() {
             match event {
                 event::Event::Key(event) => match event.code {
-                    KeyCode::Esc => {
+                    KeyCode::Esc | KeyCode::Enter => {
                         execute!(
                             io::stdout(),
                             MoveToColumn(0),
-                            terminal::Clear(ClearType::CurrentLine)
+                            terminal::Clear(ClearType::FromCursorDown)
                         )
                         .unwrap();
-                        print(format!("{}$cr `canceled`\n", prompt));
+
+                        if event.code == KeyCode::Enter {
+                            print(format!(
+                                "{} {}$cw$b `{}`\n",
+                                SUCCESS_PREFIX, prompt, items[selected]
+                            ));
+                        } else {
+                            print(format!("{} {}$cr$b `canceled`\n", ERROR_PREFIX, prompt));
+                        }
 
                         disable_raw_mode().unwrap();
-                        return Err(ReturnType::Cancel);
-                    }
-                    KeyCode::Enter => {
-                        break;
+                        return if event.code == KeyCode::Enter {
+                            Ok(items[selected].clone())
+                        } else {
+                            Err(ReturnType::Cancel)
+                        };
                     }
                     KeyCode::Up => {
                         if selected > 0 {
@@ -389,7 +406,7 @@ where
                     }
                     KeyCode::Char(c) => {
                         if event.modifiers == KeyModifiers::CONTROL && c == 'c' {
-                            write!(io::stdout(), "\n\r").unwrap();
+                            print("\n");
                             disable_raw_mode().unwrap();
                             return Err(ReturnType::Exit);
                         }
@@ -408,7 +425,10 @@ where
                 terminal::Clear(ClearType::FromCursorDown)
             )
             .unwrap();
-            print(format!("{}{}", prompt, text_input.input));
+            print(format!(
+                "{} {}{}",
+                QUESTION_PREFIX, prompt, text_input.input
+            ));
             execute!(io::stdout(), MoveDown(1), MoveToColumn(0)).unwrap();
 
             // Render the list
@@ -460,10 +480,6 @@ where
             io::stdout().flush().unwrap();
         }
     }
-
-    disable_raw_mode().unwrap();
-
-    Ok(items[selected].clone())
 }
 
 /// Render the list of items
@@ -479,6 +495,8 @@ fn render_list<T>(
 where
     T: Display + Clone,
 {
+    use unicode_segmentation::UnicodeSegmentation;
+
     let mut rendered = 0;
     let mut i = offset;
     while rendered < usable_rows {
@@ -501,19 +519,29 @@ where
             print("  ");
         }
 
-        let matched_letters = matcher
-            .fuzzy_indices(&items[i].value.to_string(), &input)
-            .unwrap_or((0, vec![]))
-            .1;
-
         let word = items[i].value.to_string();
 
-        for (byte_idx, ch) in word.char_indices() {
-            if matched_letters.iter().any(|&x| x == byte_idx) {
-                print(format!("$cc `{}`", ch));
+        let mut matched_bytes = matcher
+            .fuzzy_indices(&word, &input)
+            .map(|(_, v)| v)
+            .unwrap_or_default();
+
+        matched_bytes.sort_unstable();
+
+        let mut match_idx = 0;
+        let mut word_idx = 0;
+        for (_byte_start, grapheme) in word.grapheme_indices(true) {
+            let is_matched =
+                match_idx < matched_bytes.len() && word_idx == matched_bytes[match_idx];
+
+            if is_matched {
+                match_idx += 1;
+                print(format!("$cc `{}`", grapheme));
             } else {
-                print(format!("{}", ch));
+                print(format!("{}", grapheme));
             }
+
+            word_idx += 1;
         }
 
         rendered += 1;
@@ -525,9 +553,11 @@ where
     rendered
 }
 
-fn get_user_text_input(position: usize, input_type: TextInputType) -> Result<String, ReturnType> {
-    super::init();
-
+fn get_user_text_input(
+    prompt: &str,
+    position: usize,
+    input_type: TextInputType,
+) -> Result<String, ReturnType> {
     let mut text_input = TextInput::new(position, input_type);
 
     loop {
@@ -536,38 +566,42 @@ fn get_user_text_input(position: usize, input_type: TextInputType) -> Result<Str
                 event::Event::Key(event) => match event.modifiers {
                     KeyModifiers::CONTROL => match event.code {
                         KeyCode::Char('c') => {
-                            write!(io::stdout(), "\n\r").unwrap();
+                            print("\n");
                             disable_raw_mode().unwrap();
                             return Err(ReturnType::Exit);
                         }
                         _ => text_input.handle_event(event),
                     },
                     KeyModifiers::NONE => match event.code {
-                        KeyCode::Esc => {
+                        KeyCode::Esc | KeyCode::Enter => {
                             execute!(
                                 io::stdout(),
-                                MoveToColumn(position as u16),
-                                terminal::Clear(ClearType::UntilNewLine)
+                                MoveToColumn(0),
+                                terminal::Clear(ClearType::FromCursorDown)
                             )
                             .unwrap();
-                            print("$cr `canceled`\n");
+
+                            if event.code == KeyCode::Enter {
+                                print(format!(
+                                    "{} {}$cw$b `{}`\n",
+                                    SUCCESS_PREFIX,
+                                    prompt,
+                                    if input_type == TextInputType::Password {
+                                        "*".repeat(text_input.input.len())
+                                    } else {
+                                        text_input.input.clone()
+                                    }
+                                ));
+                            } else {
+                                print(format!("{} {}$cr$b `canceled`\n", ERROR_PREFIX, prompt));
+                            }
 
                             disable_raw_mode().unwrap();
-                            return Err(ReturnType::Cancel);
-                        }
-                        KeyCode::Enter => {
-                            execute!(
-                                io::stdout(),
-                                MoveToColumn(position as u16),
-                                terminal::Clear(ClearType::UntilNewLine)
-                            )
-                            .unwrap();
-                            if input_type == TextInputType::Password {
-                                print(format!("$cw$b `{}`", "*".repeat(text_input.input.len())));
+                            return if event.code == KeyCode::Enter {
+                                Ok(text_input.input)
                             } else {
-                                print(format!("$cw$b `{}`", text_input.input));
-                            }
-                            break;
+                                Err(ReturnType::Cancel)
+                            };
                         }
                         _ => text_input.handle_event(event),
                     },
@@ -576,12 +610,14 @@ fn get_user_text_input(position: usize, input_type: TextInputType) -> Result<Str
                 _ => {}
             }
 
+            execute!(
+                io::stdout(),
+                MoveToColumn(0),
+                terminal::Clear(ClearType::FromCursorDown)
+            )
+            .unwrap();
+            print(format!("$b$cg `?` {}{}", prompt, text_input.input));
             io::stdout().flush().unwrap();
         }
     }
-
-    write!(io::stdout(), "\n\r").unwrap();
-
-    disable_raw_mode().unwrap();
-    Ok(text_input.input)
 }

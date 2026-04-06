@@ -159,6 +159,8 @@ The special effects are defined by the following syntax: $effect `content`
 Multiple effects can be combined, ex. $b$u - bold underline, or $b `Bold and $u `underline``
 */
 pub fn print(content: impl AsRef<str>) -> PrintSize {
+    use std::io::Write;
+
     let mut size = PrintSize { cols: 0, rows: 0 };
     let mut current_width: usize = 0;
 
@@ -208,7 +210,7 @@ pub fn print(content: impl AsRef<str>) -> PrintSize {
                 size.rows += 1;
             }
 
-            execute!(stdout, Print('\n'), MoveToNextLine(1)).unwrap();
+            write!(std::io::stdout(), "\n\r");
             i += 1;
 
             while i < n && content.chars().nth(i).unwrap() == ' ' {
