@@ -36,7 +36,7 @@ curl -fsSL https://raw.githubusercontent.com/dkomeza/tiny-git-helper/main/script
 #### OR Install a specific version
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/dkomeza/tiny-git-helper/main/scripts/install.sh | bash -s -- v0.1.5
+curl -fsSL https://raw.githubusercontent.com/dkomeza/tiny-git-helper/main/scripts/install.sh | bash -s -- v0.1.6
 ```
 
 ### 🪟 Windows
